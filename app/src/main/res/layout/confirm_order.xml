@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/bg_colour"
+    android:background="@android:color/transparent"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            >
+
+
+
+            <TextView
+                android:id="@+id/textView_Price"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:gravity="center"
+                android:textSize="22sp"
+                android:textColor="@android:color/black"
+                android:text="@string/confirm_order"
+                />
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/shape"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                android:textStyle="normal"
+                android:textSize="20dp"
+                android:textColor="@android:color/black"
+                android:textAlignment="center"
+                android:text="@string/discount"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:textAlignment="center"
+                android:layout_height="wrap_content"
+                android:textStyle="normal"
+                android:textSize="20dp"
+                android:textColor="@android:color/black"
+                android:id="@+id/discountValue"
+                android:text="0.0"/>
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/shape"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textStyle="normal"
+                android:textSize="20dp"
+                android:textColor="@android:color/black"
+                android:text="@string/total"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:textAlignment="center"
+                android:layout_height="wrap_content"
+                android:id="@+id/total_services"
+                android:textStyle="normal"
+                android:textSize="20dp"
+                android:textColor="@android:color/black"
+                android:text="0.0"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/shape"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textStyle="normal"
+                android:textSize="20dp"
+
+                android:textColor="@android:color/black"
+                android:text="@string/finalTotal"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:textAlignment="center"
+                android:textStyle="normal"
+                android:textSize="20dp"
+
+                android:textColor="@android:color/black"
+                android:layout_height="wrap_content"
+                android:id="@+id/final_Total"
+                android:text="0.0"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:weightSum="4">
+
+
+            <Button
+                android:id="@+id/OrderDone"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="@string/confirm"
+                android:background="@color/green"
+                android:textColor="@android:color/white"
+                android:layout_weight="2"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:weightSum="4">
+
+
+
+
+            <Button
+                android:id="@+id/CancelOrder"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="@string/Cancel"
+                android:background="@color/orange"
+                android:textColor="@android:color/white"
+                android:layout_weight="2"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"/>
+
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

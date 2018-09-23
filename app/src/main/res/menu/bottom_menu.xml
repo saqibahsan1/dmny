@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/listen"
+        android:title="@string/listen"
+        android:icon="@drawable/aar_ic_play"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/rec"
+        android:title="@string/record"
+        android:icon="@drawable/aar_ic_rec"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/rem"
+        android:title="@string/remove"
+        android:icon="@drawable/aar_ic_clear"
+        app:showAsAction="always"/>
+
+</menu>

@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:id="@+id/parcelLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ToolbarTheme">
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                app:titleTextColor="@color/colorAccent"
+                app:popupTheme="@style/ToolbarTheme"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary">
+
+
+                <TextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:textColor="@color/colorAccent"
+                    android:text="@string/title"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+
+            </android.support.v7.widget.Toolbar>
+        </android.support.design.widget.AppBarLayout>
+
+
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/FromLayout"
+            android:padding="8dp">
+
+            <TextView
+                android:id="@+id/fromLoc"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_toRightOf="@id/imgResturaunt"
+                android:text="From Point"
+                android:textSize="@dimen/nav_header_vertical_spacing"
+                android:textStyle="bold"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                android:textColor="#000000" />
+
+
+
+            <TextView
+                android:id="@+id/TVFromAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fromLoc"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="10dp"
+                android:text="Khi,Pakistan"
+                android:textColor="#000000"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small.Inverse"
+                android:textStyle="normal" />
+
+            <ImageView
+                android:id="@+id/ImageIcon"
+                android:layout_width="40dp"
+                android:layout_height="20dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:src="@drawable/icon_marker" />
+
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/ToLayout"
+            android:padding="8dp">
+
+            <TextView
+                android:id="@+id/toPoint"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_toRightOf="@id/imgResturaunt"
+                android:text="To Point"
+                android:textSize="@dimen/nav_header_vertical_spacing"
+                android:textStyle="bold"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                android:textColor="#000000" />
+
+            <TextView
+                android:id="@+id/TvToAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/toPoint"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="10dp"
+                android:text="Khi,Pakistan"
+                android:textColor="#000000"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small.Inverse"
+                android:textStyle="normal" />
+
+            <ImageView
+                android:id="@+id/textViewPrice"
+                android:layout_width="40dp"
+                android:layout_height="20dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:src="@drawable/icon_marker" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="190dp"
+                    android:layout_gravity="center"
+
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:paddingLeft="@dimen/google_1x"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginBottom="2dp"
+                        android:layout_marginTop="10dp"
+                        android:gravity="start"
+                        android:textColor="@color/black"
+                        android:text="@string/description" />
+
+                    <EditText
+                        android:id="@+id/et_msg"
+                        android:layout_width="match_parent"
+                        android:layout_height="190dp"
+                        android:layout_centerHorizontal="true"
+                        android:layout_margin="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:layout_marginTop="10dp"
+                        android:gravity="start"
+                        android:hint="@string/Message" />
+
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="69dp"
+                        android:layout_height="69dp"
+                        android:layout_gravity="start"
+                        android:layout_marginLeft="20dp"
+                        android:id="@+id/recordAudio"
+                        android:src="@drawable/sound"/>
+
+                    <ImageView
+                        android:layout_width="69dp"
+                        android:layout_height="69dp"
+                        android:layout_gravity="start"
+                        android:layout_marginLeft="20dp"
+                        android:visibility="gone"
+                        android:id="@+id/PlayAudio"
+                        android:src="@drawable/ic_play"/>
+
+                    <ImageView
+                        android:layout_width="69dp"
+                        android:layout_height="69dp"
+                        android:layout_gravity="start"
+                        android:layout_marginLeft="5dp"
+                        android:id="@+id/addImages"
+                        android:src="@drawable/image_caputure"/>
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/recycler_view"
+                        android:layout_width="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:visibility="visible"
+                        android:layout_height="wrap_content"
+                        />
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:id="@+id/seek_barLayout"
+                android:layout_margin="@dimen/nav_header_vertical_spacing">
+
+                <SeekBar
+                    android:id="@+id/seek_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/google_1x"
+                    android:background="@color/colorPrimaryDark"
+                    />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/twenty"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textStyle="normal"
+                android:textSize="20dp"
+                android:textColor="@android:color/black"
+                android:text="@string/distance"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:textAlignment="center"
+                android:layout_height="wrap_content"
+                android:id="@+id/total_distance"
+                android:textStyle="normal"
+                android:textSize="20dp"
+                android:textColor="@android:color/black"
+                android:text="0.0"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textStyle="normal"
+                android:textSize="20dp"
+
+                android:textColor="@android:color/black"
+                android:text="@string/finalTotal"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:textAlignment="center"
+                android:textStyle="normal"
+                android:textSize="20dp"
+
+                android:textColor="@android:color/black"
+                android:layout_height="wrap_content"
+                android:id="@+id/final_Total"
+                android:text="0.0"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:orientation="vertical">
+
+            <Button
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@color/colorPrimaryDark"
+                android:text="@string/btnSend"
+                android:id="@+id/parcelSendBtn"
+                android:textColor="@android:color/white" />
+
+
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    </ScrollView>
+</LinearLayout>
