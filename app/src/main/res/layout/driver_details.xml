@@ -13,6 +13,7 @@
         android:background="@color/colorAccent"
         android:clipToPadding="true"
         app:behavior_hideable="true"
+        android:visibility="gone"
         app:behavior_peekHeight="0dp"
         app:layout_behavior="@string/bottom_sheet_behavior">
 

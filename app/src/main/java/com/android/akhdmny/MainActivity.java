@@ -16,18 +16,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.akhdmny.Activities.DefaultDialogsActivity;
 import com.android.akhdmny.Activities.DefaultMessagesActivity;
 import com.android.akhdmny.Activities.MyCart;
 import com.android.akhdmny.Activities.Profile;
+import com.android.akhdmny.ApiResponse.LoginInsideResponse;
 import com.android.akhdmny.ApiResponse.OrderConfirmation;
 import com.android.akhdmny.Fragments.FragmentComplaints;
+import com.android.akhdmny.Fragments.FragmentContact;
 import com.android.akhdmny.Fragments.FragmentNotification;
 import com.android.akhdmny.Fragments.FragmentOrder;
 import com.android.akhdmny.Fragments.FragmentHome;
@@ -37,9 +41,11 @@ import com.android.akhdmny.NetworkManager.NetworkConsume;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public static final String AUTH_PREF_KEY = "com.android.akhdmny.authKey";
@@ -54,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     TextView tvTitle;
     @BindView(R.id.Btn_Services)
     Button btn_services;
-
+    Button btn;
     static LinearLayout btn_layout;
 
 
@@ -68,11 +74,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private FargmentService fargmentService = new FargmentService();
     private FragmentSettings fragmentSettings = new FragmentSettings();
     private FragmentComplaints fragmentComplaints = new FragmentComplaints();
+    private FragmentContact fragmentContact = new FragmentContact();
     private int activeMenu;
     private Handler handlerSaveId = new Handler();
     private long DRAWER_CLOSE_DELAY = 350;
     private String ID_MENU_ACTIVE = "IdMenuActive";
     Button cartButton;
+    Gson gson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             activeMenu = R.id.home;
             setFragment(fragmentHome);
 
-            Gson gson = new Gson();
+             gson = new Gson();
             String json = NetworkConsume.getInstance().getDefaults("myObject",MainActivity.this);
             OrderConfirmation obj = gson.fromJson(json, OrderConfirmation.class);
             if (json == null){
@@ -97,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 btn_layout.setVisibility(View.GONE);
             }
            // btn_layout.setVisibility(View.VISIBLE);
-            tvTitle.setText("Home");
+            tvTitle.setText(R.string.Home);
 
         }else{
             activeMenu = savedInstanceState.getInt(ID_MENU_ACTIVE);
@@ -105,6 +113,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         navigationView.setNavigationItemSelectedListener(this);
         View headerView = navigationView.getHeaderView(0);
+        try {
+
+            CircleImageView imageView = headerView.findViewById(R.id.user_profile_Image);
+            TextView userName = headerView.findViewById(R.id.userName);
+            TextView emailText = headerView.findViewById(R.id.email);
+            String jsonLoin = NetworkConsume.getInstance().getDefaults("login",MainActivity.this);
+            LoginInsideResponse response = gson.fromJson(jsonLoin,LoginInsideResponse.class);
+            Picasso.get().load(response.getAvatar()).into(imageView);
+            userName.setText(response.getName());
+            emailText.setText(response.getEmail());
+        }catch (Exception e){}
+
 
         headerView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -175,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 setFragment(fargmentService);
                 btn_layout.setVisibility(View.GONE);
                 activeMenu = R.id.Btn_Services;
-                cartButton.setVisibility(View.VISIBLE);
+                btn.setVisibility(View.VISIBLE);
                 tvTitle.setText("Services");
             }
         });
@@ -186,9 +206,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch (activeMenu){
             case R.id.home:
                 setFragment(fragmentHome);
-                tvTitle.setText("Home");
+                tvTitle.setText(R.string.Home);
                // btn_layout.setVisibility(View.VISIBLE);
-                cartButton.setVisibility(View.VISIBLE);
+                btn.setVisibility(View.VISIBLE);
                 String json = NetworkConsume.getInstance().getDefaults("myObject",MainActivity.this);
                 if (json == null){
                     btn_layout.setVisibility(View.VISIBLE);
@@ -198,32 +218,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.orders:
                 setFragment(fragmentOrder);
-                tvTitle.setText("Orders");
+                tvTitle.setText(R.string.order);
+                btn.setVisibility(View.GONE);
                 btn_layout.setVisibility(View.GONE);
                 break;
             case R.id.settings:
                 setFragment(fragmentSettings);
                 btn_layout.setVisibility(View.GONE);
-                tvTitle.setText("Settings");
-                cartButton.setVisibility(View.GONE);
+                tvTitle.setText(R.string.settings);
+                btn.setVisibility(View.GONE);
                 break;
             case R.id.complaints:
                 setFragment(fragmentComplaints);
                 btn_layout.setVisibility(View.GONE);
-                tvTitle.setText("Complaint");
-                cartButton.setVisibility(View.GONE);
+                tvTitle.setText(R.string.Complaint);
+                btn.setVisibility(View.GONE);
                 break;
             case R.id.notifications:
-                setFragment(fragmentComplaints);
+                setFragment(fragmentNotification);
                 btn_layout.setVisibility(View.GONE);
-                tvTitle.setText("Notifications");
-                cartButton.setVisibility(View.GONE);
+                tvTitle.setText(R.string.notifications);
+                btn.setVisibility(View.GONE);
                 break;
             case R.id.contact:
-               // setFragment(fragmentComplaints);
-                startActivity(new Intent(MainActivity.this, DefaultMessagesActivity.class));
+                setFragment(fragmentContact);
+                tvTitle.setText(R.string.contact);
                 btn_layout.setVisibility(View.GONE);
-                cartButton.setVisibility(View.GONE);
+                btn.setVisibility(View.GONE);
                 break;
             default:
                 //Default
@@ -265,7 +286,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             super.onBackPressed();
         }
     }
-
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar_item, menu);
+        MenuItem item = menu.findItem(R.id.button_item);
+        btn = item.getActionView().findViewById(R.id.btn_MyCart);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, MyCart.class));
+                overridePendingTransition(R.anim.slide_left_in,R.anim.slide_left_out);
+            }
+        });
+        return true;
+    }
     /**
      * to case active id menu
      * @param outState

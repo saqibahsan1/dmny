@@ -36,7 +36,7 @@
 
 
             <TextView
-                android:id="@+id/TV_Address"
+                android:id="@+id/TV_Mob"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/Tv_title"
@@ -49,7 +49,7 @@
                 android:textStyle="normal" />
 
             <TextView
-                android:id="@+id/textView_Price"
+                android:id="@+id/tv_email"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
@@ -125,7 +125,6 @@
                 android:layout_gravity="start"
                 android:layout_marginLeft="5dp"
                 android:id="@+id/addImages"
-
                 android:src="@drawable/image_caputure"/>
 
             <android.support.v7.widget.RecyclerView
@@ -169,6 +168,7 @@
                 android:textColor="@android:color/white"
                 android:layout_weight="2"
                 android:paddingLeft="10dp"
+                android:layout_marginBottom="20dp"
                 android:paddingRight="10dp"/>
 
 

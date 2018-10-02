@@ -15,8 +15,10 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-      >
+        android:orientation="vertical">
+
+
+
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -40,21 +42,21 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
-        <Button
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:layout_marginRight="10dp"
-            android:id="@+id/btn_MyCart"
-            android:padding="5dp"
-            android:layout_marginTop="2dp"
-            android:background="@drawable/cart_icon"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            />
 
+            <Button
+                android:layout_width="50dp"
+                android:layout_height="40dp"
+                android:layout_gravity="right"
+                android:layout_marginEnd="10dp"
+                android:id="@+id/btn_MyCart"
+                android:padding="5dp"
+                android:visibility="gone"
+                android:layout_marginTop="2dp"
+                android:background="@drawable/cart_icon"
+                />
         </android.support.v7.widget.Toolbar>
         </android.support.design.widget.AppBarLayout>
+
 
 
         <FrameLayout
@@ -74,6 +76,7 @@
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/menu_drawer"
         app:itemTextColor="@color/colorAccent"
+        app:itemIconTint="@color/white"
         android:background="@color/colorPrimaryDark"
         app:theme="@style/NavigationDrawerStyle"/>
 

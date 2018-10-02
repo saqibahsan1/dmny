@@ -30,27 +30,27 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
                 android:layout_toRightOf="@id/img_Resturaunt"
-                android:text="Title"
+                android:text="@string/title"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                 android:textColor="#000000" />
 
 
 
             <TextView
-                android:id="@+id/TV_Address"
+                android:id="@+id/TV_Mob"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/Tv_title"
                 android:layout_marginLeft="5dp"
                 android:layout_marginTop="10dp"
                 android:layout_toRightOf="@id/img_Resturaunt"
-                android:text="Address"
+                android:text="@string/address"
                 android:textColor="#000000"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Small.Inverse"
                 android:textStyle="normal" />
 
             <TextView
-                android:id="@+id/textView_Price"
+                android:id="@+id/tv_email"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
@@ -93,7 +93,7 @@
                     android:layout_marginBottom="10dp"
                     android:layout_marginTop="10dp"
                     android:gravity="start"
-                    android:text="Message 1"/>
+                    android:text="@string/msg"/>
             </android.support.v7.widget.CardView>
 
         </LinearLayout>

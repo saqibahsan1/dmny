@@ -23,7 +23,7 @@
                 android:id="@+id/img_Resturaunt"
                 android:layout_width="90dp"
                 android:layout_height="110dp"
-                android:src="@drawable/dummy_image"
+                android:src="@color/black"
                 android:padding="4dp" />
 
             <TextView
@@ -33,35 +33,35 @@
                 android:layout_marginLeft="5dp"
                 android:layout_marginTop="20dp"
                 android:layout_toRightOf="@id/img_Resturaunt"
-                android:text="Saqib Ahsan"
+                android:text="Umair Khan"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                 android:textColor="#000000" />
 
 
 
             <TextView
-                android:id="@+id/TV_Address"
+                android:id="@+id/TV_Mob"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/Tv_name"
                 android:layout_marginLeft="5dp"
 
                 android:layout_toRightOf="@id/img_Resturaunt"
-                android:text="+923313648573"
+                android:text="+923002013621"
                 android:textColor="#000000"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Small.Inverse"
                 android:textStyle="normal" />
 
             <TextView
-                android:id="@+id/textView_Price"
+                android:id="@+id/tv_email"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/TV_Address"
+                android:layout_below="@id/TV_Mob"
                 android:textSize="16sp"
                 android:layout_marginLeft="5dp"
                 android:layout_toRightOf="@id/img_Resturaunt"
                 android:textColor="@android:color/black"
-                android:text="Saqibahsan709@gmail.com"
+                android:text="ktrading.9430@gmail.coms"
                 />
 
             <ImageView
@@ -88,7 +88,8 @@
             android:orientation="horizontal">
             <RelativeLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:id="@+id/Lang_Laoyout">
 
             <ImageView
                 android:layout_width="wrap_content"

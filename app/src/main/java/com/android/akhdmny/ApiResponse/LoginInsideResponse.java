@@ -12,10 +12,10 @@ public class LoginInsideResponse {
     private Integer id;
     @SerializedName("name")
     @Expose
-    private Object name;
+    private String name;
     @SerializedName("email")
     @Expose
-    private Object email;
+    private String email;
     @SerializedName("avatar")
     @Expose
     private String avatar;
@@ -51,19 +51,19 @@ public class LoginInsideResponse {
         this.id = id;
     }
 
-    public Object getName() {
+    public String getName() {
         return name;
     }
 
-    public void setName(Object name) {
+    public void setName(String name) {
         this.name = name;
     }
 
-    public Object getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public void setEmail(Object email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 

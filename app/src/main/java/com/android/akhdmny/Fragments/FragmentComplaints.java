@@ -129,7 +129,6 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
 
 
     private boolean trigger = false;
-    AlertDialog levelDialog;
     private ImagesAdapter imagesAdapter;
     private ArrayList<File> photos = new ArrayList<>();
     SharedPreferences prefs;

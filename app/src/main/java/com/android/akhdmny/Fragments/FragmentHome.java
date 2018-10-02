@@ -164,7 +164,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
             public void onClick(View v) {
                nestedScrollView.setVisibility(View.GONE);
                showOrHide(true);
-               NetworkConsume.getInstance().setDefaults("myObject",null,getActivity());
+//               NetworkConsume.getInstance().setDefaults("myObject",null,getActivity());
                 if(mMap != null){ //prevent crashing if the map doesn't exist yet (eg. on starting activity)
                     mMap.clear();
                     getCurrentLocation();
@@ -267,82 +267,85 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         //Creating a LatLng Object to store Coordinates
         LatLng latLng = new LatLng(latitude, longitude);
         //Adding marker to map
-        mMap.addMarker(new MarkerOptions()
-                .position(latLng) //setting position
-                .draggable(true) //Making the marker draggable
-                .title("Current Location")); //Adding a title
+//        mMap.addMarker(new MarkerOptions()
+//                .position(latLng) //setting position
+//                .draggable(true) //Making the marker draggable
+//                .title("Current Location")); //Adding a title
         //Moving the camera
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 
         //Animating the camera
         mMap.animateCamera(CameraUpdateFactory.zoomTo(9));
-
-        Gson gson = new Gson();
-        String json = NetworkConsume.getInstance().getDefaults("myObject",getActivity());
-        if (json == null){
+        try {
             nestedScrollView.setVisibility(View.GONE);
-        } else
+            Gson gson = new Gson();
+            String json = NetworkConsume.getInstance().getDefaults("myObject",getActivity());
+            if (json == null){
+                nestedScrollView.setVisibility(View.GONE);
+            } else
             {
-            OrderConfirmation obj = gson.fromJson(json, OrderConfirmation.class);
-            for (int i = 0; i<obj.getResponse().getServices().size(); i++)
-            {
-                createMarker(obj.getResponse().getServices().get(i).getLat(),obj.getResponse().getServices().get(i).getLong(),
-                        obj.getResponse().getServices().get(i).getTitle());
-            }
-            Picasso.get()
-                    .load(obj.getResponse().getDriver().getAvatar())
-                    .fit()
-                    .into(driver_Image);
-            driverName.setText(obj.getResponse().getDriver().getName());
-            driverRating.setText("5/"+obj.getResponse().getDriver().getRating());
-            carModel.setText(obj.getResponse().getDriver().getCarCompany()+" "+obj.getResponse().getDriver().getCarModel()
-                    +" "+obj.getResponse().getDriver().getCarColor());
-            carNumber.setText(obj.getResponse().getDriver().getCarNo());
+                OrderConfirmation obj = gson.fromJson(json, OrderConfirmation.class);
+                for (int i = 0; i<obj.getResponse().getServices().size(); i++)
+                {
+                    createMarker(obj.getResponse().getServices().get(i).getLat(),obj.getResponse().getServices().get(i).getLong(),
+                            obj.getResponse().getServices().get(i).getTitle());
+                }
+                Picasso.get()
+                        .load(obj.getResponse().getDriver().getAvatar())
+                        .fit()
+                        .into(driver_Image);
+                driverName.setText(obj.getResponse().getDriver().getName());
+                driverRating.setText("5/"+obj.getResponse().getDriver().getRating());
+                carModel.setText(obj.getResponse().getDriver().getCarCompany()+" "+obj.getResponse().getDriver().getCarModel()
+                        +" "+obj.getResponse().getDriver().getCarColor());
+                carNumber.setText(obj.getResponse().getDriver().getCarNo());
 //            View nestedScrollView = (View) view.findViewById(R.id.nestedScrollView);
-            mBottomSheetBehaviour = BottomSheetBehavior.from(nestedScrollView);
+                mBottomSheetBehaviour = BottomSheetBehavior.from(nestedScrollView);
 
-            //Remove this line to disable peek
-            mBottomSheetBehaviour.setPeekHeight(200);
-            mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
-            mBottomSheetBehaviour.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-                @Override
-                public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                    String state = "";
+                //Remove this line to disable peek
+                mBottomSheetBehaviour.setPeekHeight(200);
+                mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
+                mBottomSheetBehaviour.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+                    @Override
+                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                        String state = "";
 
-                    switch (newState) {
-                        case BottomSheetBehavior.STATE_DRAGGING: {
-                            state = "DRAGGING";
-                            break;
+                        switch (newState) {
+                            case BottomSheetBehavior.STATE_DRAGGING: {
+                                state = "DRAGGING";
+                                break;
+                            }
+                            case BottomSheetBehavior.STATE_SETTLING: {
+                                state = "SETTLING";
+                                break;
+                            }
+                            case BottomSheetBehavior.STATE_EXPANDED: {
+                                state = "EXPANDED";
+                                break;
+                            }
+                            case BottomSheetBehavior.STATE_COLLAPSED: {
+                                state = "COLLAPSED";
+                                break;
+                            }
+                            case BottomSheetBehavior.STATE_HIDDEN: {
+                                state = "HIDDEN";
+                                mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
+                                break;
+                            }
                         }
-                        case BottomSheetBehavior.STATE_SETTLING: {
-                            state = "SETTLING";
-                            break;
-                        }
-                        case BottomSheetBehavior.STATE_EXPANDED: {
-                            state = "EXPANDED";
-                            break;
-                        }
-                        case BottomSheetBehavior.STATE_COLLAPSED: {
-                            state = "COLLAPSED";
-                            break;
-                        }
-                        case BottomSheetBehavior.STATE_HIDDEN: {
-                            state = "HIDDEN";
-                            mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
-                            break;
-                        }
+
+                        //  Toast.makeText(getActivity(), "Bottom Sheet State Changed to: " + state, Toast.LENGTH_SHORT).show();
                     }
 
-                    //  Toast.makeText(getActivity(), "Bottom Sheet State Changed to: " + state, Toast.LENGTH_SHORT).show();
-                }
+                    @Override
+                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
 
-                @Override
-                public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                    }
+                });
 
-                }
-            });
+            }
+        }catch (Exception e){}
 
-        }
         //Displaying current coordinates in toast
         //  Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
@@ -381,6 +384,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 
         if (checkPermission()) {
             buildGoogleApiClient();
+            mMap.setMyLocationEnabled(true);
             // Check the location settings of the user and create the callback to react to the different possibilities
             LocationSettingsRequest.Builder locationSettingsRequestBuilder = new LocationSettingsRequest.Builder()
                     .addLocationRequest(mLocationRequest);
@@ -478,9 +482,9 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         mMap.clear();
 
         //Adding a new marker to the current pressed position we are also making the draggable true
-        mMap.addMarker(new MarkerOptions()
-                .position(latLng)
-                .draggable(true));
+//        mMap.addMarker(new MarkerOptions()
+//                .position(latLng)
+//                .draggable(true));
 
     }
 

@@ -57,6 +57,7 @@ dependencies {
     implementation 'com.pusher:chatkit-android:0.1.0'
     implementation 'com.github.nisrulz:validatetor:1.0.0'
     implementation 'com.github.rubensousa:bottomsheetbuilder:1.6.1'
+    implementation 'com.ahmedjazzar.rosetta:rosetta:1.0.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

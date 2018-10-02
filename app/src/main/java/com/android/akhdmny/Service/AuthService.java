@@ -9,11 +9,14 @@ import com.android.akhdmny.ApiResponse.CategoriesDetailResponse;
 import com.android.akhdmny.ApiResponse.CategoriesResponse;
 import com.android.akhdmny.ApiResponse.ComplaintHistoryResponse;
 import com.android.akhdmny.ApiResponse.LoginApiResponse;
+import com.android.akhdmny.ApiResponse.OrderId;
 import com.android.akhdmny.ApiResponse.ParcelApiResponse;
+import com.android.akhdmny.ApiResponse.ProfileResponse;
 import com.android.akhdmny.ApiResponse.RegisterResponse;
 import com.android.akhdmny.Requests.LoginRequest;
 import com.android.akhdmny.Requests.SignInRequest;
 import com.android.akhdmny.Requests.VerificationReguest;
+import com.android.akhdmny.Requests.requestOrder;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -56,8 +59,9 @@ public interface AuthService {
     @GET("/akhdmny/public/api/user/foursquare")
     Call<FourSquare> fourSquareApiCall(@Query("lat") double lat, @Query("long") double longi);
 
-    @GET("/akhdmny/public/api/user/order/request")
-    Call<OrderConfirmation> OrderRequest(@Query("lat") double lat,@Query("long") double longitude);
+    @POST("/createOrder")
+    Call<OrderId> OrderRequest(@Body requestOrder order);
+//    @Query("lat") double lat,@Query("long") double longitude
 
     @Multipart
     @POST("/akhdmny/public/api/user/problem?lat=24.9070714&long=67.1124509")
@@ -78,4 +82,10 @@ public interface AuthService {
                                       @Part("to_lat") double to_lat, @Part("to_long") double to_longitude,
                                       @Part("description") String description, @Part("amount") int amount, @Part("distance") String distance,
                                       @Part MultipartBody.Part[] Images, @Part MultipartBody.Part Sound);
+
+    @Multipart
+    @POST("/akhdmny/public/api/user/update/profile")
+    Call<ProfileResponse> UpdateProfile(@Part("first_name") String firstNme, @Part("last_name") String last_name,
+                                        @Part("password") String password, @Part("email") String email,
+                                        @Part("address") String address, @Part("gender") String gender, @Part MultipartBody.Part[] Image);
 }

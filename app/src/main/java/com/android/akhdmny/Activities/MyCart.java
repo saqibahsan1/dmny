@@ -3,7 +3,6 @@ package com.android.akhdmny.Activities;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -25,25 +24,26 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.akhdmny.Adapter.ImageAdapterCart;
-import com.android.akhdmny.Adapter.ImagesAdapter;
 import com.android.akhdmny.Adapter.MyCartAdapter;
 import com.android.akhdmny.ApiResponse.CartInsideResponse;
 import com.android.akhdmny.ApiResponse.CartOrder;
 import com.android.akhdmny.ApiResponse.Cartitem;
-import com.android.akhdmny.ApiResponse.OrderConfirmation;
+import com.android.akhdmny.ApiResponse.OrderId;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
 import com.android.akhdmny.Fragments.FargmentService;
-import com.android.akhdmny.Fragments.FragmentComplaints;
 import com.android.akhdmny.MainActivity;
+import com.android.akhdmny.NetworkManager.Network;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
 import com.android.akhdmny.R;
+import com.android.akhdmny.Requests.requestOrder;
 import com.android.akhdmny.Utils.GPSActivity;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -67,10 +67,20 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
     SpotsDialog dialog;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+    int progress = 0;
+    @BindView(R.id.total_services)
+    TextView total_services;
+    CartOrder cartOrder;
+    @BindView(R.id.final_Total)
+    TextView final_Total;
     TextView tvTitle;
     SeekBar seekBar;
     MediaPlayer mediaPlayer;
+    String finalTotalstr, servicTotalstr;
     private Handler mHandler;
+    private Timer mTimer1;
+    private TimerTask mTt1;
+    private Handler mTimerHandler = new Handler();
     private Runnable mRunnable;
     private ArrayList<String> photos = new ArrayList<>();
     @Override
@@ -81,10 +91,10 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
         setSupportActionBar(toolbar);
         tvTitle = (TextView) toolbar.findViewById(R.id.tvTitle);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        tvTitle.setText("Cart");
+        tvTitle.setText(R.string.cart);
         prefs = getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("Cart");
+        getSupportActionBar().setTitle(R.string.cart);
         gpsActivity = new GPSActivity(this);
         list = new ArrayList<>();
         listResponse = new ArrayList<>();
@@ -101,7 +111,7 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
                     @Override
                     public void onResponse(Call<CartOrder> call, Response<CartOrder> response) {
                         if (response.isSuccessful()) {
-                            CartOrder cartOrder = response.body();
+                             cartOrder = response.body();
                             for (int i=0; i< cartOrder.getResponse().getCartitems().size(); i++){
                                 if (cartOrder.getResponse().getCartitems().size() == 0)
                                 {
@@ -111,6 +121,10 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
                                     listResponse.add(cartOrder.getResponse());
                                 }
                             }
+                            final_Total.setText(cartOrder.getResponse().getFinalAmount().toString());
+                            finalTotalstr = cartOrder.getResponse().getFinalAmount().toString();
+                            servicTotalstr =cartOrder.getResponse().getServiceAmount().toString();
+                            total_services.setText(cartOrder.getResponse().getServiceAmount().toString());
                             MyCartAdapter myAdapter = new MyCartAdapter(MyCart.this,list);
                             RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
                             recyclerView.setLayoutManager(mLayoutManager);
@@ -143,6 +157,10 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
                 LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 View viewOrder = inflater.inflate(R.layout.confirm_order, null);
                 Button btnDone = viewOrder.findViewById(R.id.OrderDone);
+                TextView finalTotal = viewOrder.findViewById(R.id.final_Total);
+                TextView serviceTotal = viewOrder.findViewById(R.id.total_services);
+                finalTotal.setText(finalTotalstr);
+                serviceTotal.setText(servicTotalstr);
                 Button btnCancel = viewOrder.findViewById(R.id.CancelOrder);
                 btnCancel.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -204,8 +222,8 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
 
                 Button btnRemove = viewCart.findViewById(R.id.buttonRemoveItem);
                 TextView textDialogMsg = viewCart.findViewById(R.id.textDialog);
-                TextView textViewAddress = viewCart.findViewById(R.id.TV_Address);
-                TextView textViewprice = viewCart.findViewById(R.id.textView_Price);
+                TextView textViewAddress = viewCart.findViewById(R.id.TV_Mob);
+                TextView textViewprice = viewCart.findViewById(R.id.tv_email);
                 textViewTitle.setText(list.get(position).getTitle());
                 textViewAddress.setText(list.get(position).getAddress());
                 textViewprice.setText(list.get(position).getAmount().toString());
@@ -273,6 +291,46 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
         }
 
     }
+    private void stopTimer(){
+        if(mTimer1 != null){
+            mTimer1.cancel();
+            mTimer1.purge();
+
+        }
+    }
+
+    private void startTimer(){
+
+        dialog.show();
+        mTimer1 = new Timer();
+        mTt1 = new TimerTask() {
+            public void run() {
+                mTimerHandler.post(new Runnable() {
+                    public void run(){
+                        progress ++;
+                        //TODO
+                    }
+                });
+                if (progress == 80){
+                    progress = 0;
+                    stopTimer();
+                    runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            dialog.hide();
+                            alertDialog.hide();
+                        }
+                    });
+
+                }
+
+            }
+
+        };
+
+        mTimer1.schedule(mTt1, 1, 80);
+    }
     protected void initializeSeekBar(){
         seekBar.setMax(mediaPlayer.getDuration());
 
@@ -291,23 +349,33 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
     private void OrderConfirmationApi(){
         dialog = new SpotsDialog(this,"Confirming your order please wait...");
         dialog.show();
-        NetworkConsume.getInstance().setAccessKey("Bearer "+prefs.getString("access_token","12"));
-        NetworkConsume.getInstance().getAuthAPI().OrderRequest(gpsActivity.getLatitude(),gpsActivity.getLongitude())
-                .enqueue(new Callback<OrderConfirmation>() {
+        requestOrder request = new requestOrder();
+        request.setId("18");
+        request.setLat(gpsActivity.getLatitude());
+        request.setLongitude(gpsActivity.getLongitude());
+        request.setResponse(cartOrder.getResponse());
+        Network.getInstance().setAccessKey("Bearer "+prefs.getString("access_token","12"));
+        Network.getInstance().getAuthAPINew().OrderRequest(request)
+                .enqueue(new Callback<OrderId>() {
                     @Override
-                    public void onResponse(Call<OrderConfirmation> call, Response<OrderConfirmation> response) {
+                    public void onResponse(Call<OrderId> call, Response<OrderId> response) {
                         if (response.isSuccessful()){
-                            OrderConfirmation orderConfirmation = response.body();
+                            OrderId orderConfirmation = response.body();
                             dialog.hide();
+                            startTimer();
+                            if (progress == 80){
+                                dialog.hide();
+                                alertDialog.hide();
+                            }
 
-                            Gson gson = new Gson();
-                            String json = gson.toJson(orderConfirmation);
-                            NetworkConsume.getInstance().setDefaults("myObject",json,MyCart.this);
-
-                            Intent intent = new Intent(MyCart.this, MainActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(intent);
-                            finish();
+//                            Gson gson = new Gson();
+//                            String json = gson.toJson(orderConfirmation);
+                           NetworkConsume.getInstance().setDefaults("myObject",null,MyCart.this);
+//
+//                            Intent intent = new Intent(MyCart.this, MainActivity.class);
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                            startActivity(intent);
+//                            finish();
 
                         }else {
                             dialog.hide();
@@ -318,7 +386,8 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
                     }
 
                     @Override
-                    public void onFailure(Call<OrderConfirmation> call, Throwable t) {
+                    public void onFailure(Call<OrderId> call, Throwable t) {
+                        dialog.hide();
 
                     }
                 });

@@ -37,7 +37,6 @@ import com.android.akhdmny.Adapter.ImagesAdapter;
 import com.android.akhdmny.ApiResponse.AddToCart;
 import com.android.akhdmny.ApiResponse.FourSquare;
 import com.android.akhdmny.ApiResponse.FourSquareResponse;
-import com.android.akhdmny.ApiResponse.OrderConfirmation;
 import com.android.akhdmny.ApiResponse.CategoriesDetailResponse;
 import com.android.akhdmny.ApiResponse.CategoryInsideResponse;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
@@ -63,7 +62,6 @@ import cafe.adriel.androidaudiorecorder.AndroidAudioRecorder;
 import cafe.adriel.androidaudiorecorder.model.AudioChannel;
 import cafe.adriel.androidaudiorecorder.model.AudioSampleRate;
 import cafe.adriel.androidaudiorecorder.model.AudioSource;
-import de.hdodenhof.circleimageview.CircleImageView;
 import dmax.dialog.SpotsDialog;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -276,8 +274,8 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
                 recyclerViewPopup = viewCart.findViewById(R.id.recycler_view);
                 recyclerViewPopup.setLayoutManager(new LinearLayoutManager(CategoryDetailActivity.this, LinearLayoutManager.HORIZONTAL, false));
                 recyclerViewPopup.setHasFixedSize(true);
-                TextView textViewAddress = viewCart.findViewById(R.id.TV_Address);
-                TextView textViewprice = viewCart.findViewById(R.id.textView_Price);
+                TextView textViewAddress = viewCart.findViewById(R.id.TV_Mob);
+                TextView textViewprice = viewCart.findViewById(R.id.tv_email);
                 if (ApiType.toLowerCase().equals("my choice")){
                     Picasso.get().load(R.drawable.dummy_image).into(imageView);
                     textViewTitle.setText(listFoureSquare.get(position).getName());

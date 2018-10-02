@@ -106,6 +106,9 @@ public class login extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     LoginApiResponse apiResponse = response.body();
                     UserDetails.username = apiResponse.getResponse().getId();
+                    Gson gson = new Gson();
+                    String json = gson.toJson(apiResponse.getResponse());
+                    NetworkConsume.getInstance().setDefaults("login",json,login.this);
                     SharedPreferences prefs = getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
                     prefs.edit().putString("access_token", apiResponse.getResponse().getAccessToken())
                             .putString("avatar",apiResponse.getResponse().getAvatar()).commit();
