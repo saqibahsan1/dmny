@@ -14,6 +14,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.R;
 import com.android.akhdmny.Service.AuthService;
 
@@ -153,13 +154,13 @@ public class NetworkConsume {
 
     }
     public void setDefaults(String key, String value, Context context) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences preferences = context.getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(key, value);
         editor.commit();
     }
     public String getDefaults(String key, Context context) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences preferences = context.getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
         return preferences.getString(key, null);
     }
 }

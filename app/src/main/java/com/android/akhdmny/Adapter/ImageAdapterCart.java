@@ -31,10 +31,15 @@ public class ImageAdapterCart   extends RecyclerView.Adapter<ImageAdapterCart.Vi
 
     @Override
     public void onBindViewHolder(ImageAdapterCart.ViewHolder holder, int position) {
-        Picasso.get()
-                .load(imagesFiles.get(position))
-                .fit()
-                .into(holder.imageView);
+
+        if (imagesFiles.get(position) == null){
+            holder.imageView.setVisibility(View.GONE);
+        }else {
+            Picasso.get()
+                    .load(imagesFiles.get(position))
+                    .fit()
+                    .into(holder.imageView);
+        }
     }
 
     @Override

@@ -18,7 +18,7 @@ public class CartInsideResponse {
     private Integer serviceAmount;
     @SerializedName("final_amount")
     @Expose
-    private Integer finalAmount;
+    private Double finalAmount;
 
     public List<Cartitem> getCartitems() {
         return cartitems;
@@ -44,11 +44,11 @@ public class CartInsideResponse {
         this.serviceAmount = serviceAmount;
     }
 
-    public Integer getFinalAmount() {
+    public Double getFinalAmount() {
         return finalAmount;
     }
 
-    public void setFinalAmount(Integer finalAmount) {
+    public void setFinalAmount(Double finalAmount) {
         this.finalAmount = finalAmount;
     }
 

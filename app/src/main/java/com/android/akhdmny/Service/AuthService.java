@@ -1,8 +1,11 @@
 package com.android.akhdmny.Service;
 
+import com.android.akhdmny.ApiResponse.AcceptModel.AcceptOrderApiModel;
 import com.android.akhdmny.ApiResponse.AddComplaintResponse;
 import com.android.akhdmny.ApiResponse.AddToCart;
+import com.android.akhdmny.ApiResponse.CartApi.CartApiResp;
 import com.android.akhdmny.ApiResponse.CartOrder;
+import com.android.akhdmny.ApiResponse.DriverList;
 import com.android.akhdmny.ApiResponse.FourSquare;
 import com.android.akhdmny.ApiResponse.OrderConfirmation;
 import com.android.akhdmny.ApiResponse.CategoriesDetailResponse;
@@ -13,7 +16,11 @@ import com.android.akhdmny.ApiResponse.OrderId;
 import com.android.akhdmny.ApiResponse.ParcelApiResponse;
 import com.android.akhdmny.ApiResponse.ProfileResponse;
 import com.android.akhdmny.ApiResponse.RegisterResponse;
+import com.android.akhdmny.ApiResponse.UpdateTokenResponse;
+import com.android.akhdmny.ApiResponse.createOrder.CreateOrderResp;
+import com.android.akhdmny.Requests.CreateOrderRequest;
 import com.android.akhdmny.Requests.LoginRequest;
+import com.android.akhdmny.Requests.RequestOrder;
 import com.android.akhdmny.Requests.SignInRequest;
 import com.android.akhdmny.Requests.VerificationReguest;
 import com.android.akhdmny.Requests.requestOrder;
@@ -37,14 +44,18 @@ public interface AuthService {
     @POST("/akhdmny/public/api/user/login")
     Call<LoginApiResponse> LoginApi(@Body LoginRequest request);
 
+
+    @POST("/akhdmny/public/api/user/create-order")
+    Call<CreateOrderResp> CreateOrder(@Body CreateOrderRequest request);
+
     @POST("/akhdmny/public/api/user/verification")
     Call<LoginApiResponse> VerificationApi(@Body VerificationReguest request);
 
     @GET("/akhdmny/public/api/user/categories")
     Call<CategoriesResponse> CategoryApi();
 
-    @GET("/akhdmny/public/api/user/cart_item?lat=24.9070714&long=67.1124509")
-    Call<CartOrder> CartOrders();
+    @GET("/akhdmny/public/api/user/cart_item")
+    Call<CartApiResp> CartOrders(@Query("lat") double lat, @Query("long") double longitude);
 
     @GET("/akhdmny/public/api/user/cart_item/destroy")
     Call<CartOrder> RemoveCartOrders(@Query("cart_id") int userId, @Query("lat") double lat, @Query("long") double longi);
@@ -59,9 +70,17 @@ public interface AuthService {
     @GET("/akhdmny/public/api/user/foursquare")
     Call<FourSquare> fourSquareApiCall(@Query("lat") double lat, @Query("long") double longi);
 
+    @GET("/akhdmny/public/api/user/accept-bid")
+    Call<AcceptOrderApiModel> AcceptBidApi(@Query("order_id") int OrderId, @Query("bid") int Bid, @Query("driver_id") int DriverId);
+
     @POST("/createOrder")
-    Call<OrderId> OrderRequest(@Body requestOrder order);
-//    @Query("lat") double lat,@Query("long") double longitude
+    Call<OrderId> OrderRequest(@Body RequestOrder order);
+
+    @GET("/updateToken")
+    Call<UpdateTokenResponse> Token(@Query("id") int id,@Query("token") String token);
+
+    @GET("/acceptedDrivers")
+    Call<DriverList> BidApi(@Query("orderId") String orderId);
 
     @Multipart
     @POST("/akhdmny/public/api/user/problem?lat=24.9070714&long=67.1124509")
@@ -71,7 +90,7 @@ public interface AuthService {
     @POST("/akhdmny/public/api/user/cart/store")
     Call<AddToCart> addToCart(@Part("description") RequestBody description,@Part("title") RequestBody title,
                               @Part("type") int type,
-                              @Part("address") String address,@Part("amount") int amount,
+                              @Part("address") String address,@Part("amount") double amount,
                               @Part("distance") double distance,@Part("lat") double lat,@Part("long") double longitude,
                               @Part("service_id") String service_id,
                               @Part MultipartBody.Part[] Images, @Part MultipartBody.Part Sound);

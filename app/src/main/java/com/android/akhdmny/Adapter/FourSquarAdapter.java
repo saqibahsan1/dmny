@@ -13,6 +13,7 @@ import com.android.akhdmny.ApiResponse.FourSquareResponse;
 import com.android.akhdmny.R;
 import com.squareup.picasso.Picasso;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class FourSquarAdapter extends RecyclerView.Adapter<FourSquarAdapter.ProductViewHolder> {
@@ -46,7 +47,7 @@ public class FourSquarAdapter extends RecyclerView.Adapter<FourSquarAdapter.Prod
         //binding the data with the viewholder views
         holder.textViewTitle.setText(product.getName());
         holder.TxtViewAddress.setText(product.getLocation().getCc()+","+product.getLocation().getDistance()+" Km");
-        holder.textViewPrice.setText(String.valueOf(product.getAmount()));
+        holder.textViewPrice.setText(new DecimalFormat("##").format(product.getAmount()));
         Picasso.get().load(R.drawable.dummy_image).error(R.drawable.dummy_image).into(holder.imageView);
 
 

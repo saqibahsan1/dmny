@@ -226,7 +226,8 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
                         recyclerView.setAdapter(myAdapter);
                         dialog.hide();
                     }else {
-                        NetworkConsume.getInstance().SnackBarError(main_layout,CategoryDetailActivity.this,R.string.error_text);
+                        dialog.dismiss();
+                        NetworkConsume.getInstance().SnackBarError(main_layout,CategoryDetailActivity.this,R.string.error);
                     }
                 }else {
                     Gson gson = new Gson();
@@ -580,7 +581,7 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
 
 
     }
-    private void addDataTOApi(String id,String title,int type,String address,double distance,int amount,double lat, double longitude){
+    private void addDataTOApi(String id,String title,int type,String address,double distance,double amount,double lat, double longitude){
         dialog = new SpotsDialog(this,"Please wait...");
         dialog.show();
         File AudioFile = new File(AUDIO_FILE_PATH);

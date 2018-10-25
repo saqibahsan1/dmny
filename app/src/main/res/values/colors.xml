@@ -16,6 +16,7 @@
     <color name="list_divider">#272727</color>
     <color name="counter_text_bg">#626262</color>
     <color name="counter_text_color">#c5c4c4</color>
-    <color name="colorPrimaryLightA">#1d6fac</color>
+    <color name="colorPrimaryLightA">#c9ccce</color>
+    <color name="text_color_link">@color/colorPrimary</color>
 
 </resources>

@@ -67,12 +67,14 @@
     <string name="Message">أدخل رسالة…</string>
     <string name="amount">0.0</string>
     <string name="btnSend">إرسال</string>
-    <string name="title">عنوان</string>
+    <string name="title">عنوان</string>البند قد أمر
+    <string name="success_order">البند قد أمر</string>
     <string name="notification">لا إشعارات في هذه اللحظة</string>
     <string name="notifications">إشعارات</string>
     <string name="Complaint">الجديد</string>
     <string name="map">خريطة</string>
     <string name="new_orders">طلبات جديدة</string>
+    <string name="accept">قبول</string>
     <string name="driver_orders">تقديم الطلبات</string>
     <string name="history">التاريخ</string>
     <string name="Home">الصفحة الرئيسية</string>
@@ -86,4 +88,9 @@
     <string name="rate">معدل التطبيق لدينا</string>
     <string name="langType">الإنجليزية</string>
     <string name="logout">الخروج</string>
+    <string name="categories">الاقسام</string>
+    <string name="bid">المناقصة</string>
+    <string name="new_msg">رسالة جديدة…</string>
+    <string name="tip">Tip...</string>
+
 </resources>

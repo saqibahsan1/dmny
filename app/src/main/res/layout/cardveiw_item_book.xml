@@ -21,8 +21,9 @@
             <ImageView
                 android:id="@+id/book_img_id"
                 android:layout_width="match_parent"
-                android:layout_height="92dp"
-                android:background="#2d2d2d"
+                android:layout_height="match_parent"
+                android:background="#fff"
+                android:src="@drawable/place_holder"
                 android:scaleType="centerCrop" />
 
             <ProgressBar

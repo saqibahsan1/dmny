@@ -27,7 +27,7 @@ public class FourSquareResponse {
     private Boolean hasPerk;
     @SerializedName("amount")
     @Expose
-    private Integer amount;
+    private Double amount;
 
     public String getId() {
         return id;
@@ -77,11 +77,11 @@ public class FourSquareResponse {
         this.hasPerk = hasPerk;
     }
 
-    public Integer getAmount() {
+    public Double getAmount() {
         return amount;
     }
 
-    public void setAmount(Integer amount) {
+    public void setAmount(Double amount) {
         this.amount = amount;
     }
 

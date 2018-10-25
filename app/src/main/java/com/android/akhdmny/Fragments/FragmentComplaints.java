@@ -621,7 +621,7 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
                         LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
                         NetworkConsume.getInstance().SnackBarErrorHistory(ComplaintLayout,getActivity(),message.getError().getMessage().get(0));
 
-                       // Toast.makeText(getActivity(), message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
+                       // Toast.makeText(getActivity(), message.getError().getBody().get(0), Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
                     }
 

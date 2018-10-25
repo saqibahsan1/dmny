@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,11 +27,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.akhdmny.Activities.Bid;
 import com.android.akhdmny.Activities.Chat;
+import com.android.akhdmny.ApiResponse.AcceptModel.Driver;
+import com.android.akhdmny.ApiResponse.AcceptModel.User;
 import com.android.akhdmny.ApiResponse.OrderConfirmation;
+import com.android.akhdmny.FireBaseNotification.TrackerService;
 import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
 import com.android.akhdmny.R;
+import com.android.akhdmny.Utils.Route;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -51,14 +57,26 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.android.akhdmny.MainActivity.btn;
+import static com.android.akhdmny.MainActivity.btn_layout;
 import static com.android.akhdmny.MainActivity.showOrHide;
 
 
@@ -100,11 +118,11 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 
     @BindView(R.id.OrderCancel)
     Button CancelOrder;
-
+    String id ="";
     MapView mMapView;
     private GoogleApiClient mGoogleApiClient;
-    private double longitude;
-    private double latitude;
+    private double longitude,lat=0.0;
+    private double latitude,lon=0.0;
     private GoogleApiClient googleApiClient;
     private String TAG = "gps";
     public static final int REQUEST_CHECK_SETTINGS = 123;
@@ -113,6 +131,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
     int FASTEST_INTERVAL = 500;
     private FragmentActivity myContext;
     private BottomSheetBehavior mBottomSheetBehaviour;
+    Marker marker;
     public FragmentHome() {
 
     }
@@ -127,7 +146,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 //        MapFragment mapFragment = (MapFragment) getActivity().getFragmentManager().findFragmentById(R.id.map);
         mMapView = (MapView) view.findViewById(R.id.map);
         mMapView.onCreate(savedInstanceState);
-
+        //listnerBid();
         mMapView.getMapAsync(this);
         mMapView.onResume();
         try {
@@ -164,10 +183,13 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
             public void onClick(View v) {
                nestedScrollView.setVisibility(View.GONE);
                showOrHide(true);
-//               NetworkConsume.getInstance().setDefaults("myObject",null,getActivity());
+               NetworkConsume.getInstance().setDefaults("D_model",null,getActivity());
+               NetworkConsume.getInstance().setDefaults("O_model",null,getActivity());
+               NetworkConsume.getInstance().setDefaults("U_model",null,getActivity());
                 if(mMap != null){ //prevent crashing if the map doesn't exist yet (eg. on starting activity)
                     mMap.clear();
                     getCurrentLocation();
+                    btn.setVisibility(View.VISIBLE);
 
                 }
 
@@ -179,7 +201,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
                 startActivity(new Intent(getActivity(), Chat.class));
             }
         });
-
+            startTrackerService();
         return view;
     }
 
@@ -212,6 +234,10 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
             }
         }
     };
+    private void startTrackerService() {
+        getActivity().startService(new Intent(getActivity(), TrackerService.class));
+        //finish();
+    }
 
 
     @Override
@@ -229,6 +255,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 
                         if (checkPermission())
                             buildGoogleApiClient();
+                        startTrackerService();
                         Toast.makeText(getActivity(), "Permission Granted", Toast.LENGTH_LONG).show();
                     } else {
                         Toast.makeText(getActivity(), "Permission Denied", Toast.LENGTH_LONG).show();
@@ -240,12 +267,56 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         }
 
     }
-    protected Marker createMarker(double latitude, double longitude, String title) {
+    private void  listnerBid(){
+        String id = NetworkConsume.getInstance().getDefaults("id",getActivity());
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").child("User").
+                child(id);
+        ref.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+                Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
 
-        return mMap.addMarker(new MarkerOptions()
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+                Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
+                if (dataSnapshot.getKey().equals("orderId")){
+                    NetworkConsume.getInstance().setDefaults("orderId",dataSnapshot.getValue().toString(),getActivity());
+                }
+                if (dataSnapshot.getKey().equals("status") && dataSnapshot.getValue().toString().equals("1")){
+                    Intent start = new Intent(getActivity(),Bid.class);
+                    start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(start);
+                }
+
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
+                Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w(TAG, "onCancelled", databaseError.toException());
+            }
+        });
+    }
+
+    protected Marker createMarker(double latitude, double longitude, String title,int Rid) {
+
+        return marker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(latitude, longitude))
                 .anchor(0.5f, 0.5f)
                 .title(title)
+                .icon(BitmapDescriptorFactory.fromResource(Rid))
                 .draggable(true));
     }
     public void getCurrentLocation() {
@@ -261,44 +332,124 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
             moveMap();
         }
     }
+    private void listner(String id){
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Tracking").child(id);
+        ref.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+                Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+                Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
+
+                    if (dataSnapshot.getKey().equals("latitude")) {
+                        lat = Double.valueOf(dataSnapshot.getValue().toString());
+                    }
+                    if (dataSnapshot.getKey().equals("longitude")) {
+                        lon= Double.valueOf(dataSnapshot.getValue().toString());
+                    }
+                    if (lat != 0.0 && lon != 0.0) {
+                        drawRoute(lat, lon);
+                    }
+
+                }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
+
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
+                Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w(TAG, "onCancelled", databaseError.toException());
+            }
+        });
+    }
+    public void drawRoute(double lat,double lng) {
+        PolylineOptions lineOptions = new PolylineOptions();
+        Polyline polyline ;
+        List<LatLng> points = new ArrayList<>();
+        if (marker != null){
+            marker.remove();
+            createMarker(lat,lng,"driver",R.drawable.car_icon);
+
+        }
+        LatLng latLng = new LatLng(lat, lng);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+            lineOptions.add(new LatLng(lat, lng));
+            points.add(latLng);
+
+
+           // createMarker(lat,lng,"Driver");
+
+        lineOptions.width(12);
+        lineOptions.addAll(points);
+        lineOptions.clickable(true);
+        lineOptions.color(Color.RED);
+        polyline = mMap.addPolyline(lineOptions);
+         points = polyline.getPoints();
+        points.add(latLng);
+        polyline.setPoints(points);
+
+         mMap.addPolyline(lineOptions);
+    }
     private void moveMap() {
         //String to display current latitude and longitude
         String msg = latitude + ", " + longitude;
         //Creating a LatLng Object to store Coordinates
         LatLng latLng = new LatLng(latitude, longitude);
-        //Adding marker to map
-//        mMap.addMarker(new MarkerOptions()
-//                .position(latLng) //setting position
-//                .draggable(true) //Making the marker draggable
-//                .title("Current Location")); //Adding a title
-        //Moving the camera
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
+                .anchor(0.5f, 0.5f)
+                .title("current position")
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker))
+                .draggable(true));
         //Animating the camera
         mMap.animateCamera(CameraUpdateFactory.zoomTo(9));
         try {
-            nestedScrollView.setVisibility(View.GONE);
+          //  nestedScrollView.setVisibility(View.GONE);
             Gson gson = new Gson();
-            String json = NetworkConsume.getInstance().getDefaults("myObject",getActivity());
-            if (json == null){
+            String d_model = NetworkConsume.getInstance().getDefaults("D_model",getActivity());
+            String o_model = NetworkConsume.getInstance().getDefaults("O_model",getActivity());
+            String u_model = NetworkConsume.getInstance().getDefaults("U_model",getActivity());
+            if (d_model == null && o_model == null && u_model == null){
                 nestedScrollView.setVisibility(View.GONE);
+                btn_layout.setVisibility(View.VISIBLE);
             } else
             {
-                OrderConfirmation obj = gson.fromJson(json, OrderConfirmation.class);
-                for (int i = 0; i<obj.getResponse().getServices().size(); i++)
-                {
-                    createMarker(obj.getResponse().getServices().get(i).getLat(),obj.getResponse().getServices().get(i).getLong(),
-                            obj.getResponse().getServices().get(i).getTitle());
-                }
+                btn_layout.setVisibility(View.GONE);
+                nestedScrollView.setVisibility(View.VISIBLE);
+                Driver obj = gson.fromJson(d_model, Driver.class);
+                User user = gson.fromJson(u_model, User.class);
+                    listner(String.valueOf(obj.getId()));
+                    createMarker(obj.getLat(),obj.getLong(),obj.getName(),R.drawable.car_icon);
+
                 Picasso.get()
-                        .load(obj.getResponse().getDriver().getAvatar())
+                        .load(obj.getAvatar()).error(R.drawable.dummy_image)
                         .fit()
                         .into(driver_Image);
-                driverName.setText(obj.getResponse().getDriver().getName());
-                driverRating.setText("5/"+obj.getResponse().getDriver().getRating());
-                carModel.setText(obj.getResponse().getDriver().getCarCompany()+" "+obj.getResponse().getDriver().getCarModel()
-                        +" "+obj.getResponse().getDriver().getCarColor());
-                carNumber.setText(obj.getResponse().getDriver().getCarNo());
+
+                Picasso.get()
+                        .load(user.getAvatar()).error(R.drawable.dummy_image)
+                        .fit()
+                        .into(driver_Image);
+                driverName.setText(obj.getName());
+                driverRating.setText("5/"+obj.getRating());
+                carModel.setText(obj.getCarCompany()+" "+obj.getCarModel()
+                        +" "+obj.getCarColor());
+                carNumber.setText(obj.getCarNo());
 //            View nestedScrollView = (View) view.findViewById(R.id.nestedScrollView);
                 mBottomSheetBehaviour = BottomSheetBehavior.from(nestedScrollView);
 
@@ -313,18 +464,22 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
                         switch (newState) {
                             case BottomSheetBehavior.STATE_DRAGGING: {
                                 state = "DRAGGING";
+                                mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
                                 break;
                             }
                             case BottomSheetBehavior.STATE_SETTLING: {
                                 state = "SETTLING";
+                                mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
                                 break;
                             }
                             case BottomSheetBehavior.STATE_EXPANDED: {
                                 state = "EXPANDED";
+
                                 break;
                             }
                             case BottomSheetBehavior.STATE_COLLAPSED: {
                                 state = "COLLAPSED";
+                                mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
                                 break;
                             }
                             case BottomSheetBehavior.STATE_HIDDEN: {
@@ -350,6 +505,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         //  Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
 
+
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addConnectionCallbacks(this)
@@ -374,9 +530,6 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         // For showing a move to my location button
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         //Setting onMarkerDragListener to track the marker drag
         mMap.setOnMarkerDragListener(this);
         //Adding a long click listener to the map

@@ -9,10 +9,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.akhdmny.ApiResponse.CartApi.CartItem;
 import com.android.akhdmny.ApiResponse.Cartitem;
 import com.android.akhdmny.R;
 import com.squareup.picasso.Picasso;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class MyCartAdapter extends RecyclerView.Adapter<MyCartAdapter.ProductViewHolder> {
@@ -22,10 +24,10 @@ public class MyCartAdapter extends RecyclerView.Adapter<MyCartAdapter.ProductVie
     private Context mCtx;
 
     //we are storing all the products in a list
-    private ArrayList<Cartitem> productList;
+    private ArrayList<CartItem> productList;
 
     //getting the context and product list with constructor
-    public MyCartAdapter(Context mCtx, ArrayList<Cartitem> productList) {
+    public MyCartAdapter(Context mCtx, ArrayList<CartItem> productList) {
         this.mCtx = mCtx;
         this.productList = productList;
     }
@@ -41,7 +43,7 @@ public class MyCartAdapter extends RecyclerView.Adapter<MyCartAdapter.ProductVie
     @Override
     public void onBindViewHolder(ProductViewHolder holder, int position) {
         //getting the product of the specified position
-        Cartitem product = productList.get(position);
+        CartItem product = productList.get(position);
 
         try {
             if (product == null){
@@ -49,11 +51,11 @@ public class MyCartAdapter extends RecyclerView.Adapter<MyCartAdapter.ProductVie
             }else {
                 holder.textViewTitle.setText(product.getTitle());
                 holder.TxtViewAddress.setText(String.valueOf(product.getAddress()));
-                holder.textViewPrice.setText(String.valueOf(product.getAmount()));
-                if (product.getServiceImage() == null){
-                    Picasso.get().load(R.drawable.dummy_image).into(holder.imageView);
+                holder.textViewPrice.setText(String.valueOf(new DecimalFormat("##").format(product.getAmount())));
+                if (product.getImage() == null){
+                    Picasso.get().load(R.drawable.place_holder).into(holder.imageView);
                 }else {
-                    Picasso.get().load(product.getServiceImage()).into(holder.imageView);
+                    Picasso.get().load(product.getImage()).into(holder.imageView);
                 }
             }
         }catch (Exception e){

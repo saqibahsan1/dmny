@@ -2,6 +2,7 @@ package com.android.akhdmny.Fragments;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,12 +13,15 @@ import android.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.akhdmny.Activities.CategoryDetailActivity;
@@ -45,31 +49,40 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class FargmentService extends Fragment {
+public class FargmentService extends AppCompatActivity {
 
     ArrayList<CatInsideResponse> categoriesNames;
     @BindView(R.id.recyclerview_id)
     RecyclerView recyclerview;
-    @BindView(R.id.rotateloading)
-    RotateLoading rotateLoading;
+
     RecyclerViewAdapter myAdapter;
     SharedPreferences prefs;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    TextView tvTitle;
     public FargmentService(){
 
     }
 
-    @Nullable
+
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.services, container, false);
-        ButterKnife.bind(this,view);
-        prefs = getActivity().getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.services);
+        ButterKnife.bind(this);
+        setSupportActionBar(toolbar);
+
+        tvTitle = (TextView) toolbar.findViewById(R.id.tvTitle);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        tvTitle.setText(R.string.categories);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        prefs = getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
         categoriesNames = new ArrayList<>();
         CategoryApi();
         ItemClick();
-
-        return view;
     }
+
 
     private void CategoryApi(){
         NetworkConsume.getInstance().setAccessKey(prefs.getString("access_token","12"));
@@ -82,24 +95,24 @@ public class FargmentService extends Fragment {
                     categoriesNames.add(categoriesResponse.getResponse().get(i));
                 }
                    // categoriesNames = new ArrayList((categoriesResponse.getResponse()));
-                    myAdapter = new RecyclerViewAdapter(getActivity(),categoriesNames);
-                    recyclerview.setLayoutManager(new GridLayoutManager(getActivity(),3));
+                    myAdapter = new RecyclerViewAdapter(FargmentService.this,categoriesNames);
+                    recyclerview.setLayoutManager(new GridLayoutManager(FargmentService.this,3));
                     recyclerview.setAdapter(myAdapter);
-                    rotateLoading.stop();
+
 
 
                 }else {
-                    rotateLoading.stop();
+
                     Gson gson = new Gson();
                     LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
-                    Toast.makeText(getActivity(), message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(FargmentService.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
                 }
 
             }
 
             @Override
             public void onFailure(Call<CategoriesResponse> call, Throwable t) {
-                Toast.makeText(getActivity(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(FargmentService.this, t.getMessage(), Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -112,20 +125,20 @@ public class FargmentService extends Fragment {
     }
 
     private void ItemClick(){
-        recyclerview.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), recyclerview, new ClickListener() {
+        recyclerview.addOnItemTouchListener(new RecyclerTouchListener(FargmentService.this, recyclerview, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                NetworkConsume.getInstance().setDefaults("id",categoriesNames.get(position).getId().toString(),getActivity());
-                NetworkConsume.getInstance().setDefaults("image",categoriesNames.get(position).getIcon(),getActivity());
-                NetworkConsume.getInstance().setDefaults("title",categoriesNames.get(position).getTitle(),getActivity());
-                NetworkConsume.getInstance().setDefaults("colour",categoriesNames.get(position).getColor(),getActivity());
+                NetworkConsume.getInstance().setDefaults("id",categoriesNames.get(position).getId().toString(),FargmentService.this);
+                NetworkConsume.getInstance().setDefaults("image",categoriesNames.get(position).getIcon(),FargmentService.this);
+                NetworkConsume.getInstance().setDefaults("title",categoriesNames.get(position).getTitle(),FargmentService.this);
+                NetworkConsume.getInstance().setDefaults("colour",categoriesNames.get(position).getColor(),FargmentService.this);
 
                 if (categoriesNames.get(position).getTitle().trim().equals("Parcels")){
-                    startActivity(new Intent(getActivity(), ParcelActivity.class));
-                    getActivity().overridePendingTransition(R.anim.slide_left_in,R.anim.slide_left_out);
+                    startActivity(new Intent(FargmentService.this, ParcelActivity.class));
+                    overridePendingTransition(R.anim.slide_left_in,R.anim.slide_left_out);
                 }else {
-                    startActivity(new Intent(getActivity(), CategoryDetailActivity.class));
-                    getActivity().overridePendingTransition(R.anim.slide_left_in,R.anim.slide_left_out);
+                    startActivity(new Intent(FargmentService.this, CategoryDetailActivity.class));
+                    overridePendingTransition(R.anim.slide_left_in,R.anim.slide_left_out);
                 }
 
 
@@ -182,6 +195,16 @@ public class FargmentService extends Fragment {
 
 
     }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
 
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
 }

@@ -112,7 +112,9 @@ public class FragmentSettings extends Fragment {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         SharedPreferences prefs = getActivity().getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
                         prefs.edit().putString("access_token", "")
-                                .putString("avatar","").commit();
+                                .putString("avatar","")
+                                .putString("login","").commit();
+
                        startActivity( new Intent(getActivity(),login.class));
                     }
                 })

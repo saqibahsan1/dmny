@@ -136,6 +136,19 @@
 
         </LinearLayout>
 
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginStart="@dimen/input_button_height"
+            android:layout_marginEnd="@dimen/input_button_height"
+            android:layout_marginTop="@dimen/book_border"
+            android:hint="@string/tip"
+            android:padding="@dimen/book_border"
+            android:inputType="number"
+            android:background="@drawable/edit_text_bg"
+            android:id="@+id/et_tip"/>
+
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -152,34 +165,22 @@
                 android:text="@string/confirm"
                 android:background="@color/green"
                 android:textColor="@android:color/white"
-                android:layout_weight="2"
+                android:layout_weight="1"
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"/>
-
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="@dimen/activity_vertical_margin"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:weightSum="4">
-
-
-
 
             <Button
                 android:id="@+id/CancelOrder"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:text="@string/Cancel"
+                android:layout_marginTop="@dimen/book_border"
+                android:layout_marginBottom="@dimen/book_border"
                 android:background="@color/orange"
                 android:textColor="@android:color/white"
-                android:layout_weight="2"
+                android:layout_weight="1"
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"/>
-
 
 
         </LinearLayout>

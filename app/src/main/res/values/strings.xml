@@ -6,13 +6,15 @@
     <string name="Register"> <u>Register</u></string>
     <string name="Resend"> <u>Resend</u></string>
     <string name="msg"> <u>Write here...</u></string>
+    <string name="new_msg">New Message…</string>
     <string name="Enter_code_Text"> Please enter the verification code</string>
     <string name="login">Login</string>
     <string name="login_Text">LOGIN TO YOUR ACCOUNT</string>
     <string name="success">Your Complain has been added</string>
     <string name="successParcel">Your Parcel request has been added</string>
     <string name="success_CartItem">Item has been added to the cart</string>
-    <string name="error_text">Please enter a message</string>
+    <string name="success_order">Item has been Ordered</string>
+    <string name="error_text">Please enter a body</string>
     <string name="error">No Record Found</string>
     <string name="open">Open Navigation</string>
     <string name="Loading_history">Loading complaint history…</string>
@@ -64,8 +66,9 @@
     <string name="total">Total services</string>
     <string name="finalTotal">Final Total</string>
     <string name="Coupon">Have a Coupon?</string>
-    <string name="Message">Enter message…</string>
+    <string name="Message">Enter body…</string>
     <string name="amount">0.0</string>
+    <string name="accept">Accept</string>
     <string name="btnSend">Send</string>
     <string name="title">Title</string>
     <string name="notification">No Notifications at this moment</string>
@@ -86,5 +89,8 @@
     <string name="rate">Rate Our App</string>
     <string name="langType">English</string>
     <string name="logout">Logout</string>
+    <string name="categories">Categories</string>
+    <string name="bid">Bid</string>
+    <string name="tip">Tip...</string>
 
 </resources>

@@ -3,6 +3,7 @@ package com.android.akhdmny.Activities;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -13,10 +14,12 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -25,22 +28,31 @@ import android.widget.Toast;
 
 import com.android.akhdmny.Adapter.ImageAdapterCart;
 import com.android.akhdmny.Adapter.MyCartAdapter;
+import com.android.akhdmny.ApiResponse.CartApi.CartApiResp;
+import com.android.akhdmny.ApiResponse.CartApi.CartItem;
 import com.android.akhdmny.ApiResponse.CartInsideResponse;
 import com.android.akhdmny.ApiResponse.CartOrder;
 import com.android.akhdmny.ApiResponse.Cartitem;
+import com.android.akhdmny.ApiResponse.CategoriesResponse;
 import com.android.akhdmny.ApiResponse.OrderId;
+import com.android.akhdmny.ApiResponse.createOrder.CreateOrderResp;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
 import com.android.akhdmny.Fragments.FargmentService;
 import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.NetworkManager.Network;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
 import com.android.akhdmny.R;
-import com.android.akhdmny.Requests.requestOrder;
+import com.android.akhdmny.Requests.CreateOrderRequest;
+import com.android.akhdmny.Requests.RequestOrder;
 import com.android.akhdmny.Utils.GPSActivity;
+import com.android.akhdmny.Utils.User;
+import com.android.akhdmny.Utils.UserDetails;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -53,7 +65,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletionListener {
-    ArrayList<Cartitem> list;
+    ArrayList<CartItem> list;
     ArrayList<CartInsideResponse> listResponse;
     @BindView(R.id.recyclerView)
     RecyclerView recyclerView;
@@ -64,25 +76,29 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
     SharedPreferences prefs;
     AlertDialog alertDialog;
     GPSActivity gpsActivity;
-    SpotsDialog dialog;
+//    SpotsDialog dialog;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+    @BindView(R.id.avi)
+    AVLoadingIndicatorView loader;
+    EditText editText;
     int progress = 0;
     @BindView(R.id.total_services)
     TextView total_services;
-    CartOrder cartOrder;
+
     @BindView(R.id.final_Total)
     TextView final_Total;
     TextView tvTitle;
     SeekBar seekBar;
     MediaPlayer mediaPlayer;
-    String finalTotalstr, servicTotalstr;
+    String finalTotalstr, servicTotalstr,discount;
     private Handler mHandler;
     private Timer mTimer1;
     private TimerTask mTt1;
     private Handler mTimerHandler = new Handler();
     private Runnable mRunnable;
     private ArrayList<String> photos = new ArrayList<>();
+    RequestOrder request;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,38 +118,54 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
         itemTouchLister();
     }
 
+    void startAnim(){
+        loader.show();
+        // or avi.smoothToShow();
+    }
+
+    void stopAnim(){
+        loader.hide();
+        // or avi.smoothToHide();
+    }
+
     private void CartApi(){
-        dialog = new SpotsDialog(this,"Please wait...");
-        dialog.show();
+       startAnim();
         NetworkConsume.getInstance().setAccessKey("Bearer "+prefs.getString("access_token","12"));
-        NetworkConsume.getInstance().getAuthAPI().CartOrders().
-                enqueue(new Callback<CartOrder>() {
+        NetworkConsume.getInstance().getAuthAPI().CartOrders(gpsActivity.getLatitude(),gpsActivity.getLongitude()).
+                enqueue(new Callback<CartApiResp>() {
                     @Override
-                    public void onResponse(Call<CartOrder> call, Response<CartOrder> response) {
+                    public void onResponse(Call<CartApiResp> call, Response<CartApiResp> response) {
                         if (response.isSuccessful()) {
-                             cartOrder = response.body();
-                            for (int i=0; i< cartOrder.getResponse().getCartitems().size(); i++){
-                                if (cartOrder.getResponse().getCartitems().size() == 0)
+                            CartApiResp cartOrder = response.body();
+                            for (int i=0; i< cartOrder.getResponse().getCartItems().size(); i++){
+                                if (cartOrder.getResponse().getCartItems().size() == 0)
                                 {
 
                                 }else {
-                                    list.add(cartOrder.getResponse().getCartitems().get(i));
-                                    listResponse.add(cartOrder.getResponse());
+                                    list.add(cartOrder.getResponse().getCartItems().get(i));
+                                  //  listResponse.add(cartOrder.getResponse());
                                 }
                             }
-                            final_Total.setText(cartOrder.getResponse().getFinalAmount().toString());
-                            finalTotalstr = cartOrder.getResponse().getFinalAmount().toString();
-                            servicTotalstr =cartOrder.getResponse().getServiceAmount().toString();
-                            total_services.setText(cartOrder.getResponse().getServiceAmount().toString());
-                            MyCartAdapter myAdapter = new MyCartAdapter(MyCart.this,list);
-                            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-                            recyclerView.setLayoutManager(mLayoutManager);
-                            recyclerView.setItemAnimator(new DefaultItemAnimator());
-                            recyclerView.setAdapter(myAdapter);
-                            dialog.hide();
+                            try {
+
+                                final_Total.setText(String.valueOf(new DecimalFormat("##").format(cartOrder.getResponse().getFinalAmount())));
+                                finalTotalstr = String.valueOf(new DecimalFormat("##").format(cartOrder.getResponse().getFinalAmount()));
+                                servicTotalstr =String.valueOf(new DecimalFormat("##").format(cartOrder.getResponse().getAmount()));
+                                discount = String.valueOf(new DecimalFormat("##").format(cartOrder.getResponse().getDiscountAmount()));
+                                total_services.setText(String.valueOf(new DecimalFormat("##").format(cartOrder.getResponse().getAmount())));
+                                MyCartAdapter myAdapter = new MyCartAdapter(MyCart.this,list);
+                                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                                recyclerView.setLayoutManager(mLayoutManager);
+                                recyclerView.setItemAnimator(new DefaultItemAnimator());
+                                recyclerView.setAdapter(myAdapter);
+                                stopAnim();
+                            }catch (Exception e){
+                                Log.i("err",e.getLocalizedMessage());
+                            }
+
 
                         }else {
-                            dialog.hide();
+                            stopAnim();
                             Gson gson = new Gson();
                             LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
                             Toast.makeText(MyCart.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
@@ -142,8 +174,8 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
                     }
 
                     @Override
-                    public void onFailure(Call<CartOrder> call, Throwable t) {
-                        dialog.hide();
+                    public void onFailure(Call<CartApiResp> call, Throwable t) {
+                        stopAnim();
                         Toast.makeText(MyCart.this, t.getMessage(), Toast.LENGTH_SHORT).show();
 
                     }
@@ -158,8 +190,11 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
                 View viewOrder = inflater.inflate(R.layout.confirm_order, null);
                 Button btnDone = viewOrder.findViewById(R.id.OrderDone);
                 TextView finalTotal = viewOrder.findViewById(R.id.final_Total);
+                TextView discountVal = viewOrder.findViewById(R.id.discountValue);
                 TextView serviceTotal = viewOrder.findViewById(R.id.total_services);
+                 editText = viewOrder.findViewById(R.id.et_tip);
                 finalTotal.setText(finalTotalstr);
+                discountVal.setText(discount);
                 serviceTotal.setText(servicTotalstr);
                 Button btnCancel = viewOrder.findViewById(R.id.CancelOrder);
                 btnCancel.setOnClickListener(new View.OnClickListener() {
@@ -171,7 +206,14 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
                 btnDone.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                    OrderConfirmationApi();
+
+                        if (editText.getText().toString().equals("")){
+                            Toast.makeText(MyCart.this, "Please enter a tip...", Toast.LENGTH_SHORT).show();
+                        }else {
+                            createOrderApi();
+                        }
+
+
                     }
                 });
 
@@ -196,15 +238,15 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
                 RecyclerView recyclerViewPopup = viewCart.findViewById(R.id.recycler_view);
                 recyclerViewPopup.setLayoutManager(new LinearLayoutManager(MyCart.this, LinearLayoutManager.HORIZONTAL, false));
                 recyclerViewPopup.setHasFixedSize(true);
-                for (int i =0; i<list.get(position).getImages().size()-1;i++)
-                {
-                    photos.add(list.get(i).getImages().get(i));
+//                for (int i =0; i<list.get(position).getImage().size()-1;i++)
+//                {
+                    photos.add(list.get(position).getImage());
 
-                }
+
                 ImageAdapterCart imagesAdapter = new ImageAdapterCart(MyCart.this, photos);
 
                 recyclerViewPopup.setAdapter(imagesAdapter);
-                Picasso.get().load(list.get(position).getServiceImage()).into(imageView);
+                Picasso.get().load(R.drawable.place_holder).into(imageView);
                 PlayAudio.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -236,7 +278,8 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
                 btnRemove.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        RemoveCartOrderApi(list.get(position).getId());
+
+                        //RemoveCartOrderApi(list.get(position).getId());
                     }
                 });
             }
@@ -275,6 +318,11 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
             e.printStackTrace();
         }
     }
+    @Override
+    public void onStop() {
+        super.onStop();
+
+    }
     private void stopPlaying(){
 
         if(mediaPlayer != null){
@@ -299,38 +347,47 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
         }
     }
 
-    private void startTimer(){
-
-        dialog.show();
-        mTimer1 = new Timer();
-        mTt1 = new TimerTask() {
-            public void run() {
-                mTimerHandler.post(new Runnable() {
-                    public void run(){
-                        progress ++;
-                        //TODO
-                    }
-                });
-                if (progress == 80){
-                    progress = 0;
-                    stopTimer();
-                    runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            dialog.hide();
-                            alertDialog.hide();
-                        }
-                    });
-
-                }
-
-            }
-
-        };
-
-        mTimer1.schedule(mTt1, 1, 80);
-    }
+//    private void startTimer(){
+//
+////        dialog.show();
+//        mTimer1 = new Timer();
+//        mTt1 = new TimerTask() {
+//            public void run() {
+//                mTimerHandler.post(new Runnable() {
+//                    public void run(){
+//                        progress ++;
+//                        //TODO
+//                    }
+//                });
+//                if (progress == 80){
+//                    progress = 0;
+//                    stopTimer();
+//                    runOnUiThread(new Runnable() {
+//
+//                        @Override
+//                        public void run() {
+//                            try {
+//                                progress = 0;
+//                                dialog.hide();
+//                                alertDialog.hide();
+//                                NetworkConsume.getInstance().SnackBarSucccess(MyCartLayout,MyCart.this,R.string.success_order);
+//                                Intent intent = new Intent(MyCart.this, MainActivity.class);
+//                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                                startActivity(intent);
+//                                stopTimer();
+//                            }catch (Exception e){}
+//
+//                        }
+//                    });
+//
+//                }
+//
+//            }
+//
+//        };
+//
+//        mTimer1.schedule(mTt1, 2, 100);
+//    }
     protected void initializeSeekBar(){
         seekBar.setMax(mediaPlayer.getDuration());
 
@@ -346,100 +403,89 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
         mHandler.postDelayed(mRunnable,50);
     }
 
-    private void OrderConfirmationApi(){
-        dialog = new SpotsDialog(this,"Confirming your order please wait...");
-        dialog.show();
-        requestOrder request = new requestOrder();
-        request.setId("18");
+    private void createOrderApi(){
+        startAnim();
+        CreateOrderRequest request = new CreateOrderRequest();
         request.setLat(gpsActivity.getLatitude());
-        request.setLongitude(gpsActivity.getLongitude());
-        request.setResponse(cartOrder.getResponse());
-        Network.getInstance().setAccessKey("Bearer "+prefs.getString("access_token","12"));
-        Network.getInstance().getAuthAPINew().OrderRequest(request)
-                .enqueue(new Callback<OrderId>() {
-                    @Override
-                    public void onResponse(Call<OrderId> call, Response<OrderId> response) {
-                        if (response.isSuccessful()){
-                            OrderId orderConfirmation = response.body();
-                            dialog.hide();
-                            startTimer();
-                            if (progress == 80){
-                                dialog.hide();
-                                alertDialog.hide();
-                            }
+        request.setLong(gpsActivity.getLongitude());
+        request.setTip(Integer.valueOf(editText.getText().toString()));
+        request.setDiscountPercent(4);
+        NetworkConsume.getInstance().getAuthAPI().CreateOrder(request).enqueue(new Callback<CreateOrderResp>() {
+            @Override
+            public void onResponse(Call<CreateOrderResp> call, Response<CreateOrderResp> response) {
+                if (response.isSuccessful()){
+                    CreateOrderResp resp = response.body();
+                    if (resp.getStatus())
+                    {
+                        NetworkConsume.getInstance().setDefaults("createOrder",""+resp.getResponse().getOrderId(),MyCart.this);
+                        startActivity(new Intent(MyCart.this,MainActivity.class));
+                        finish();
+                        alertDialog.dismiss();
+                    }
+                }else {
 
-//                            Gson gson = new Gson();
-//                            String json = gson.toJson(orderConfirmation);
-                           NetworkConsume.getInstance().setDefaults("myObject",null,MyCart.this);
+                    stopAnim();
+                    Gson gson = new Gson();
+                    LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
+                    Toast.makeText(MyCart.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CreateOrderResp> call, Throwable t) {
+
+            }
+        });
+    }
+
+//    private void RemoveCartOrderApi(int id){
+//        dialog = new SpotsDialog(this,"Removing item please wait...",R.style.AppTheme);
+//        dialog.show();
+//        NetworkConsume.getInstance().setAccessKey("Bearer "+prefs.getString("access_token","12"));
+//        NetworkConsume.getInstance().getAuthAPI().RemoveCartOrders(id,gpsActivity.getLatitude(),gpsActivity.getLongitude()).
+//                enqueue(new Callback<CartOrder>() {
+//                    @Override
+//                    public void onResponse(Call<CartOrder> call, Response<CartOrder> response) {
+//                        if (response.isSuccessful()) {
+//                            listResponse = new ArrayList<>();
+//                            list = new ArrayList<>();
+//                            alertDialog.hide();
+//                            CartOrder cartOrder = response.body();
+//                            for (int i=0; i< cartOrder.getResponse().getCartitems().size(); i++){
+//                                if (cartOrder.getResponse().getCartitems().size() == 0)
+//                                {
 //
-//                            Intent intent = new Intent(MyCart.this, MainActivity.class);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                            startActivity(intent);
-//                            finish();
-
-                        }else {
-                            dialog.hide();
-                            Gson gson = new Gson();
-                            LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
-                            Toast.makeText(MyCart.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<OrderId> call, Throwable t) {
-                        dialog.hide();
-
-                    }
-                });
-    }
-    private void RemoveCartOrderApi(int id){
-        dialog = new SpotsDialog(this,"Removing item please wait...",R.style.AppTheme);
-        dialog.show();
-        NetworkConsume.getInstance().setAccessKey("Bearer "+prefs.getString("access_token","12"));
-        NetworkConsume.getInstance().getAuthAPI().RemoveCartOrders(id,gpsActivity.getLatitude(),gpsActivity.getLongitude()).
-                enqueue(new Callback<CartOrder>() {
-                    @Override
-                    public void onResponse(Call<CartOrder> call, Response<CartOrder> response) {
-                        if (response.isSuccessful()) {
-                            listResponse = new ArrayList<>();
-                            list = new ArrayList<>();
-                            alertDialog.hide();
-                            CartOrder cartOrder = response.body();
-                            for (int i=0; i< cartOrder.getResponse().getCartitems().size(); i++){
-                                if (cartOrder.getResponse().getCartitems().size() == 0)
-                                {
-
-                                }else {
-                                    list.add(cartOrder.getResponse().getCartitems().get(i));
-                                    listResponse.add(cartOrder.getResponse());
-                                }
-                            }
-                            MyCartAdapter myAdapter = new MyCartAdapter(MyCart.this,list);
-                            dialog.hide();
-                            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-                            recyclerView.setLayoutManager(mLayoutManager);
-                            recyclerView.setItemAnimator(new DefaultItemAnimator());
-                            recyclerView.setAdapter(myAdapter);
-                            myAdapter.notifyDataSetChanged();
-                            NetworkConsume.getInstance().SnackBarSucccess(MyCartLayout,MyCart.this,R.string.remove_item);
-
-                        }else {
-                            dialog.hide();
-                            Gson gson = new Gson();
-                            LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
-                            Toast.makeText(MyCart.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
-                        }
-
-                    }
-
-                    @Override
-                    public void onFailure(Call<CartOrder> call, Throwable t) {
-                        dialog.hide();
-                        Toast.makeText(MyCart.this, t.getMessage(), Toast.LENGTH_SHORT).show();
-
-                    }
-                });
-    }
+//                                }else {
+//                                    list.add(cartOrder.getResponse().getCartitems().get(i));
+//                                    listResponse.add(cartOrder.getResponse());
+//                                }
+//                            }
+//                            MyCartAdapter myAdapter = new MyCartAdapter(MyCart.this,list);
+//                            dialog.hide();
+//                            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+//                            recyclerView.setLayoutManager(mLayoutManager);
+//                            recyclerView.setItemAnimator(new DefaultItemAnimator());
+//                            recyclerView.setAdapter(myAdapter);
+//                            myAdapter.notifyDataSetChanged();
+//                            NetworkConsume.getInstance().SnackBarSucccess(MyCartLayout,MyCart.this,R.string.remove_item);
+//
+//                        }else {
+//                            dialog.hide();
+//                            Gson gson = new Gson();
+//                            LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
+//                            Toast.makeText(MyCart.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
+//                        }
+//
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Call<CartOrder> call, Throwable t) {
+//                        dialog.hide();
+//                        Toast.makeText(MyCart.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+//
+//                    }
+//                });
+//    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {

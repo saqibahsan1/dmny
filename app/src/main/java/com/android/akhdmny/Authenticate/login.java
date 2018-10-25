@@ -24,6 +24,7 @@ import com.android.akhdmny.Utils.UserDetails;
 import com.android.akhdmny.Utils.Validator;
 import com.google.gson.Gson;
 import com.victor.loading.rotate.RotateLoading;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -44,12 +45,13 @@ public class login extends AppCompatActivity {
     Button btn_login;
     @BindView(R.id.rotateloading)
     RotateLoading rotateLoading;
+    @BindView(R.id.loader)
+    AVLoadingIndicatorView loader;
     @BindView(R.id.btn_forgot_password)
     Button btn_forgot_password;
     @BindView(R.id.btn_skip)
     Button btn_skip;
     String token = "YWhsYW0tYXBwLWFuZHJvaWQ6NGQxNjNlZTgtMzJiZi00M2U2LWFlMzgtY2E1YmMwZjA0N2Nk";
-    SpotsDialog dialog;
     private Activity mActivity;
 
     @Override
@@ -60,7 +62,15 @@ public class login extends AppCompatActivity {
         ClickEvent();
 
     }
+    void startAnim(){
+        loader.show();
+        // or avi.smoothToShow();
+    }
 
+    void stopAnim(){
+        loader.hide();
+        // or avi.smoothToHide();
+    }
     private void ClickEvent(){
         mActivity = this;
 
@@ -80,9 +90,8 @@ public class login extends AppCompatActivity {
     }
 
     private void Login(){
-       // rotateLoading.start();
-        dialog = new SpotsDialog(this,"Please wait...");
-        dialog.show();
+
+
         Validator validator = new Validator(login.this, true);
 
         validator
@@ -91,7 +100,7 @@ public class login extends AppCompatActivity {
                 .validate(et_password.getText().toString(), et_password, 3);
 
         if (validator.fails()) {
-            dialog.hide();
+
             return;
         }
 
@@ -99,7 +108,7 @@ public class login extends AppCompatActivity {
         LoginRequest request = new LoginRequest();
         request.setPhone(et_Mobile.getText().toString());
         request.setPassword(et_password.getText().toString());
-
+        startAnim();
         NetworkConsume.getInstance().getAuthAPI().LoginApi(request).enqueue(new Callback<LoginApiResponse>() {
             @Override
             public void onResponse(Call<LoginApiResponse> call, Response<LoginApiResponse> response) {
@@ -109,6 +118,7 @@ public class login extends AppCompatActivity {
                     Gson gson = new Gson();
                     String json = gson.toJson(apiResponse.getResponse());
                     NetworkConsume.getInstance().setDefaults("login",json,login.this);
+                    NetworkConsume.getInstance().setDefaults("id",String.valueOf(apiResponse.getResponse().getId()),login.this);
                     SharedPreferences prefs = getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
                     prefs.edit().putString("access_token", apiResponse.getResponse().getAccessToken())
                             .putString("avatar",apiResponse.getResponse().getAvatar()).commit();
@@ -117,11 +127,11 @@ public class login extends AppCompatActivity {
 
                     finish();
                     overridePendingTransition(R.anim.slide_left_in,R.anim.slide_left_out);
-                    dialog.hide();
+                   stopAnim();
 
                 }else {
                    // rotateLoading.stop();
-                    dialog.hide();
+                    stopAnim();
                     Gson gson = new Gson();
                     LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
                     Toast.makeText(mActivity, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
@@ -131,7 +141,7 @@ public class login extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<LoginApiResponse> call, Throwable t) {
-                dialog.hide();
+                stopAnim();
                 Toast.makeText(login.this, t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
         });
