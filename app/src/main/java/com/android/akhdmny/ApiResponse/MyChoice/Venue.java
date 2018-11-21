@@ -1,11 +1,11 @@
 
-package com.android.akhdmny.ApiResponse;
+package com.android.akhdmny.ApiResponse.MyChoice;
 
 import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class FourSquareResponse {
+public class Venue {
 
     @SerializedName("id")
     @Expose

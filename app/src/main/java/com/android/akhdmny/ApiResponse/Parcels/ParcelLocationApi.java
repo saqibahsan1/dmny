@@ -1,18 +1,17 @@
 
-package com.android.akhdmny.ApiResponse;
+package com.android.akhdmny.ApiResponse.Parcels;
 
-import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class FourSquare {
+public class ParcelLocationApi {
 
     @SerializedName("status")
     @Expose
     private Boolean status;
     @SerializedName("response")
     @Expose
-    private List<FourSquareResponse> response = null;
+    private Response response;
     @SerializedName("error")
     @Expose
     private Object error;
@@ -25,11 +24,11 @@ public class FourSquare {
         this.status = status;
     }
 
-    public List<FourSquareResponse> getResponse() {
+    public Response getResponse() {
         return response;
     }
 
-    public void setResponse(List<FourSquareResponse> response) {
+    public void setResponse(Response response) {
         this.response = response;
     }
 

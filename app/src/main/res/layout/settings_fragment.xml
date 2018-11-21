@@ -30,9 +30,9 @@
                 android:id="@+id/Tv_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
                 android:layout_marginTop="20dp"
-                android:layout_toRightOf="@id/img_Resturaunt"
+                android:layout_toEndOf="@id/img_Resturaunt"
                 android:text="Umair Khan"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                 android:textColor="#000000" />
@@ -44,9 +44,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/Tv_name"
-                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
 
-                android:layout_toRightOf="@id/img_Resturaunt"
+                android:layout_toEndOf="@id/img_Resturaunt"
                 android:text="+923002013621"
                 android:textColor="#000000"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Small.Inverse"
@@ -58,8 +58,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/TV_Mob"
                 android:textSize="16sp"
-                android:layout_marginLeft="5dp"
-                android:layout_toRightOf="@id/img_Resturaunt"
+                android:layout_marginStart="5dp"
+                android:layout_toEndOf="@id/img_Resturaunt"
                 android:textColor="@android:color/black"
                 android:text="ktrading.9430@gmail.coms"
                 />
@@ -72,8 +72,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="1dp"
                 app:srcCompat="@drawable/next_icon"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="0dp" />
+                 />
 
         </RelativeLayout>
 
@@ -95,7 +94,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
                 android:layout_marginTop="12dp"
-                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
                 android:id="@+id/lang_icon"
                 android:src="@drawable/language_icon"/>
 
@@ -109,17 +108,18 @@
                     android:textColor="@android:color/black"
                     android:textSize="16sp"
                     android:layout_marginTop="@dimen/google_1x"
-                    android:layout_toRightOf="@+id/lang_icon" />
+                    />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
-                android:layout_toLeftOf="@+id/next_icon"
+                android:layout_toStartOf="@+id/next_icon"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
+                android:id="@+id/langType"
                 android:layout_marginTop="10dp"
-                android:layout_marginLeft="140dp"
+                android:layout_marginStart="140dp"
                 android:text="@string/langType"/>
 
             <ImageView
@@ -129,7 +129,7 @@
                 android:layout_marginTop="15dp"
                 android:id="@+id/next_icon"
                 app:srcCompat="@drawable/next_icon"
-                android:layout_alignParentRight="true" />
+                 />
             </RelativeLayout>
 
         </LinearLayout>
@@ -155,7 +155,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
                 android:layout_marginTop="12dp"
-                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
                 android:src="@drawable/rating_icon"/>
 
             <TextView
@@ -174,7 +174,7 @@
                 android:layout_height="20dp"
                 android:layout_weight="0.1"
 
-                android:layout_marginRight="12dp"
+                android:layout_marginEnd="12dp"
                 android:layout_marginTop="15dp"
                 app:srcCompat="@drawable/next_icon" />
 
@@ -205,7 +205,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
                 android:layout_marginTop="12dp"
-                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
                 android:src="@drawable/logout"/>
 
             <TextView
@@ -224,7 +224,7 @@
                 android:layout_height="20dp"
                 android:layout_weight="0.1"
 
-                android:layout_marginRight="12dp"
+                android:layout_marginEnd="12dp"
                 android:layout_marginTop="15dp"
                 app:srcCompat="@drawable/next_icon" />
 

@@ -35,15 +35,16 @@ import com.android.akhdmny.Adapter.CatDetailAdapter;
 import com.android.akhdmny.Adapter.FourSquarAdapter;
 import com.android.akhdmny.Adapter.ImagesAdapter;
 import com.android.akhdmny.ApiResponse.AddToCart;
-import com.android.akhdmny.ApiResponse.FourSquare;
-import com.android.akhdmny.ApiResponse.FourSquareResponse;
-import com.android.akhdmny.ApiResponse.CategoriesDetailResponse;
-import com.android.akhdmny.ApiResponse.CategoryInsideResponse;
+import com.android.akhdmny.ApiResponse.Categories.CategoryDetailsResponse;
+import com.android.akhdmny.ApiResponse.Categories.Service;
+import com.android.akhdmny.ApiResponse.MyChoice.FourSquare;
+import com.android.akhdmny.ApiResponse.MyChoice.Venue;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
-import com.android.akhdmny.Fragments.FargmentService;
+import com.android.akhdmny.Fragments.ServicesActivity;
 import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
 import com.android.akhdmny.R;
+import com.android.akhdmny.Requests.CategoryDetailsRequest;
 import com.android.akhdmny.Utils.GPSActivity;
 import com.github.rubensousa.bottomsheetbuilder.BottomSheetBuilder;
 import com.github.rubensousa.bottomsheetbuilder.BottomSheetMenuDialog;
@@ -53,6 +54,7 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,7 +64,6 @@ import cafe.adriel.androidaudiorecorder.AndroidAudioRecorder;
 import cafe.adriel.androidaudiorecorder.model.AudioChannel;
 import cafe.adriel.androidaudiorecorder.model.AudioSampleRate;
 import cafe.adriel.androidaudiorecorder.model.AudioSource;
-import dmax.dialog.SpotsDialog;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -76,8 +77,10 @@ import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class CategoryDetailActivity extends AppCompatActivity implements MediaPlayer.OnCompletionListener {
-    ArrayList<CategoryInsideResponse> list;
-    ArrayList<FourSquareResponse> listFoureSquare;
+    ArrayList<Service> list;
+    ArrayList<com.android.akhdmny.ApiResponse.Categories.Response> listResp;
+    ArrayList<Venue> listFoureSquare;
+    String currency;
     @BindView(R.id.recyclerView)
     RecyclerView recyclerView;
     @BindView(R.id.et_searchText)
@@ -104,7 +107,7 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
     RecyclerView recyclerViewPopup;
     EditText et_Description;
     SeekBar seekBar;
-    SpotsDialog dialog;
+
     AlertDialog alertDialog;
     private Handler mHandler;
     private Runnable mRunnable;
@@ -112,8 +115,10 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
     private ImagesAdapter imagesAdapter;
     public static final int RequestPermissionCode = 0;
     String ApiType = "";
-    private static String AUDIO_FILE_PATH =
-            Environment.getExternalStorageDirectory().getPath() + "/recorded_audio.wav";
+    private static String AUDIO_FILE_PATH = "";
+
+
+    String token = "Basic YWhsYW0tYXBwLWFuZHJvaWQ6NGQxNjNlZTgtMzJiZi00M2U2LWFlMzgtY2E1YmMwZjA0N2Nk";
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -154,8 +159,7 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
     }
 
     private void FourSquareApi(){
-        dialog = new SpotsDialog(this,"Please wait...");
-        dialog.show();
+        NetworkConsume.getInstance().ShowProgress(CategoryDetailActivity.this);
         NetworkConsume.getInstance().setAccessKey(prefs.getString("access_token","12"));
         NetworkConsume.getInstance().getAuthAPI().fourSquareApiCall(gpsActivity.getLatitude(),gpsActivity.getLongitude()).
                 enqueue(new Callback<FourSquare>() {
@@ -163,20 +167,22 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
                     public void onResponse(Call<FourSquare> call, Response<FourSquare> response) {
                         if (response.isSuccessful()) {
                             FourSquare square = response.body();
-                            if ( square.getResponse().size() != 0) {
+                            if ( square.getResponse().getResponse().getVenues().size() != 0) {
                                 listFoureSquare = new ArrayList<>();
-                                for (int i = 0; i < square.getResponse().size(); i++) {
-                                    listFoureSquare.add(square.getResponse().get(i));
+                                for (int i = 0; i < square.getResponse().getResponse().getVenues().size(); i++) {
+                                    listFoureSquare.add(square.getResponse().getResponse().getVenues().get(i));
                                 }
-                                FourSquarAdapter myAdapter = new FourSquarAdapter(CategoryDetailActivity.this, listFoureSquare);
+                                currency = square.getResponse().getCurrency();
+                                FourSquarAdapter myAdapter = new FourSquarAdapter(CategoryDetailActivity.this, listFoureSquare,square.getResponse().getCurrency());
                                 recyclerView.setAdapter(myAdapter);
-                                dialog.hide();
+                                NetworkConsume.getInstance().HideProgress(CategoryDetailActivity.this);
                             }else {
                                 NetworkConsume.getInstance().SnackBarError(main_layout,CategoryDetailActivity.this,R.string.error_text);
+                                NetworkConsume.getInstance().HideProgress(CategoryDetailActivity.this);
                             }
                         }else {
                             Gson gson = new Gson();
-                            dialog.hide();
+                            NetworkConsume.getInstance().HideProgress(CategoryDetailActivity.this);
                             LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
                             Toast.makeText(CategoryDetailActivity.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
                         }
@@ -185,7 +191,7 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
 
                     @Override
                     public void onFailure(Call<FourSquare> call, Throwable t) {
-                        dialog.hide();
+                        NetworkConsume.getInstance().HideProgress(CategoryDetailActivity.this);
                         Toast.makeText(CategoryDetailActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
 
                     }
@@ -208,30 +214,36 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
     }
 
     private void DetailApi(String address){
-        dialog = new SpotsDialog(this,"Please wait...");
-        dialog.show();
-        NetworkConsume.getInstance().setAccessKey(prefs.getString("access_token","12"));
-        NetworkConsume.getInstance().getAuthAPI().CatDetails(1,gpsActivity.getLatitude(),gpsActivity.getLongitude(),address).
-                enqueue(new Callback<CategoriesDetailResponse>() {
+        NetworkConsume.getInstance().ShowProgress(CategoryDetailActivity.this);
+        NetworkConsume.getInstance().setAccessKey(token);
+        CategoryDetailsRequest categoryDetailsRequest = new CategoryDetailsRequest();
+        categoryDetailsRequest.setAddress(address);
+        categoryDetailsRequest.setCategory_id(NetworkConsume.getInstance().getDefaults("cat_id",CategoryDetailActivity.this));
+        categoryDetailsRequest.setLat(gpsActivity.getLatitude());
+        categoryDetailsRequest.setLongitude(gpsActivity.getLongitude());
+        NetworkConsume.getInstance().getAuthAPI().CatDetails(categoryDetailsRequest).
+                enqueue(new Callback<CategoryDetailsResponse>() {
             @Override
-            public void onResponse(Call<CategoriesDetailResponse> call, Response<CategoriesDetailResponse> response) {
+            public void onResponse(Call<CategoryDetailsResponse> call, Response<CategoryDetailsResponse> response) {
                 if (response.isSuccessful()) {
-                    CategoriesDetailResponse categoriesResponse = response.body();
-                    if ( categoriesResponse.getResponse().size() != 0) {
+                    CategoryDetailsResponse categoriesResponse = response.body();
+                    if ( categoriesResponse.getResponse().getServices().size() != 0) {
                         list = new ArrayList<>();
-                        for (int i = 0; i < categoriesResponse.getResponse().size(); i++) {
-                            list.add(categoriesResponse.getResponse().get(i));
+                        listResp = new ArrayList<>();
+                        for (int i = 0; i < categoriesResponse.getResponse().getServices().size(); i++) {
+                            list.add(categoriesResponse.getResponse().getServices().get(i));
                         }
-                        CatDetailAdapter myAdapter = new CatDetailAdapter(CategoryDetailActivity.this, list);
+                        listResp.add(categoriesResponse.getResponse());
+                        CatDetailAdapter myAdapter = new CatDetailAdapter(CategoryDetailActivity.this, list,categoriesResponse.getResponse().getCurrency());
                         recyclerView.setAdapter(myAdapter);
-                        dialog.hide();
+                        NetworkConsume.getInstance().HideProgress(CategoryDetailActivity.this);
                     }else {
-                        dialog.dismiss();
+                        NetworkConsume.getInstance().HideProgress(CategoryDetailActivity.this);
                         NetworkConsume.getInstance().SnackBarError(main_layout,CategoryDetailActivity.this,R.string.error);
                     }
                 }else {
                     Gson gson = new Gson();
-                    dialog.hide();
+                    NetworkConsume.getInstance().HideProgress(CategoryDetailActivity.this);
                     LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
                     Toast.makeText(CategoryDetailActivity.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
                 }
@@ -239,8 +251,8 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
             }
 
             @Override
-            public void onFailure(Call<CategoriesDetailResponse> call, Throwable t) {
-                dialog.hide();
+            public void onFailure(Call<CategoryDetailsResponse> call, Throwable t) {
+                NetworkConsume.getInstance().HideProgress(CategoryDetailActivity.this);
                 Toast.makeText(CategoryDetailActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
 
             }
@@ -257,7 +269,7 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
 
             }
         });
-        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(this, recyclerView, new FargmentService.ClickListener() {
+        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(this, recyclerView, new ServicesActivity.ClickListener() {
             @Override
             public void onClick(View view, int position) {
                 final AlertDialog.Builder ADD_Cart = new AlertDialog.Builder(CategoryDetailActivity.this);
@@ -278,15 +290,16 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
                 TextView textViewAddress = viewCart.findViewById(R.id.TV_Mob);
                 TextView textViewprice = viewCart.findViewById(R.id.tv_email);
                 if (ApiType.toLowerCase().equals("my choice")){
-                    Picasso.get().load(R.drawable.dummy_image).into(imageView);
+                    Picasso.get().load(R.drawable.place_holder).into(imageView);
                     textViewTitle.setText(listFoureSquare.get(position).getName());
-                    textViewAddress.setText(String.valueOf(listFoureSquare.get(position).getLocation().getCc()+","+listFoureSquare.get(position).getLocation().getDistance()+" km"));
-                    textViewprice.setText(listFoureSquare.get(position).getAmount().toString());
+                    textViewAddress.setText(String.valueOf(listFoureSquare.get(position).getLocation().getFormattedAddress().get(0)+","+listFoureSquare.get(position).getLocation().getDistance()+" km"));
+                    textViewprice.setText(new DecimalFormat("##").format(listFoureSquare.get(position).getAmount())+" "+currency);
+
                 }else {
                     Picasso.get().load(list.get(position).getImage()).into(imageView);
                     textViewTitle.setText(list.get(position).getTitle());
                     textViewAddress.setText(list.get(position).getAddress());
-                    textViewprice.setText(list.get(position).getPrice().toString());
+                    textViewprice.setText(list.get(position).getPrice().toString()+" "+listResp.get(position).getCurrency());
                 }
                 btn.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -313,7 +326,7 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
                     @Override
                     public void onClick(View v) {
                         if(checkPermission()) {
-
+                           AUDIO_FILE_PATH = Environment.getExternalStorageDirectory().getPath() + "/recorded_audio.wav";
                             AndroidAudioRecorder.with(CategoryDetailActivity.this)
                                     // Required
                                     .setFilePath(AUDIO_FILE_PATH)
@@ -540,9 +553,9 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
     static class RecyclerTouchListener implements RecyclerView.OnItemTouchListener {
 
         private GestureDetector gestureDetector;
-        private FargmentService.ClickListener clickListener;
+        private ServicesActivity.ClickListener clickListener;
 
-        public RecyclerTouchListener(Context context, final RecyclerView recyclerView, final FargmentService.ClickListener clickListener) {
+        public RecyclerTouchListener(Context context, final RecyclerView recyclerView, final ServicesActivity.ClickListener clickListener) {
             this.clickListener = clickListener;
             gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
                 @Override
@@ -582,12 +595,14 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
 
     }
     private void addDataTOApi(String id,String title,int type,String address,double distance,double amount,double lat, double longitude){
-        dialog = new SpotsDialog(this,"Please wait...");
-        dialog.show();
+        NetworkConsume.getInstance().ShowProgress(CategoryDetailActivity.this);
+        MultipartBody.Part voicePart = null;
         File AudioFile = new File(AUDIO_FILE_PATH);
-        RequestBody propertyImage = RequestBody.create(MediaType.parse("audio/*"), AudioFile);
-        MultipartBody.Part voicePart = MultipartBody.Part.createFormData("voice", AudioFile.getName(), propertyImage);
-
+        if (AudioFile.length() == 0){}
+        else {
+            RequestBody propertyImage = RequestBody.create(MediaType.parse("audio/*"), AudioFile);
+            voicePart = MultipartBody.Part.createFormData("voice", AudioFile.getName(), propertyImage);
+        }
         MultipartBody.Part[] ImagesParts = new MultipartBody.Part[photos.size()];
         for (int i = 0; i<photos.size();i++) {
             File addImageFile = new File(photos.get(i).getPath());
@@ -614,9 +629,9 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
                             AUDIO_FILE_PATH = "";
                             NetworkConsume.getInstance().SnackBarSucccess(main_layout,CategoryDetailActivity.this,R.string.success_CartItem);
                            alertDialog.dismiss();
-                           dialog.hide();
+                            NetworkConsume.getInstance().HideProgress(CategoryDetailActivity.this);
                         }else {
-                            dialog.hide();
+                            NetworkConsume.getInstance().HideProgress(CategoryDetailActivity.this);
                             Gson gson = new Gson();
                             LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
                             Toast.makeText(CategoryDetailActivity.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
@@ -627,7 +642,7 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
 
                     @Override
                     public void onFailure(Call<AddToCart> call, Throwable t) {
-                            dialog.hide();
+                        NetworkConsume.getInstance().HideProgress(CategoryDetailActivity.this);
                         Toast.makeText(CategoryDetailActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
 
                     }

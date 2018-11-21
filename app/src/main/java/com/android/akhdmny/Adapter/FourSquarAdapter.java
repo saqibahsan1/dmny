@@ -8,8 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.akhdmny.ApiResponse.CategoryInsideResponse;
-import com.android.akhdmny.ApiResponse.FourSquareResponse;
+import com.android.akhdmny.ApiResponse.MyChoice.Venue;
 import com.android.akhdmny.R;
 import com.squareup.picasso.Picasso;
 
@@ -23,12 +22,14 @@ public class FourSquarAdapter extends RecyclerView.Adapter<FourSquarAdapter.Prod
     private Context mCtx;
 
     //we are storing all the products in a list
-    private ArrayList<FourSquareResponse> productList;
+    private ArrayList<Venue> productList;
+    String currency;
 
     //getting the context and product list with constructor
-    public FourSquarAdapter(Context mCtx, ArrayList<FourSquareResponse> productList) {
+    public FourSquarAdapter(Context mCtx, ArrayList<Venue> productList,String currency) {
         this.mCtx = mCtx;
         this.productList = productList;
+        this.currency = currency;
     }
 
     @Override
@@ -42,13 +43,13 @@ public class FourSquarAdapter extends RecyclerView.Adapter<FourSquarAdapter.Prod
     @Override
     public void onBindViewHolder(FourSquarAdapter.ProductViewHolder holder, int position) {
         //getting the product of the specified position
-        FourSquareResponse product = productList.get(position);
+        Venue product = productList.get(position);
 
         //binding the data with the viewholder views
         holder.textViewTitle.setText(product.getName());
-        holder.TxtViewAddress.setText(product.getLocation().getCc()+","+product.getLocation().getDistance()+" Km");
-        holder.textViewPrice.setText(new DecimalFormat("##").format(product.getAmount()));
-        Picasso.get().load(R.drawable.dummy_image).error(R.drawable.dummy_image).into(holder.imageView);
+        holder.TxtViewAddress.setText(product.getLocation().getFormattedAddress().get(0)+", "+product.getLocation().getDistance()+" Km");
+        holder.textViewPrice.setText(new DecimalFormat("##").format(product.getAmount())+" "+currency);
+        Picasso.get().load(R.drawable.place_holder).error(R.drawable.place_holder).into(holder.imageView);
 
 
     }

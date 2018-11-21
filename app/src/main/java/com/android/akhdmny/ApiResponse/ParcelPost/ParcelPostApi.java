@@ -1,18 +1,17 @@
 
-package com.android.akhdmny.ApiResponse;
+package com.android.akhdmny.ApiResponse.ParcelPost;
 
-import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class CategoriesDetailResponse {
+public class ParcelPostApi {
 
     @SerializedName("status")
     @Expose
     private Boolean status;
     @SerializedName("response")
     @Expose
-    private List<CategoryInsideResponse> response = null;
+    private Response response;
     @SerializedName("error")
     @Expose
     private Object error;
@@ -25,11 +24,11 @@ public class CategoriesDetailResponse {
         this.status = status;
     }
 
-    public List<CategoryInsideResponse> getResponse() {
+    public Response getResponse() {
         return response;
     }
 
-    public void setResponse(List<CategoryInsideResponse> response) {
+    public void setResponse(Response response) {
         this.response = response;
     }
 

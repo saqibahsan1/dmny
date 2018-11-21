@@ -23,6 +23,7 @@ import com.android.akhdmny.Requests.SignInRequest;
 import com.android.akhdmny.Utils.UserDetails;
 import com.android.akhdmny.Utils.Validator;
 import com.google.gson.Gson;
+import com.hbb20.CountryCodePicker;
 import com.victor.loading.rotate.RotateLoading;
 import com.wang.avi.AVLoadingIndicatorView;
 
@@ -45,13 +46,13 @@ public class login extends AppCompatActivity {
     Button btn_login;
     @BindView(R.id.rotateloading)
     RotateLoading rotateLoading;
-    @BindView(R.id.loader)
-    AVLoadingIndicatorView loader;
     @BindView(R.id.btn_forgot_password)
     Button btn_forgot_password;
     @BindView(R.id.btn_skip)
     Button btn_skip;
-    String token = "YWhsYW0tYXBwLWFuZHJvaWQ6NGQxNjNlZTgtMzJiZi00M2U2LWFlMzgtY2E1YmMwZjA0N2Nk";
+    @BindView(R.id.ccp_getFullNumber)
+    CountryCodePicker ccp_getFullNumber;
+    String token = "Basic YWhsYW0tYXBwLWFuZHJvaWQ6NGQxNjNlZTgtMzJiZi00M2U2LWFlMzgtY2E1YmMwZjA0N2Nk";
     private Activity mActivity;
 
     @Override
@@ -62,18 +63,10 @@ public class login extends AppCompatActivity {
         ClickEvent();
 
     }
-    void startAnim(){
-        loader.show();
-        // or avi.smoothToShow();
-    }
 
-    void stopAnim(){
-        loader.hide();
-        // or avi.smoothToHide();
-    }
     private void ClickEvent(){
         mActivity = this;
-
+        ccp_getFullNumber.registerCarrierNumberEditText(et_Mobile);
         btn_register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -96,7 +89,7 @@ public class login extends AppCompatActivity {
 
         validator
                 .setRules(Validator.Rules.REQUIRED, Validator.Rules.MIN)
-                .validate(et_Mobile.getText().toString(), et_Mobile, 3)
+                .validate(ccp_getFullNumber.getFullNumberWithPlus(), et_Mobile, 3)
                 .validate(et_password.getText().toString(), et_password, 3);
 
         if (validator.fails()) {
@@ -106,9 +99,9 @@ public class login extends AppCompatActivity {
 
         NetworkConsume.getInstance().setAccessKey("Basic "+token);
         LoginRequest request = new LoginRequest();
-        request.setPhone(et_Mobile.getText().toString());
+        request.setPhone(ccp_getFullNumber.getFullNumberWithPlus());
         request.setPassword(et_password.getText().toString());
-        startAnim();
+        NetworkConsume.getInstance().ShowProgress(login.this);
         NetworkConsume.getInstance().getAuthAPI().LoginApi(request).enqueue(new Callback<LoginApiResponse>() {
             @Override
             public void onResponse(Call<LoginApiResponse> call, Response<LoginApiResponse> response) {
@@ -127,11 +120,11 @@ public class login extends AppCompatActivity {
 
                     finish();
                     overridePendingTransition(R.anim.slide_left_in,R.anim.slide_left_out);
-                   stopAnim();
+                  NetworkConsume.getInstance().HideProgress(login.this);
 
                 }else {
                    // rotateLoading.stop();
-                    stopAnim();
+                    NetworkConsume.getInstance().HideProgress(login.this);
                     Gson gson = new Gson();
                     LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
                     Toast.makeText(mActivity, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
@@ -141,7 +134,7 @@ public class login extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<LoginApiResponse> call, Throwable t) {
-                stopAnim();
+                NetworkConsume.getInstance().HideProgress(login.this);
                 Toast.makeText(login.this, t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
         });

@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.akhdmny.ApiResponse.CategoryInsideResponse;
+import com.android.akhdmny.ApiResponse.Categories.Service;
 import com.android.akhdmny.R;
 import com.squareup.picasso.Picasso;
 
@@ -22,12 +22,14 @@ public class CatDetailAdapter extends RecyclerView.Adapter<CatDetailAdapter.Prod
     private Context mCtx;
 
     //we are storing all the products in a list
-    private ArrayList<CategoryInsideResponse> productList;
+    private ArrayList<Service> productList;
+    String currency;
 
     //getting the context and product list with constructor
-    public CatDetailAdapter(Context mCtx, ArrayList<CategoryInsideResponse> productList) {
+    public CatDetailAdapter(Context mCtx, ArrayList<Service> productList,String currency) {
         this.mCtx = mCtx;
         this.productList = productList;
+        this.currency = currency;
     }
 
     @Override
@@ -41,12 +43,12 @@ public class CatDetailAdapter extends RecyclerView.Adapter<CatDetailAdapter.Prod
     @Override
     public void onBindViewHolder(ProductViewHolder holder, int position) {
         //getting the product of the specified position
-        CategoryInsideResponse product = productList.get(position);
+        Service product = productList.get(position);
 
         //binding the data with the viewholder views
         holder.textViewTitle.setText(product.getTitle());
         holder.TxtViewAddress.setText(String.valueOf(product.getAddress()));
-        holder.textViewPrice.setText(String.valueOf(product.getPrice()));
+        holder.textViewPrice.setText(String.valueOf(product.getPrice())+" "+currency);
         Picasso.get().load(product.getImage()).error(R.drawable.dummy_image).into(holder.imageView);
 
 

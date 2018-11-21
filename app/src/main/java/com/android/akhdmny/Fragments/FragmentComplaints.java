@@ -2,25 +2,19 @@ package com.android.akhdmny.Fragments;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.GestureDetector;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -28,7 +22,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -41,6 +34,7 @@ import com.android.akhdmny.Adapter.ImagesAdapter;
 import com.android.akhdmny.ApiResponse.AddComplaintResponse;
 import com.android.akhdmny.ApiResponse.ComplaintHistoryInsideResponse;
 import com.android.akhdmny.ApiResponse.ComplaintHistoryResponse;
+import com.android.akhdmny.Authenticate.login;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
 import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
@@ -52,7 +46,6 @@ import com.github.rubensousa.bottomsheetbuilder.adapter.BottomSheetItemClickList
 import com.google.gson.Gson;
 import com.llollox.androidtoggleswitch.widgets.ToggleSwitch;
 import com.squareup.picasso.Picasso;
-import com.victor.loading.rotate.RotateLoading;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,7 +58,6 @@ import cafe.adriel.androidaudiorecorder.AndroidAudioRecorder;
 import cafe.adriel.androidaudiorecorder.model.AudioChannel;
 import cafe.adriel.androidaudiorecorder.model.AudioSampleRate;
 import cafe.adriel.androidaudiorecorder.model.AudioSource;
-import de.hdodenhof.circleimageview.CircleImageView;
 import dmax.dialog.SpotsDialog;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -81,8 +73,8 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class FragmentComplaints extends Fragment implements MediaPlayer.OnCompletionListener {
     public static final int RequestPermissionCode = 0;
-    private static final String AUDIO_FILE_PATH =
-            Environment.getExternalStorageDirectory().getPath() + "/recorded_audio.wav";
+    private static String AUDIO_FILE_PATH =
+           "";
 
     MediaPlayer mediaPlayer;
 
@@ -170,7 +162,7 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
                 }
             }
         });
-        RV_historyList.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), RV_historyList, new FargmentService.ClickListener() {
+        RV_historyList.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), RV_historyList, new ServicesActivity.ClickListener() {
             @Override
             public void onClick(View view, int position) {
                 final android.app.AlertDialog.Builder history = new android.app.AlertDialog.Builder(getActivity());
@@ -249,7 +241,7 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
             public void onClick(View v) {
                 if(checkPermission()) {
                         trigger = true;
-
+                    AUDIO_FILE_PATH = Environment.getExternalStorageDirectory().getPath() + "/recorded_audio.wav";
                     AndroidAudioRecorder.with(getActivity())
                             // Required
                             .setFilePath(AUDIO_FILE_PATH)
@@ -314,6 +306,7 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
 
 
     }
+
     private void bottomSheet(){
         BottomSheetMenuDialog dialog = new BottomSheetBuilder(getActivity(), R.style.AppTheme_BottomSheetDialog)
                 .setMode(BottomSheetBuilder.MODE_LIST)
@@ -387,6 +380,7 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
         mHandler.postDelayed(mRunnable,50);
     }
     private void apiHistory(){
+        NetworkConsume.getInstance().ShowProgress(getActivity());
         NetworkConsume.getInstance().setAccessKey(prefs.getString("access_token","12"));
         NetworkConsume.getInstance().getAuthAPI().History().enqueue(new Callback<ComplaintHistoryResponse>() {
             @Override
@@ -402,9 +396,11 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
 
                         HistoryAdapter myAdapter = new HistoryAdapter(getActivity(), list);
                         RV_historyList.setAdapter(myAdapter);
+                        NetworkConsume.getInstance().HideProgress(getActivity());
                     }else {
                         try {
                             NetworkConsume.getInstance().SnackBarErrorHistory(historyLayout,getActivity(),"No History was found");
+                            NetworkConsume.getInstance().HideProgress(getActivity());
                         }catch (Exception e){
 
                         }
@@ -412,9 +408,21 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
 
 
                 }else {
-
+                    NetworkConsume.getInstance().HideProgress(getActivity());
                     Gson gson = new Gson();
                     LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
+                    if (message.getError().getMessage().get(0).equals("Unauthorized access_token")){
+                        SharedPreferences prefs = getActivity().getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
+                        prefs.edit().putString("access_token", "")
+                                .putString("avatar","")
+                                .putString("login","").commit();
+
+                        Intent intent = new Intent(getActivity(), login.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        getActivity().finish();
+                    }
+
                     Toast.makeText(getActivity(), message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -561,10 +569,16 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
         stopPlaying();
     }
     private void addDataTOApi(){
-        dialog.show();
+        MultipartBody.Part voicePart = null;
+        NetworkConsume.getInstance().ShowProgress(getActivity());
         File AudioFile = new File(AUDIO_FILE_PATH);
-        RequestBody propertyImage = RequestBody.create(MediaType.parse("audio/*"), AudioFile);
-        MultipartBody.Part voicePart = MultipartBody.Part.createFormData("voice", AudioFile.getName(), propertyImage);
+        if (AudioFile.length() ==0){
+
+
+        }else {
+            RequestBody propertyImage = RequestBody.create(MediaType.parse("audio/*"), AudioFile);
+            voicePart = MultipartBody.Part.createFormData("voice", AudioFile.getName(), propertyImage);
+        }
 
         MultipartBody.Part[] ImagesParts = new MultipartBody.Part[photos.size()];
         for (int i = 0; i<photos.size();i++) {
@@ -580,7 +594,7 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
                     .validate(et_textMessage.getText().toString(), et_textMessage, 3);
 
             if (validator.fails()) {
-                dialog.dismiss();
+                NetworkConsume.getInstance().HideProgress(getActivity());
                 return;
             }
 
@@ -614,22 +628,33 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
                     }catch (Exception e){
 
                     }
-                        dialog.dismiss();
+                        NetworkConsume.getInstance().HideProgress(getActivity());
                     }else {
 
                         Gson gson = new Gson();
                         LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
                         NetworkConsume.getInstance().SnackBarErrorHistory(ComplaintLayout,getActivity(),message.getError().getMessage().get(0));
+                        if (message.getError().getMessage().get(0).equals("Unauthorized access_token")){
+                            SharedPreferences prefs = getActivity().getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
+                            prefs.edit().putString("access_token", "")
+                                    .putString("avatar","")
+                                    .putString("login","").commit();
+
+                            Intent intent = new Intent(getActivity(), login.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                            getActivity().finish();
+                        }
 
                        // Toast.makeText(getActivity(), message.getError().getBody().get(0), Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
+                        NetworkConsume.getInstance().HideProgress(getActivity());
                     }
 
                 }
 
                 @Override
                 public void onFailure(Call<AddComplaintResponse> call, Throwable t) {
-                    dialog.dismiss();
+                    NetworkConsume.getInstance().HideProgress(getActivity());
                     Toast.makeText(getActivity(), t.getMessage(), Toast.LENGTH_SHORT).show();
 
                 }
@@ -641,9 +666,9 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
     static class RecyclerTouchListener implements RecyclerView.OnItemTouchListener {
 
         private GestureDetector gestureDetector;
-        private FargmentService.ClickListener clickListener;
+        private ServicesActivity.ClickListener clickListener;
 
-        public RecyclerTouchListener(Context context, final RecyclerView recyclerView, final FargmentService.ClickListener clickListener) {
+        public RecyclerTouchListener(Context context, final RecyclerView recyclerView, final ServicesActivity.ClickListener clickListener) {
             this.clickListener = clickListener;
             gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
                 @Override

@@ -10,7 +10,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -30,9 +29,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.akhdmny.Adapter.ImagesAdapter;
-import com.android.akhdmny.ApiResponse.ParcelApiResponse;
+import com.android.akhdmny.ApiResponse.ParcelPost.ParcelPostApi;
+import com.android.akhdmny.ApiResponse.Parcels.ParcelLocationApi;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
-import com.android.akhdmny.Fragments.FragmentComplaints;
 import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
 import com.android.akhdmny.R;
@@ -48,7 +47,6 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
-import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,7 +60,6 @@ import cafe.adriel.androidaudiorecorder.AndroidAudioRecorder;
 import cafe.adriel.androidaudiorecorder.model.AudioChannel;
 import cafe.adriel.androidaudiorecorder.model.AudioSampleRate;
 import cafe.adriel.androidaudiorecorder.model.AudioSource;
-import dmax.dialog.SpotsDialog;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -93,6 +90,8 @@ public class ParcelActivity extends AppCompatActivity implements GoogleApiClient
     TextView TvToAddress;
     @BindView(R.id.total_distance)
     TextView total_distance;
+    @BindView(R.id.final_Total)
+    TextView final_Total;
     @BindView(R.id.et_msg)
     EditText et_msg;
     @BindView(R.id.recordAudio)
@@ -118,7 +117,6 @@ public class ParcelActivity extends AppCompatActivity implements GoogleApiClient
     Place place,place2;
     SharedPreferences prefs;
     String dist;
-    SpotsDialog dialog;
     Boolean trigger = false;
     public static final int RequestPermissionCode = 0;
     private static final String AUDIO_FILE_PATH =
@@ -147,6 +145,7 @@ public class ParcelActivity extends AppCompatActivity implements GoogleApiClient
         fromLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                NetworkConsume.getInstance().ShowProgress(ParcelActivity.this);
                 PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
                 try {
                     startActivityForResult(builder.build(ParcelActivity.this), PLACE_PICKER_REQUEST);
@@ -158,6 +157,7 @@ public class ParcelActivity extends AppCompatActivity implements GoogleApiClient
         ToLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                NetworkConsume.getInstance().ShowProgress(ParcelActivity.this);
                 PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
                 try {
                     startActivityForResult(builder.build(ParcelActivity.this), PLACE_PICKER_ToRequest);
@@ -177,7 +177,12 @@ public class ParcelActivity extends AppCompatActivity implements GoogleApiClient
             public void onClick(View v) {
                 if (et_msg.getText().toString().equals("")){
                     NetworkConsume.getInstance().SnackBarError(parcelLayout,ParcelActivity.this,R.string.error_text);
-                }else {
+                }else if ( TVFromAddress.getText().toString().equals("")){
+                    NetworkConsume.getInstance().SnackBarError(parcelLayout,ParcelActivity.this,R.string.error_from);
+                }else if ( TvToAddress.getText().toString().equals("")){
+                    NetworkConsume.getInstance().SnackBarError(parcelLayout,ParcelActivity.this,R.string.error_to);
+                }
+                else {
                     ParcelApi();
                 }
             }
@@ -239,11 +244,18 @@ public class ParcelActivity extends AppCompatActivity implements GoogleApiClient
 
     }
     private void ParcelApi(){
-        dialog = new SpotsDialog(this,"Please wait...");
-        dialog.show();
+
+        NetworkConsume.getInstance().ShowProgress(ParcelActivity.this);
         File AudioFile = new File(AUDIO_FILE_PATH);
-        RequestBody propertyImage = RequestBody.create(MediaType.parse("audio/*"), AudioFile);
-        MultipartBody.Part voicePart = MultipartBody.Part.createFormData("voice", AudioFile.getName(), propertyImage);
+        MultipartBody.Part voicePart = null;
+        if (AudioFile.length() ==0){
+
+
+        }else {
+            RequestBody propertyImage = RequestBody.create(MediaType.parse("audio/*"), AudioFile);
+            voicePart = MultipartBody.Part.createFormData("voice", AudioFile.getName(), propertyImage);
+        }
+
 
         MultipartBody.Part[] ImagesParts = new MultipartBody.Part[photos.size()];
         for (int i = 0; i<photos.size();i++) {
@@ -253,15 +265,21 @@ public class ParcelActivity extends AppCompatActivity implements GoogleApiClient
         }
         NetworkConsume.getInstance().setAccessKey(prefs.getString("access_token","12"));
         NetworkConsume.getInstance().getAuthAPI().ParcelApi(place.getLatLng().latitude,place.getLatLng().longitude,
-                place2.getLatLng().latitude,place2.getLatLng().longitude,et_msg.getText().toString(),20,dist,ImagesParts,voicePart).
-                enqueue(new Callback<ParcelApiResponse>() {
+                place2.getLatLng().latitude,place2.getLatLng().longitude,et_msg.getText().toString(),final_Total.getText().toString(),total_distance.getText().toString(),ImagesParts,voicePart).
+                enqueue(new Callback<ParcelPostApi>() {
             @Override
-            public void onResponse(Call<ParcelApiResponse> call, Response<ParcelApiResponse> response) {
+            public void onResponse(Call<ParcelPostApi> call, Response<ParcelPostApi> response) {
                 if (response.isSuccessful()){
-                    dialog.hide();
-                    NetworkConsume.getInstance().SnackBarError(parcelLayout,ParcelActivity.this,R.string.successParcel);
+                    ParcelPostApi apiResponse = response.body();
+                    NetworkConsume.getInstance().setDefaults("orderId",""+apiResponse.getResponse().getOrderItem().getOrderId(),ParcelActivity.this);
+                    Intent i = new Intent(ParcelActivity.this, MainActivity.class);
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(i);
+                    finish();
+                    NetworkConsume.getInstance().HideProgress(ParcelActivity.this);
+                    NetworkConsume.getInstance().SnackBarSucccess(parcelLayout,ParcelActivity.this,R.string.successParcel);
                 }else {
-                    dialog.hide();
+                    NetworkConsume.getInstance().HideProgress(ParcelActivity.this);
                     Gson gson = new Gson();
                     LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
                     Toast.makeText(ParcelActivity.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
@@ -271,8 +289,8 @@ public class ParcelActivity extends AppCompatActivity implements GoogleApiClient
             }
 
             @Override
-            public void onFailure(Call<ParcelApiResponse> call, Throwable t) {
-                dialog.hide();
+            public void onFailure(Call<ParcelPostApi> call, Throwable t) {
+                NetworkConsume.getInstance().HideProgress(ParcelActivity.this);
                 Toast.makeText(ParcelActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
 
             }
@@ -463,6 +481,7 @@ public class ParcelActivity extends AppCompatActivity implements GoogleApiClient
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
+                NetworkConsume.getInstance().HideProgress(ParcelActivity.this);
                 trigger = true;
                 place = PlacePicker.getPlace(data, this);
                 StringBuilder stBuilder = new StringBuilder();
@@ -470,16 +489,20 @@ public class ParcelActivity extends AppCompatActivity implements GoogleApiClient
                 String latitude = String.valueOf(place.getLatLng().latitude);
                 String longitude = String.valueOf(place.getLatLng().longitude);
                 String address = String.format("%s", place.getAddress());
-                stBuilder.append("Name: ");
+                if (TVFromAddress.getText().toString().equals("")){
+
+                }else {
+                    GetAmount();
+                }
                 stBuilder.append(placename);
-                stBuilder.append("\n");
-                stBuilder.append("Address: ");
+                stBuilder.append(", ");
                 stBuilder.append(address);
                 TVFromAddress.setText(stBuilder.toString());
             }
         }
         if (requestCode == PLACE_PICKER_ToRequest) {
             if (resultCode == RESULT_OK) {
+                NetworkConsume.getInstance().HideProgress(ParcelActivity.this);
                 trigger = true;
                 place2 = PlacePicker.getPlace(data, this);
                 StringBuilder stBuilder = new StringBuilder();
@@ -487,23 +510,21 @@ public class ParcelActivity extends AppCompatActivity implements GoogleApiClient
                 String latitude = String.valueOf(place2.getLatLng().latitude);
                 String longitude = String.valueOf(place2.getLatLng().longitude);
                 String address = String.format("%s", place2.getAddress());
-                stBuilder.append("Name: ");
+
                 stBuilder.append(placename);
-                stBuilder.append("Address: ");
-                stBuilder.append("\n");
+                stBuilder.append(", ");
                 stBuilder.append(address);
                 TvToAddress.setText(stBuilder.toString());
             }
             try {
                 if (trigger){
-                    double distance  = CalculationByDistance(place.getLatLng(),place2.getLatLng());
-                    dist = new DecimalFormat("##.##").format(distance)+" km" ;
-                    //total_distance.setText(String.valueOf(distance));
-                    total_distance.setText(dist);
-
+                    GetAmount();
                 }
             }catch (Exception e){}
 
+        }
+        if (resultCode == RESULT_CANCELED){
+            NetworkConsume.getInstance().HideProgress(ParcelActivity.this);
         }
         if (requestCode == 0){
             if (resultCode == RESULT_OK) {
@@ -533,6 +554,34 @@ public class ParcelActivity extends AppCompatActivity implements GoogleApiClient
                     File photoFile = EasyImage.lastlyTakenButCanceledPhoto(ParcelActivity.this);
                     if (photoFile != null) photoFile.delete();
                 }
+            }
+        });
+    }
+
+    private void GetAmount(){
+        NetworkConsume.getInstance().ShowProgress(ParcelActivity.this);
+        NetworkConsume.getInstance().setAccessKey(prefs.getString("access_token",""));
+        NetworkConsume.getInstance().getAuthAPI().parcels(place.getLatLng().latitude,place.getLatLng().longitude,place2.getLatLng().latitude,place2.getLatLng().longitude).enqueue(new Callback<ParcelLocationApi>() {
+            @Override
+            public void onResponse(Call<ParcelLocationApi> call, Response<ParcelLocationApi> response) {
+                if (response.isSuccessful()){
+                    ParcelLocationApi api = response.body();
+                    total_distance.setText(new DecimalFormat("##.#").format(api.getResponse().getDistance())+" Km");
+                    final_Total.setText(new DecimalFormat("##.#").format(api.getResponse().getAmount())+" "+ api.getResponse().getCurrency());
+
+                    NetworkConsume.getInstance().HideProgress(ParcelActivity.this);
+                }else {
+                    NetworkConsume.getInstance().HideProgress(ParcelActivity.this);
+                    Gson gson = new Gson();
+                    LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
+                    Toast.makeText(ParcelActivity.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ParcelLocationApi> call, Throwable t) {
+                Toast.makeText(ParcelActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                NetworkConsume.getInstance().HideProgress(ParcelActivity.this);
             }
         });
     }

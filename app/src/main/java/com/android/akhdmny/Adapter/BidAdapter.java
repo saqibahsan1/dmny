@@ -14,6 +14,7 @@ import com.android.akhdmny.ApiResponse.DriverListInsideResponse;
 import com.android.akhdmny.ApiResponse.FireBaseBids;
 import com.android.akhdmny.R;
 import com.android.akhdmny.Service.ClickListener;
+import com.fuzzproductions.ratingbar.RatingBar;
 import com.squareup.picasso.Picasso;
 
 import java.lang.ref.WeakReference;
@@ -35,7 +36,7 @@ public class BidAdapter extends RecyclerView.Adapter<BidAdapter.BidHolder> {
     @Override
     public BidHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(mCtx);
-        View view = inflater.inflate(R.layout.driver_list, null);
+        View view = inflater.inflate(R.layout.order_test, null);
         return new BidHolder(view);
     }
 
@@ -44,8 +45,21 @@ public class BidAdapter extends RecyclerView.Adapter<BidAdapter.BidHolder> {
 
         DriverListInsideResponse response = productList.get(position);
         holder.listenerRef = new WeakReference<>(listener);
-        holder.textViewTitle.setText(response.getName());
-        holder.TxtViewAddress.setText(mCtx.getString(R.string.bid)+" "+String.valueOf(response.getBid()));
+        try {
+            holder.price.setText(response.getBid()+" "+response.getCurrency());
+            holder.textViewTitle.setText(response.getName());
+        }catch (Exception e){
+
+        }
+        if (response.getDistance() !=null){
+            holder.distance.setText(response.getDistance()+" Km");
+        }
+        if (response.getCar() !=null){
+            holder.TxtViewAddress.setText(response.getCar());
+        }
+        if (response.getRate()!=null) {
+            holder.ratingBar.setRating(response.getRate());
+        }
         if (response.getImage() == null){
             Picasso.get().load(R.drawable.place_holder).error(R.drawable.place_holder).into(holder.imageView);
         }else {
@@ -68,14 +82,17 @@ public class BidAdapter extends RecyclerView.Adapter<BidAdapter.BidHolder> {
     }
 
     public class BidHolder extends RecyclerView.ViewHolder {
-        TextView textViewTitle, TxtViewAddress;
+        TextView textViewTitle, TxtViewAddress,distance,price;
         Button btnAccept;
         WeakReference<ClickListener> listenerRef;
         ImageView imageView;
+        RatingBar ratingBar;
 
         public BidHolder(View itemView) {
             super(itemView);
-
+            distance = itemView.findViewById(R.id.distance);
+            ratingBar = itemView.findViewById(R.id.ratingBar);
+            price = itemView.findViewById(R.id.price);
             textViewTitle = itemView.findViewById(R.id.textViewTitle);
             TxtViewAddress = itemView.findViewById(R.id.TVAddress);
             btnAccept = itemView.findViewById(R.id.BtnAccept);

@@ -16,17 +16,17 @@
 
             <ImageView
                 android:id="@+id/imgResturaunt"
-                android:layout_width="80dp"
-                android:layout_height="60dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:src="@drawable/place_holder"
                 android:padding="4dp" />
 
             <TextView
                 android:id="@+id/textViewTitle"
-                android:layout_width="180dp"
+                android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
-                android:layout_toEndOf="@id/imgResturaunt"
+                android:layout_toEndOf="@+id/imgResturaunt"
                 android:text="@string/title"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                 android:textColor="#000000" />

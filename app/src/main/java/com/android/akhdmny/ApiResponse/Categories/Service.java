@@ -1,10 +1,10 @@
 
-package com.android.akhdmny.ApiResponse;
+package com.android.akhdmny.ApiResponse.Categories;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class CategoryInsideResponse {
+public class Service {
 
     @SerializedName("id")
     @Expose

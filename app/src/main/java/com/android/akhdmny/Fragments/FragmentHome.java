@@ -1,16 +1,20 @@
 package com.android.akhdmny.Fragments;
 
 import android.Manifest;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
@@ -31,12 +35,14 @@ import com.android.akhdmny.Activities.Bid;
 import com.android.akhdmny.Activities.Chat;
 import com.android.akhdmny.ApiResponse.AcceptModel.Driver;
 import com.android.akhdmny.ApiResponse.AcceptModel.User;
-import com.android.akhdmny.ApiResponse.OrderConfirmation;
+import com.android.akhdmny.ApiResponse.TimeOut.OrderTimeOut;
+import com.android.akhdmny.ErrorHandling.LoginApiError;
 import com.android.akhdmny.FireBaseNotification.TrackerService;
 import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
 import com.android.akhdmny.R;
-import com.android.akhdmny.Utils.Route;
+import com.arsy.maps_library.MapRadar;
+import com.arsy.maps_library.MapRipple;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -54,6 +60,7 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -64,17 +71,27 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-import static android.content.Context.MODE_PRIVATE;
 import static com.android.akhdmny.MainActivity.btn;
 import static com.android.akhdmny.MainActivity.btn_layout;
 import static com.android.akhdmny.MainActivity.showOrHide;
@@ -101,6 +118,9 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
     @BindView(R.id.carNumber)
     TextView carNumber;
 
+    @BindView(R.id.mapLayout)
+    LinearLayout mapLayout;
+
     @BindView(R.id.driverName)
     TextView driverName;
 
@@ -119,7 +139,9 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
     @BindView(R.id.OrderCancel)
     Button CancelOrder;
     String id ="";
+    Context context;
     MapView mMapView;
+
     private GoogleApiClient mGoogleApiClient;
     private double longitude,lat=0.0;
     private double latitude,lon=0.0;
@@ -132,6 +154,15 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
     private FragmentActivity myContext;
     private BottomSheetBehavior mBottomSheetBehaviour;
     Marker marker;
+    private static CountDownTimer countDownTimer;
+    MapRipple mapRipple;
+    MapRadar mapRadar;
+    SharedPreferences prefs;
+    private Circle lastUserCircle;
+    private long pulseDuration = 1000;
+    private ValueAnimator lastPulseAnimator;
+    private static final int PERMISSION_CALL = 22;
+    String DriverNumber;
     public FragmentHome() {
 
     }
@@ -141,12 +172,15 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
        View view = inflater.inflate(R.layout.fragment_home, container, false);
        ButterKnife.bind(this,view);
-//        SupportMapFragment mapFragment = (SupportMapFragment) myContext.getSupportFragmentManager()
+        id = NetworkConsume.getInstance().getDefaults("id",getActivity());
+       context = getActivity();
+//        SupportMapFragment mapFragment = (SupportMapFragment)getActivity().()
 //                .findFragmentById(R.id.map);
-//        MapFragment mapFragment = (MapFragment) getActivity().getFragmentManager().findFragmentById(R.id.map);
+//        mapFragment.getMapAsync(this);
         mMapView = (MapView) view.findViewById(R.id.map);
         mMapView.onCreate(savedInstanceState);
         //listnerBid();
+        prefs = getActivity().getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
         mMapView.getMapAsync(this);
         mMapView.onResume();
         try {
@@ -167,32 +201,18 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-        {
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSION_CODE);
-        }else {
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSION_CODE);
-        }
 
         CancelOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               nestedScrollView.setVisibility(View.GONE);
-               showOrHide(true);
-               NetworkConsume.getInstance().setDefaults("D_model",null,getActivity());
-               NetworkConsume.getInstance().setDefaults("O_model",null,getActivity());
-               NetworkConsume.getInstance().setDefaults("U_model",null,getActivity());
-                if(mMap != null){ //prevent crashing if the map doesn't exist yet (eg. on starting activity)
-                    mMap.clear();
-                    getCurrentLocation();
-                    btn.setVisibility(View.VISIBLE);
+              CancelOrder();
 
-                }
-
+            }
+        });
+        driverCall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                callEvent();
             }
         });
         driverChat.setOnClickListener(new View.OnClickListener() {
@@ -204,6 +224,31 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
             startTrackerService();
         return view;
     }
+    private void callEvent(){
+        if (checkCallPermission()) {
+            String uri = "tel:" + DriverNumber;
+            Intent intent = new Intent(Intent.ACTION_CALL);
+            intent.setData(Uri.parse(uri));
+            startActivity(intent);
+        }else {
+            requestPermissionForCall();
+        }
+
+    }
+    private void requestPermissionForCall() {
+
+        if (Build.VERSION.SDK_INT >= 23) {
+            requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, PERMISSION_CALL);
+        }
+
+    }
+
+    public boolean checkCallPermission(){
+        int callPerm = ContextCompat.checkSelfPermission(getActivity(),Manifest.permission.CALL_PHONE);
+
+        return callPerm == PackageManager.PERMISSION_GRANTED;
+    }
+
 
     private ResultCallback<LocationSettingsResult> mResultCallbackFromSettings = new ResultCallback<LocationSettingsResult>() {
         @Override
@@ -267,45 +312,49 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         }
 
     }
-    private void  listnerBid(){
-        String id = NetworkConsume.getInstance().getDefaults("id",getActivity());
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").child("User").
-                child(id);
-        ref.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-                Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
 
-            }
+    private void CancelOrder(){
+        NetworkConsume.getInstance().ShowProgress(getActivity());
 
+        NetworkConsume.getInstance().setAccessKey("Bearer "+prefs.getString("access_token","12"));
+        String orderId =NetworkConsume.getInstance().getDefaults("orderId",getActivity());
+        NetworkConsume.getInstance().getAuthAPI().cancelOrderApi(orderId).enqueue(new Callback<OrderTimeOut>() {
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-                Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
-                if (dataSnapshot.getKey().equals("orderId")){
-                    NetworkConsume.getInstance().setDefaults("orderId",dataSnapshot.getValue().toString(),getActivity());
+            public void onResponse(Call<OrderTimeOut> call, Response<OrderTimeOut> response) {
+                if (response.isSuccessful()){
+                    OrderTimeOut timeOut = response.body();
+//                    NetworkConsume.getInstance().SnackBarSucccessStr(mapLayout,getActivity(),timeOut.getResponse().getMessage());
+                    nestedScrollView.setVisibility(View.GONE);
+                    showOrHide(true);
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").
+                            child("User").child(id);
+                    ref.child("status").setValue(6);
+                    NetworkConsume.getInstance().HideProgress(getActivity());
+                    NetworkConsume.getInstance().setDefaults("orderId","",getActivity());
+                    NetworkConsume.getInstance().setDefaults("D_model","",getActivity());
+                    NetworkConsume.getInstance().setDefaults("O_model","",getActivity());
+                    NetworkConsume.getInstance().setDefaults("U_model","",getActivity());
+                    if(mMap != null){ //prevent crashing if the map doesn't exist yet (eg. on starting activity)
+                        mMap.clear();
+                        getCurrentLocation();
+                        btn.setVisibility(View.VISIBLE);
+
+                    }
+//                    if (mapRadar.isAnimationRunning()){
+//                        mapRipple.stopRippleMapAnimation();
+//                    }
+                }else {
+                    NetworkConsume.getInstance().HideProgress(getActivity());
+                    Gson gson = new Gson();
+                    LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
+                    Toast.makeText(getActivity(), message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
                 }
-                if (dataSnapshot.getKey().equals("status") && dataSnapshot.getValue().toString().equals("1")){
-                    Intent start = new Intent(getActivity(),Bid.class);
-                    start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(start);
-                }
-
-
             }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-                Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.w(TAG, "onCancelled", databaseError.toException());
+            public void onFailure(Call<OrderTimeOut> call, Throwable t) {
+                Toast.makeText(getActivity(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                NetworkConsume.getInstance().HideProgress(getActivity());
             }
         });
     }
@@ -335,46 +384,29 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
     private void listner(String id){
 
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Tracking").child(id);
-        ref.addChildEventListener(new ChildEventListener() {
+        ref.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-                Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-                Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
-
-                    if (dataSnapshot.getKey().equals("latitude")) {
-                        lat = Double.valueOf(dataSnapshot.getValue().toString());
+                for (DataSnapshot dataSnapshot1: dataSnapshot.getChildren()) {
+                    if (dataSnapshot1.getKey().equals("latitude")) {
+                        lat = Double.valueOf(dataSnapshot1.getValue().toString());
                     }
-                    if (dataSnapshot.getKey().equals("longitude")) {
-                        lon= Double.valueOf(dataSnapshot.getValue().toString());
+                    if (dataSnapshot1.getKey().equals("longitude")) {
+                        lon = Double.valueOf(dataSnapshot1.getValue().toString());
                     }
                     if (lat != 0.0 && lon != 0.0) {
                         drawRoute(lat, lon);
                     }
-
                 }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
-
-
             }
 
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-                Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
-            }
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.w(TAG, "onCancelled", databaseError.toException());
             }
         });
+
     }
     public void drawRoute(double lat,double lng) {
         PolylineOptions lineOptions = new PolylineOptions();
@@ -416,22 +448,24 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
                 .title("current position")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker))
                 .draggable(true));
-        //Animating the camera
+
         mMap.animateCamera(CameraUpdateFactory.zoomTo(9));
         try {
-          //  nestedScrollView.setVisibility(View.GONE);
+
             Gson gson = new Gson();
             String d_model = NetworkConsume.getInstance().getDefaults("D_model",getActivity());
             String o_model = NetworkConsume.getInstance().getDefaults("O_model",getActivity());
             String u_model = NetworkConsume.getInstance().getDefaults("U_model",getActivity());
-            if (d_model == null && o_model == null && u_model == null){
+            if (d_model.equals("")){
                 nestedScrollView.setVisibility(View.GONE);
-                btn_layout.setVisibility(View.VISIBLE);
+//                btn_layout.setVisibility(View.VISIBLE);
             } else
             {
+
                 btn_layout.setVisibility(View.GONE);
                 nestedScrollView.setVisibility(View.VISIBLE);
                 Driver obj = gson.fromJson(d_model, Driver.class);
+                DriverNumber = obj.getPhone();
                 User user = gson.fromJson(u_model, User.class);
                     listner(String.valueOf(obj.getId()));
                     createMarker(obj.getLat(),obj.getLong(),obj.getName(),R.drawable.car_icon);
@@ -499,7 +533,9 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
                 });
 
             }
-        }catch (Exception e){}
+        }catch (Exception e){
+          //  Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
 
         //Displaying current coordinates in toast
         //  Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
@@ -525,19 +561,29 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 
     }
 
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         // For showing a move to my location button
         //Setting onMarkerDragListener to track the marker drag
+
         mMap.setOnMarkerDragListener(this);
         //Adding a long click listener to the map
         mMap.setOnMapLongClickListener(this);
 
         if (checkPermission()) {
             buildGoogleApiClient();
-            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setScrollGesturesEnabled(true);
+            mMap.getUiSettings().setAllGesturesEnabled(true);
+//            mMap.setMyLocationEnabled(true);
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+
+                LatLng sydney = new LatLng(latitude, longitude);
+                mMap.addMarker(new MarkerOptions().position(sydney).icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker)).
+                        title("Driver"));
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+            }
             // Check the location settings of the user and create the callback to react to the different possibilities
             LocationSettingsRequest.Builder locationSettingsRequestBuilder = new LocationSettingsRequest.Builder()
                     .addLocationRequest(mLocationRequest);
@@ -551,11 +597,13 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
     }
     private void requestPermission() {
 
-        ActivityCompat.requestPermissions(getActivity(), new String[]
-                {
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                }, PERMISSION_CODE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(new String[]
+                    {
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                    }, PERMISSION_CODE);
+        }
 
     }
     public boolean checkPermission() {
@@ -625,6 +673,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 
     @Override
     public void onLocationChanged(Location location) {
+
 
     }
 

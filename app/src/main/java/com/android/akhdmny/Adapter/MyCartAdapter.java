@@ -25,11 +25,13 @@ public class MyCartAdapter extends RecyclerView.Adapter<MyCartAdapter.ProductVie
 
     //we are storing all the products in a list
     private ArrayList<CartItem> productList;
+    String currency;
 
     //getting the context and product list with constructor
-    public MyCartAdapter(Context mCtx, ArrayList<CartItem> productList) {
+    public MyCartAdapter(Context mCtx, ArrayList<CartItem> productList,String currency) {
         this.mCtx = mCtx;
         this.productList = productList;
+        this.currency = currency;
     }
 
     @Override
@@ -51,7 +53,7 @@ public class MyCartAdapter extends RecyclerView.Adapter<MyCartAdapter.ProductVie
             }else {
                 holder.textViewTitle.setText(product.getTitle());
                 holder.TxtViewAddress.setText(String.valueOf(product.getAddress()));
-                holder.textViewPrice.setText(String.valueOf(new DecimalFormat("##").format(product.getAmount())));
+                holder.textViewPrice.setText(String.valueOf(new DecimalFormat("##").format(product.getAmount()))+" "+currency);
                 if (product.getImage() == null){
                     Picasso.get().load(R.drawable.place_holder).into(holder.imageView);
                 }else {

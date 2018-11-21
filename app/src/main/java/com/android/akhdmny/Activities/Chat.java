@@ -40,6 +40,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.akhdmny.ApiResponse.AcceptModel.Driver;
+import com.android.akhdmny.ApiResponse.AcceptModel.Order;
 import com.android.akhdmny.ApiResponse.AcceptModel.User;
 import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
@@ -104,6 +105,7 @@ Uri mImageUri = Uri.EMPTY;
     DatabaseReference myRef,myRef2;
     Driver obj;
     User user;
+    Order order;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,11 +127,12 @@ Uri mImageUri = Uri.EMPTY;
         String d_model = NetworkConsume.getInstance().getDefaults("D_model",Chat.this);
         String o_model = NetworkConsume.getInstance().getDefaults("O_model",Chat.this);
         String u_model = NetworkConsume.getInstance().getDefaults("U_model",Chat.this);
-        if (d_model == null && o_model == null && u_model == null){
+        if (d_model.equals("")){
             Log.e("chat","Empty data");
         }else {
             obj = gson.fromJson(d_model, Driver.class);
              user = gson.fromJson(u_model, User.class);
+             order = gson.fromJson(o_model,Order.class);
         }
         firebaseDatabase = FirebaseDatabase.getInstance();
         myRef = FirebaseDatabase.getInstance().getReference().child("Chat").child(String.valueOf(user.getId())).child(String.valueOf(obj.getId()));
@@ -250,14 +253,12 @@ Uri mImageUri = Uri.EMPTY;
                     StorageReference filePath = FirebaseStorage.getInstance().getReference().child("Chat_Images").child(imageUri.getLastPathSegment());
                      Log.d("LOGGED", "ImageURI : " +mImageUri);
 
+                    NetworkConsume.getInstance().ShowProgress(Chat.this);
 
-//            mProgressDialog.setBody("Uploading...");
-//            mProgressDialog.show();
 
             filePath.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                 Uri downloadUri = taskSnapshot.getUploadSessionUri();
                     Task<Uri> urlTask = taskSnapshot.getStorage().getDownloadUrl();
                     while (!urlTask.isSuccessful());
                     String currentDateandTime = sdf.format(new Date());
@@ -276,7 +277,7 @@ Uri mImageUri = Uri.EMPTY;
                     map.put("type", "1");
                     myRef.push().setValue(map);
                     myRef2.push().setValue(map);
-                  //  mProgressDialog.dismiss();
+                    NetworkConsume.getInstance().HideProgress(Chat.this);
                 }
             });
 
@@ -354,11 +355,6 @@ Uri mImageUri = Uri.EMPTY;
         };
         Log.d("LOGGED", "Set Layout : " );
         recyclerView.setAdapter(mFirebaseAdapter);
-
-
-
-
-
         myRef.addValueEventListener(new com.google.firebase.database.ValueEventListener() {
             @Override
             public void onDataChange(com.google.firebase.database.DataSnapshot dataSnapshot) {

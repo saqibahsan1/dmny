@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:visibility="visible"
+    android:id="@+id/tipLL"
+    android:background="@color/transparent"
+    android:orientation="vertical">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:inputType="number"
+        android:drawableEnd="@drawable/cancel_icon"
+        android:textAlignment="center"
+        android:hint="0"
+        android:paddingEnd="@dimen/google_1x"
+        android:paddingStart="@dimen/google_1x"
+        android:textColorHint="@color/black"
+        android:id="@+id/inputTip"
+
+        android:textColor="@color/black"
+        android:background="@drawable/edit_text_bg"
+        />
+        <requestFocus/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:textColor="@color/colorAccent"
+        android:id="@+id/submitTip"
+        android:text="@string/submit"/>
+
+    </LinearLayout>
+
+</LinearLayout>
+

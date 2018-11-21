@@ -27,6 +27,8 @@ import com.android.akhdmny.R;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
+import java.util.Arrays;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -44,6 +46,8 @@ public class FragmentSettings extends Fragment {
     TextView TV_Mob;
     @BindView(R.id.tv_email)
     TextView tv_email;
+    @BindView(R.id.langType)
+    TextView langType;
 
 
 
@@ -70,7 +74,7 @@ public class FragmentSettings extends Fragment {
             LoginInsideResponse response = gson.fromJson(jsonLoin,LoginInsideResponse.class);
             Picasso.get().load(response.getAvatar()).into(img_Resturaunt);
             String splitter = response.getName();
-            String[] strings = splitter.split(" ");
+    //            String[] strings = splitter.split(" ");
 
             Tv_name.setText(response.getName());
             TV_Mob.setText(response.getPhone());
@@ -95,7 +99,27 @@ public class FragmentSettings extends Fragment {
         Lang_Laoyout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LocaleHelper.languageSwitcher.showChangeLanguageDialog((FragmentActivity) getActivity());
+//                LocaleHelper.languageSwitcher.showChangeLanguageDialog((FragmentActivity) getActivity());
+                String lang = LocaleHelper.getInstance().getLanguage();
+                if (lang == null || lang.equals("")){
+                    lang = "en";
+                }
+                int index = Arrays.asList(getResources().getStringArray(R.array.languages_short)).indexOf(lang);
+                new android.app.AlertDialog.Builder(getActivity())
+                        .setTitle(R.string.dialog_language_title_select_language)
+                        .setSingleChoiceItems(R.array.languages, index, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String lang = getResources().getStringArray(R.array.languages_short)[which];
+                                LocaleHelper.getInstance().setLanguage(lang);
+                                langType.setText(lang.toUpperCase());
+                                dialog.dismiss();
+
+                                getActivity().recreate();
+
+                            }
+                        })
+                        .show();
 
             }
         });
@@ -115,7 +139,10 @@ public class FragmentSettings extends Fragment {
                                 .putString("avatar","")
                                 .putString("login","").commit();
 
-                       startActivity( new Intent(getActivity(),login.class));
+                        Intent intent = new Intent(getActivity(), login.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        getActivity().finish();
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

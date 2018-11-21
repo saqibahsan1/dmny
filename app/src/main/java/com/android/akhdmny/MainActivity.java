@@ -1,18 +1,15 @@
 package com.android.akhdmny;
 
+import android.Manifest;
 import android.app.Fragment;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
-import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -30,15 +27,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.akhdmny.Activities.Bid;
-import com.android.akhdmny.Activities.Chat;
-import com.android.akhdmny.Activities.DefaultDialogsActivity;
-import com.android.akhdmny.Activities.DefaultMessagesActivity;
 import com.android.akhdmny.Activities.MyCart;
 import com.android.akhdmny.Activities.Profile;
 import com.android.akhdmny.ApiResponse.LoginInsideResponse;
-import com.android.akhdmny.ApiResponse.OrderConfirmation;
-import com.android.akhdmny.ApiResponse.UpdateTokenResponse;
-import com.android.akhdmny.ErrorHandling.LoginApiError;
 import com.android.akhdmny.FireBaseNotification.TrackerService;
 import com.android.akhdmny.Fragments.FragmentComplaints;
 import com.android.akhdmny.Fragments.FragmentContact;
@@ -46,8 +37,7 @@ import com.android.akhdmny.Fragments.FragmentNotification;
 import com.android.akhdmny.Fragments.FragmentOrder;
 import com.android.akhdmny.Fragments.FragmentHome;
 import com.android.akhdmny.Fragments.FragmentSettings;
-import com.android.akhdmny.Fragments.FargmentService;
-import com.android.akhdmny.NetworkManager.Network;
+import com.android.akhdmny.Fragments.ServicesActivity;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.GoogleMap;
@@ -56,16 +46,16 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
+import java.util.Locale;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public static final String AUTH_PREF_KEY = "com.android.akhdmny.authKey";
@@ -83,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static Button btn;
     public static LinearLayout btn_layout;
     public static int Device_Width;
-
+    String orderId = "";
     private static final int PERMISSION_CODE = 99;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
@@ -91,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private FragmentNotification fragmentNotification = new FragmentNotification();
     private FragmentHome fragmentHome = new FragmentHome();
     private FragmentOrder fragmentOrder = new FragmentOrder();
-    private FargmentService fargmentService = new FargmentService();
+    private ServicesActivity fargmentService = new ServicesActivity();
     private FragmentSettings fragmentSettings = new FragmentSettings();
     private FragmentComplaints fragmentComplaints = new FragmentComplaints();
     private FragmentContact fragmentContact = new FragmentContact();
@@ -101,18 +91,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private String ID_MENU_ACTIVE = "IdMenuActive";
     Button cartButton;
     private static final String TAG = MainActivity.class.getSimpleName();
-
+    String lang;
     Gson gson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        lang = LocaleHelper.getInstance().getLanguage();
+        Locale locale = new Locale(lang);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+        getBaseContext().getResources().updateConfiguration(config,
+                getBaseContext().getResources().getDisplayMetrics());
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        gson = new Gson();
         setSupportActionBar(toolbar);
         DisplayMetrics metrics = getApplicationContext().getResources().getDisplayMetrics();
         Device_Width = metrics.widthPixels;
-
+        NetworkConsume.getInstance().setDefaults("tip","",MainActivity.this);
+        NetworkConsume.getInstance().setDefaults("coupon", "", MainActivity.this);
         tvTitle = (TextView) toolbar.findViewById(R.id.tvTitle);
         btn_layout = findViewById(R.id.btn_layout);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -122,12 +121,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 String newToken = instanceIdResult.getToken();
                 Log.e("newToken", newToken);
                String id = NetworkConsume.getInstance().getDefaults("id",this);
+                final String path = "Token/" + id;
+                lang = LocaleHelper.getInstance().getLanguage();
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference(path);
+
+                ref.child("lang").setValue(lang);
 
                 UpdateToken(Integer.valueOf(id),newToken);
 
             });
 
         }catch (Exception e){}
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+        {
+
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSION_CODE);
+        }
 
         if(null == savedInstanceState){
             activeMenu = R.id.home;
@@ -206,31 +216,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
         clickLIstner();
 
-        gson = new Gson();
+
 
 
     }
-    private void UpdateToken(int id,String token){
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
 
-        Network.getInstance().getAuthAPINew().Token(id,token).enqueue(new Callback<UpdateTokenResponse>() {
-            @Override
-            public void onResponse(Call<UpdateTokenResponse> call, Response<UpdateTokenResponse> response) {
-                UpdateTokenResponse updateTokenResponse = response.body();
-                if (response.isSuccessful()){
-                    //  Toast.makeText(FCM_service.this, updateTokenResponse.getResponse().getToken(), Toast.LENGTH_SHORT).show();
+            case PERMISSION_CODE:
 
-                }else {
-                    Gson gson = new Gson();
-                    LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
-                    Toast.makeText(MainActivity.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
+                if (grantResults.length > 0) {
+
+                    boolean finelocation = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+//                    boolean coarselocation = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+
+                    if (finelocation) {
+
+
+
+                       // Toast.makeText(getActivity(), "Permission Granted", Toast.LENGTH_LONG).show();
+                    } else {
+                      //  Toast.makeText(getActivity(), "Permission Denied", Toast.LENGTH_LONG).show();
+
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<UpdateTokenResponse> call, Throwable t) {
-                Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+                break;
+        }
+
+    }
+
+    private void UpdateToken(int id,String token){
+        final String path = "Token/" + id;
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference(path);
+        ref.child("token").setValue(token);
     }
 
     public static void showOrHide(boolean visibility){
@@ -256,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btn_services.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this,FargmentService.class));
+                startActivity(new Intent(MainActivity.this,ServicesActivity.class));
                 overridePendingTransition(R.anim.slide_left_in,R.anim.slide_left_out);
                 btn_layout.setVisibility(View.GONE);
                 activeMenu = R.id.Btn_Services;
@@ -266,61 +286,156 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    private void listner(){
-        String id = NetworkConsume.getInstance().getDefaults("id",MainActivity.this);
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").child("User").
-                child(id);
-        ref.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-                Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
-
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-                Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
-                if (dataSnapshot.getKey().equals("orderId")){
-                    NetworkConsume.getInstance().setDefaults("orderId",dataSnapshot.getValue().toString(),MainActivity.this);
-                }
-                if (dataSnapshot.getKey().equals("status") && dataSnapshot.getValue().toString().equals("1")){
-                    Intent start = new Intent(MainActivity.this,Bid.class);
-                    start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(start);
-                }
-
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-                Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.w(TAG, "onCancelled", databaseError.toException());
-            }
-        });
-    }
+//    private void listner(){
+//        String id = NetworkConsume.getInstance().getDefaults("id",MainActivity.this);
+//        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").child("User").
+//                child(id);
+//        ref.addChildEventListener(new ChildEventListener() {
+//            @Override
+//            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+//                Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
+//
+//            }
+//
+//            @Override
+//            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+//                Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
+//                if (dataSnapshot.getKey().equals("orderId")){
+//                    NetworkConsume.getInstance().setDefaults("orderId",dataSnapshot.getValue().toString(),MainActivity.this);
+//                }
+//                if (dataSnapshot.getKey().equals("status") && dataSnapshot.getValue().toString().equals("1")){
+//                    Intent start = new Intent(MainActivity.this,Bid.class);
+//                    start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    startActivity(start);
+//                }
+//
+//
+//            }
+//
+//            @Override
+//            public void onChildRemoved(DataSnapshot dataSnapshot) {
+//                Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
+//            }
+//
+//            @Override
+//            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
+//                Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//                Log.w(TAG, "onCancelled", databaseError.toException());
+//            }
+//        });
+//    }
 
     @Override
     protected void onResume() {
         super.onResume();
         activeMenu = R.id.home;
+        String d_model = NetworkConsume.getInstance().getDefaults("D_model",MainActivity.this);
+
+
         if (activeMenu == R.id.home) {
-              btn_layout.setVisibility(View.VISIBLE);
-              tvTitle.setText(getString(R.string.Home));
+            setFragment(fragmentHome);
+
+                btn_layout.setVisibility(View.VISIBLE);
+
+
+            tvTitle.setText(getString(R.string.Home));
         }else {
             Log.i("Hide","true");
         }
-        listner();
+      // listner();
     }
+
+//    private void listner(){
+//
+//        String id = NetworkConsume.getInstance().getDefaults("id",MainActivity.this);
+//        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").child("User")
+//                .child(id);
+//        ref.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//
+//                for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
+//                    if (dataSnapshot1.getKey().equals("orderId")){
+//                        orderId = dataSnapshot1.getValue().toString();
+//                    }
+//                    if (dataSnapshot1.getKey().equals("status") && dataSnapshot1.getValue().toString().equals("1")){
+//                        NetworkConsume.getInstance().setDefaults("orderId",orderId,MainActivity.this);
+//                        Intent start = new Intent(MainActivity.this,Bid.class);
+//                        start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                        startActivity(start);
+//                    }
+//                    if (dataSnapshot1.getKey().equals("status") && dataSnapshot1.getValue().toString().equals("3")){
+//                        Intent start = new Intent(MainActivity.this,MainActivity.class);
+//                        start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                        NetworkConsume.getInstance().setDefaults("D_model",null,MainActivity.this);
+//                        NetworkConsume.getInstance().setDefaults("O_model",null,MainActivity.this);
+//                        NetworkConsume.getInstance().setDefaults("U_model",null,MainActivity.this);
+//                        NetworkConsume.getInstance().setDefaults("orderId",null,MainActivity.this);
+//                        startActivity(start);
+//
+//                    }
+////                    * Status 0 = move to home screen then start loading map
+////* status 1 = stop loading then open bid screen and show bids
+////* status 2 = move to home screen then call getOrderDetails and then setup map and start tracking
+////* status 3 = stop tracking and return to normal state of map and show message “your order has been delivered” and then show rating screen
+////* status 4 = stop tracking and return to normal state of map and show message “your order has been cancelled”
+////* status 5 = move to normal state of map and show message “Order timeout”
+////* status 6 = move to normal state of map and do nothing.
+////                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//            }
+//        });
+////        ref.addChildEventListener(new ChildEventListener() {
+////            @Override
+////            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+////                Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
+////            }
+////
+////            @Override
+////            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+////                Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
+////                if (dataSnapshot.getKey().equals("orderId")){
+////                    NetworkConsume.getInstance().setDefaults("orderId",dataSnapshot.getValue().toString(),MainActivity.this);
+////                }
+////                if (dataSnapshot.getKey().equals("status") && dataSnapshot.getValue().toString().equals("0")){
+////                    Intent start = new Intent(MainActivity.this,AcceptOrderActivity.class);
+////                    start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+////                   startActivity(start);
+////                }
+////                if (dataSnapshot.getKey().equals("status") && dataSnapshot.getValue().toString().equals("2")){
+////                    Intent start = new Intent(MainActivity.this,DriverOrders.class);
+////                    start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+////                    startActivity(start);
+////                    requestLocationUpdatesOnRoute();
+////                }
+////
+////            }
+////
+////            @Override
+////            public void onChildRemoved(DataSnapshot dataSnapshot) {
+////                Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
+////            }
+////
+////            @Override
+////            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
+////                Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
+////            }
+////
+////            @Override
+////            public void onCancelled(DatabaseError databaseError) {
+////                Log.w(TAG, "onCancelled", databaseError.toException());
+////            }
+////        });
+//    }
 
     private void switchFragment(int activeMenu) {
         switch (activeMenu){
@@ -342,24 +457,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 setFragment(fragmentOrder);
                 tvTitle.setText(R.string.order);
                 btn.setVisibility(View.GONE);
+                activeMenu = R.id.orders;
                 btn_layout.setVisibility(View.GONE);
                 break;
             case R.id.settings:
                 setFragment(fragmentSettings);
                 btn_layout.setVisibility(View.GONE);
                 tvTitle.setText(R.string.settings);
+                activeMenu = R.id.settings;
                 btn.setVisibility(View.GONE);
                 break;
             case R.id.complaints:
                 setFragment(fragmentComplaints);
                 btn_layout.setVisibility(View.GONE);
                 tvTitle.setText(R.string.complaint);
+                activeMenu = R.id.complaints;
                 btn.setVisibility(View.GONE);
                 break;
             case R.id.notifications:
                 setFragment(fragmentNotification);
                 btn_layout.setVisibility(View.GONE);
                 tvTitle.setText(R.string.notifications);
+                activeMenu = R.id.notifications;
                 btn.setVisibility(View.GONE);
                 break;
             case R.id.contact:
@@ -367,6 +486,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                setFragment(fragmentContact);
                 tvTitle.setText(R.string.contact);
                 btn_layout.setVisibility(View.GONE);
+                activeMenu = R.id.contact;
                 btn.setVisibility(View.GONE);
                 break;
             default:
@@ -414,15 +534,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getMenuInflater().inflate(R.menu.toolbar_item, menu);
         MenuItem item = menu.findItem(R.id.button_item);
         btn = item.getActionView().findViewById(R.id.btn_MyCart);
-        String json = NetworkConsume.getInstance().getDefaults("U_model",MainActivity.this);
-        if (json == null){
-            btn_layout.setVisibility(View.VISIBLE);
-            btn.setVisibility(View.VISIBLE);
-        }else {
-            btn_layout.setVisibility(View.GONE);
-            btn.setVisibility(View.GONE);
-
-        }
+//        String json = NetworkConsume.getInstance().getDefaults("U_model",MainActivity.this);
+//        if (json.equals("null")){
+//            btn_layout.setVisibility(View.VISIBLE);
+//            btn.setVisibility(View.VISIBLE);
+//        }else {
+//            btn_layout.setVisibility(View.GONE);
+//            btn.setVisibility(View.GONE);
+//
+//        }
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

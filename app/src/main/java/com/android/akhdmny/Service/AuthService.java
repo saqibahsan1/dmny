@@ -5,25 +5,28 @@ import com.android.akhdmny.ApiResponse.AddComplaintResponse;
 import com.android.akhdmny.ApiResponse.AddToCart;
 import com.android.akhdmny.ApiResponse.CartApi.CartApiResp;
 import com.android.akhdmny.ApiResponse.CartOrder;
+import com.android.akhdmny.ApiResponse.Categories.CategoryDetailsResponse;
+import com.android.akhdmny.ApiResponse.Coupon.CouponApiResponse;
 import com.android.akhdmny.ApiResponse.DriverList;
-import com.android.akhdmny.ApiResponse.FourSquare;
-import com.android.akhdmny.ApiResponse.OrderConfirmation;
-import com.android.akhdmny.ApiResponse.CategoriesDetailResponse;
+import com.android.akhdmny.ApiResponse.MyChoice.FourSquare;
+import com.android.akhdmny.ApiResponse.MyOrderDetails.MyOrders;
 import com.android.akhdmny.ApiResponse.CategoriesResponse;
 import com.android.akhdmny.ApiResponse.ComplaintHistoryResponse;
 import com.android.akhdmny.ApiResponse.LoginApiResponse;
 import com.android.akhdmny.ApiResponse.OrderId;
-import com.android.akhdmny.ApiResponse.ParcelApiResponse;
+import com.android.akhdmny.ApiResponse.ParcelPost.ParcelPostApi;
+import com.android.akhdmny.ApiResponse.Parcels.ParcelLocationApi;
 import com.android.akhdmny.ApiResponse.ProfileResponse;
 import com.android.akhdmny.ApiResponse.RegisterResponse;
+import com.android.akhdmny.ApiResponse.TimeOut.OrderTimeOut;
 import com.android.akhdmny.ApiResponse.UpdateTokenResponse;
 import com.android.akhdmny.ApiResponse.createOrder.CreateOrderResp;
+import com.android.akhdmny.Requests.CategoryDetailsRequest;
 import com.android.akhdmny.Requests.CreateOrderRequest;
 import com.android.akhdmny.Requests.LoginRequest;
 import com.android.akhdmny.Requests.RequestOrder;
 import com.android.akhdmny.Requests.SignInRequest;
 import com.android.akhdmny.Requests.VerificationReguest;
-import com.android.akhdmny.Requests.requestOrder;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -55,14 +58,13 @@ public interface AuthService {
     Call<CategoriesResponse> CategoryApi();
 
     @GET("/akhdmny/public/api/user/cart_item")
-    Call<CartApiResp> CartOrders(@Query("lat") double lat, @Query("long") double longitude);
+    Call<CartApiResp> CartOrders(@Query("lat") double lat, @Query("long") double longitude,@Query("code") String code);
 
     @GET("/akhdmny/public/api/user/cart_item/destroy")
-    Call<CartOrder> RemoveCartOrders(@Query("cart_id") int userId, @Query("lat") double lat, @Query("long") double longi);
+    Call<CartApiResp> RemoveCartOrders(@Query("cart_id") int userId, @Query("lat") double lat, @Query("long") double longi);
 
-    @GET("/akhdmny/public/api/user/services")
-    Call<CategoriesDetailResponse> CatDetails(@Query("category_id") int id, @Query("lat") double lat,@Query("long") double longitude,
-                                              @Query("address") String address);
+    @POST("/akhdmny/public/api/user/services")
+    Call<CategoryDetailsResponse> CatDetails(@Body CategoryDetailsRequest request);
 
     @GET("/akhdmny/public/api/user/problem")
     Call<ComplaintHistoryResponse> History();
@@ -82,6 +84,22 @@ public interface AuthService {
     @GET("/acceptedDrivers")
     Call<DriverList> BidApi(@Query("orderId") String orderId);
 
+    @GET("/akhdmny/public/api/user/get-orders")
+    Call<MyOrders> MyOrders();
+
+    @GET("/akhdmny/public/api/user/order-timeout")
+    Call<OrderTimeOut> OrderTimeOut(@Query("order_id") String orderId);
+
+    @GET("/akhdmny/public/api/user/cancel-order")
+    Call<OrderTimeOut> cancelOrderApi(@Query("order_id") String orderId);
+
+    @GET("/akhdmny/public/api/user/parcel")
+    Call<ParcelLocationApi> parcels(@Query("from_lat") double from_lat, @Query("from_long") double from_long,
+                                    @Query("to_lat") double to_lat, @Query("to_long") double to_long);
+
+    @GET("/akhdmny/public/api/user/get-coupons")
+    Call<CouponApiResponse> GetCoupon();
+
     @Multipart
     @POST("/akhdmny/public/api/user/problem?lat=24.9070714&long=67.1124509")
     Call<AddComplaintResponse> AddComplaint(@Part("description") RequestBody description, @Part("title") RequestBody title,
@@ -97,10 +115,10 @@ public interface AuthService {
 
     @Multipart
     @POST("/akhdmny/public/api/user/parcel")
-    Call<ParcelApiResponse> ParcelApi(@Part("from_lat") double lat, @Part("from_long") double longitude,
-                                      @Part("to_lat") double to_lat, @Part("to_long") double to_longitude,
-                                      @Part("description") String description, @Part("amount") int amount, @Part("distance") String distance,
-                                      @Part MultipartBody.Part[] Images, @Part MultipartBody.Part Sound);
+    Call<ParcelPostApi> ParcelApi(@Part("from_lat") double lat, @Part("from_long") double longitude,
+                                  @Part("to_lat") double to_lat, @Part("to_long") double to_longitude,
+                                  @Part("description") String description, @Part("amount") String amount, @Part("distance") String distance,
+                                  @Part MultipartBody.Part[] Images, @Part MultipartBody.Part Sound);
 
     @Multipart
     @POST("/akhdmny/public/api/user/update/profile")

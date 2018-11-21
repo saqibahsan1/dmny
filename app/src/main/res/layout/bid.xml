@@ -49,4 +49,18 @@
 
     </android.support.v7.widget.RecyclerView>
 
+    <Button
+        android:id="@+id/CancelOrder"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="@dimen/book_border"
+        android:layout_marginEnd="5dp"
+        android:background="@drawable/cancel_screen"
+        android:gravity="center"
+        android:text="@string/cancel_order"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textStyle="bold" />
+
 </LinearLayout>

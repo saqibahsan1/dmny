@@ -1,6 +1,7 @@
 package com.android.akhdmny.NetworkManager;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -30,6 +31,7 @@ public class NetworkConsume {
 
     private static final String API_ENDPOINT = "http://148.251.72.170:8080/";
     private String _accessToken = null;
+    private ProgressDialog progressDialog = null;
 
     private Retrofit _retrofit;
     private Retrofit.Builder _retrofitBuilder = null;
@@ -92,16 +94,38 @@ public class NetworkConsume {
 
         rebuild();
     }
-    public boolean checkPermission(Context context) {
+    public void ShowDialogeY(Context context){
 
-        int FirstPermissionResult = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION);
-        int SecondPermissionResult = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION);
+        progressDialog = new ProgressDialog(context,R.style.TransparentTheme);
+//        progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        progressDialog.show();
+        progressDialog.setContentView(R.layout.custom_progressdialog);
+        progressDialog.setCancelable(false);
+    }
 
-        return FirstPermissionResult == PackageManager.PERMISSION_GRANTED &&
-                SecondPermissionResult == PackageManager.PERMISSION_GRANTED;
-
+    public void ShowProgress(Context context){
+        ShowDialogeY(context);
+        progressDialog.show();
+    }
+    public void HideProgress(Context context){
+//        ShowDialogeN(context);
+        progressDialog.hide();
+        progressDialog.dismiss();
     }
     public void SnackBarSucccess(LinearLayout layout,Context context,int message){
+        Snackbar snackbar = Snackbar.make(layout, message, Snackbar.LENGTH_LONG);
+        View snackbarLayout = snackbar.getView();
+        FrameLayout.LayoutParams params=(FrameLayout.LayoutParams)snackbarLayout.getLayoutParams();
+        params.gravity = Gravity.TOP;
+        snackbarLayout.setLayoutParams(params);
+        snackbarLayout.setBackgroundColor(context.getResources().getColor(R.color.green));
+        TextView textView = (TextView)snackbarLayout.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.tick, 0, 0, 0);
+        textView.setCompoundDrawablePadding(context.getResources().getDimensionPixelOffset(R.dimen.snackBar));
+        snackbar.show();
+
+    }
+    public void SnackBarSucccessStr(LinearLayout layout,Context context,String message){
         Snackbar snackbar = Snackbar.make(layout, message, Snackbar.LENGTH_LONG);
         View snackbarLayout = snackbar.getView();
         FrameLayout.LayoutParams params=(FrameLayout.LayoutParams)snackbarLayout.getLayoutParams();

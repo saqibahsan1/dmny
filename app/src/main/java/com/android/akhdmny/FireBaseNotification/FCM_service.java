@@ -66,30 +66,36 @@ public class FCM_service extends FirebaseMessagingService {
 
     }
     private void UpdateToken(int id,String token){
-
-        Network.getInstance().getAuthAPINew().Token(id,token).enqueue(new Callback<UpdateTokenResponse>() {
-            @Override
-            public void onResponse(Call<UpdateTokenResponse> call, Response<UpdateTokenResponse> response) {
-                UpdateTokenResponse updateTokenResponse = response.body();
-                if (response.isSuccessful()){
-                    //  Toast.makeText(FCM_service.this, updateTokenResponse.getResponse().getToken(), Toast.LENGTH_SHORT).show();
-
-                }else {
-                    Gson gson = new Gson();
-                    LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
-                    Toast.makeText(FCM_service.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<UpdateTokenResponse> call, Throwable t) {
-                Toast.makeText(FCM_service.this, t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        final String path = "Token/" + id;
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference(path);
+        ref.child("token").setValue(token);
     }
 
+//    private void UpdateToken(int id,String token){
+//
+//        Network.getInstance().getAuthAPINew().Token(id,token).enqueue(new Callback<UpdateTokenResponse>() {
+//            @Override
+//            public void onResponse(Call<UpdateTokenResponse> call, Response<UpdateTokenResponse> response) {
+//                UpdateTokenResponse updateTokenResponse = response.body();
+//                if (response.isSuccessful()){
+//                    //  Toast.makeText(FCM_service.this, updateTokenResponse.getResponse().getToken(), Toast.LENGTH_SHORT).show();
+//
+//                }else {
+//                    Gson gson = new Gson();
+//                    LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
+//                    Toast.makeText(FCM_service.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<UpdateTokenResponse> call, Throwable t) {
+//                Toast.makeText(FCM_service.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//    }
+
     private void sendNotification(String messageBody) {
-        Intent intent = new Intent(this, Bid.class);
+        Intent intent = new Intent(this, TrackerService.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);

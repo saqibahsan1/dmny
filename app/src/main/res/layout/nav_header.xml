@@ -15,10 +15,10 @@
         <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:src="@color/black"
+            android:src="@drawable/dummy_image"
             app:civ_border_width="2dp"
             android:id="@+id/user_profile_Image"
-            app:civ_border_color="@color/colorPrimaryDark" />
+            app:civ_border_color="@color/black" />
 
         <TextView
             android:layout_width="wrap_content"
