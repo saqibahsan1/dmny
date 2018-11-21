@@ -132,7 +132,6 @@ public class ServicesActivity extends AppCompatActivity {
         recyclerview.addOnItemTouchListener(new RecyclerTouchListener(ServicesActivity.this, recyclerview, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                NetworkConsume.getInstance().setDefaults("id",categoriesNames.get(position).getId().toString(),ServicesActivity.this);
                 NetworkConsume.getInstance().setDefaults("image",categoriesNames.get(position).getIcon(),ServicesActivity.this);
                 NetworkConsume.getInstance().setDefaults("title",categoriesNames.get(position).getTitle(),ServicesActivity.this);
                 NetworkConsume.getInstance().setDefaults("colour",categoriesNames.get(position).getColor(),ServicesActivity.this);

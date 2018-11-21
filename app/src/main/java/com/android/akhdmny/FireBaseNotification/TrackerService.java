@@ -46,10 +46,16 @@ public class TrackerService extends Service {
     }
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        // Toast.makeText(this, " MyService Started", Toast.LENGTH_LONG).show();
+        listner();
+        return START_STICKY;
+    }
+    @Override
     public void onCreate() {
         super.onCreate();
      //   requestLocationUpdates();
-        listner();
+
 
     }
 
@@ -107,6 +113,20 @@ public class TrackerService extends Service {
                                 child("User").child(id);
                         ref.child("status").setValue(6);
                         Toast.makeText(TrackerService.this, "Your Order has been cancelled", Toast.LENGTH_SHORT).show();
+                        start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(start);
+
+                    }
+                    if (dataSnapshot1.getKey().equals("status") && dataSnapshot1.getValue().toString().equals("5")){
+                        Intent start = new Intent(TrackerService.this,MainActivity.class);
+                        NetworkConsume.getInstance().setDefaults("orderId","",TrackerService.this);
+                        NetworkConsume.getInstance().setDefaults("D_model","",TrackerService.this);
+                        NetworkConsume.getInstance().setDefaults("O_model","",TrackerService.this);
+                        NetworkConsume.getInstance().setDefaults("U_model","",TrackerService.this);
+                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").
+                                child("User").child(id);
+                        ref.child("status").setValue(6);
+                        Toast.makeText(TrackerService.this, "Your Order has been Timed Out", Toast.LENGTH_SHORT).show();
                         start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(start);
 

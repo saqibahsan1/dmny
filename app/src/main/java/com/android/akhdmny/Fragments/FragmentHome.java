@@ -221,7 +221,6 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
                 startActivity(new Intent(getActivity(), Chat.class));
             }
         });
-            startTrackerService();
         return view;
     }
     private void callEvent(){
@@ -279,10 +278,6 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
             }
         }
     };
-    private void startTrackerService() {
-        getActivity().startService(new Intent(getActivity(), TrackerService.class));
-        //finish();
-    }
 
 
     @Override
@@ -300,7 +295,6 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 
                         if (checkPermission())
                             buildGoogleApiClient();
-                        startTrackerService();
                         Toast.makeText(getActivity(), "Permission Granted", Toast.LENGTH_LONG).show();
                     } else {
                         Toast.makeText(getActivity(), "Permission Denied", Toast.LENGTH_LONG).show();

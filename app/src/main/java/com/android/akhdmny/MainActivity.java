@@ -335,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         activeMenu = R.id.home;
         String d_model = NetworkConsume.getInstance().getDefaults("D_model",MainActivity.this);
 
-
+            startTrackerService();
         if (activeMenu == R.id.home) {
             setFragment(fragmentHome);
 
@@ -348,6 +348,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
       // listner();
     }
+    private void startTrackerService() {
+        startService(new Intent(MainActivity.this, TrackerService.class));
+        //finish();
+    }
+
 
 //    private void listner(){
 //
@@ -445,7 +450,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                // btn_layout.setVisibility(View.VISIBLE);
 
                 String json = NetworkConsume.getInstance().getDefaults("U_model",MainActivity.this);
-                if (json == null){
+                if (json.equals("")){
                     btn_layout.setVisibility(View.VISIBLE);
                     btn.setVisibility(View.VISIBLE);
                 }else {
