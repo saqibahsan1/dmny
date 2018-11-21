@@ -4,7 +4,14 @@ package com.android.akhdmny.Utils;
 
 public class Show_Chat_Conversation_Data_Items {
     private String body;
-    private String sender;
+    private String id;
+    private Boolean isDelivered;
+    private Boolean isRead;
+    private String senderId;
+    private String senderImage;
+    private String senderName;
+    private String time;
+    private int type;
 
     public String getId() {
         return id;
@@ -14,19 +21,19 @@ public class Show_Chat_Conversation_Data_Items {
         this.id = id;
     }
 
-    public String getIsDelivered() {
+    public Boolean getIsDelivered() {
         return isDelivered;
     }
 
-    public void setIsDelivered(String isDelivered) {
+    public void setIsDelivered(Boolean isDelivered) {
         this.isDelivered = isDelivered;
     }
 
-    public String getIsRead() {
+    public Boolean getIsRead() {
         return isRead;
     }
 
-    public void setIsRead(String isRead) {
+    public void setIsRead(Boolean isRead) {
         this.isRead = isRead;
     }
 
@@ -62,19 +69,18 @@ public class Show_Chat_Conversation_Data_Items {
         this.time = time;
     }
 
-    public String getType() {
+    public int getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(int type) {
         this.type = type;
     }
 
-    public Show_Chat_Conversation_Data_Items(String body, String sender, String id, String isDelivered,
-                                             String isRead,String senderId,String senderImage,
-                                             String senderName,String time,String type) {
+    public Show_Chat_Conversation_Data_Items(String body, String id, Boolean isDelivered,
+                                             Boolean isRead,String senderId,String senderImage,
+                                             String senderName,String time,int type) {
         this.body = body;
-        this.sender = sender;
         this.id = id;
         this.isDelivered = isDelivered;
         this.isRead = isRead;
@@ -85,14 +91,7 @@ public class Show_Chat_Conversation_Data_Items {
         this.type = type;
     }
 
-    private String id;
-    private String isDelivered;
-    private String isRead;
-    private String senderId;
-    private String senderImage;
-    private String senderName;
-    private String time;
-    private String type;
+
 
     public Show_Chat_Conversation_Data_Items()
     {
@@ -108,11 +107,5 @@ public class Show_Chat_Conversation_Data_Items {
         this.body = body;
     }
 
-    public String getSender() {
-        return sender;
-    }
-
-    public void setSender(String sender) {
-        this.sender = sender;
-    }
 }
+

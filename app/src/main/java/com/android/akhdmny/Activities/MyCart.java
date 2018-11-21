@@ -131,6 +131,10 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
     ScriptIntrinsicBlur scriptIntrinsicBlur;
     Allocation allocOriginalScreenshot, allocBlurred;
     String currency= "";
+
+    double finalAmount = 0;
+    int tip = 0;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -178,12 +182,12 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
                                 }
                                 listResponse.add(cartOrder.getResponse());
 //                                total_tip.setText();
-                                final_Total.setText(String.valueOf(new DecimalFormat("##").format(cartOrder.getResponse().getFinalAmount())+" "+
-                                        cartOrder.getResponse().getCurrency()));
-                                finalTotalstr = String.valueOf(new DecimalFormat("##").format(cartOrder.getResponse().getFinalAmount()));
+                                final_Total.setText(String.valueOf(cartOrder.getResponse().getFinalAmount().floatValue() + " " + cartOrder.getResponse().getCurrency()));
+                                finalTotalstr = String.valueOf(cartOrder.getResponse().getFinalAmount().floatValue());
+                                finalAmount = cartOrder.getResponse().getFinalAmount();
                                 servicTotalstr =String.valueOf(cartOrder.getResponse().getCartItems().size());
-                                discount = String.valueOf(new DecimalFormat("##").format(cartOrder.getResponse().getDiscountPercent()));
-                                discountValue.setText(new DecimalFormat("##").format(cartOrder.getResponse().getDiscountAmount())+"%");
+                                discount = String.valueOf(cartOrder.getResponse().getDiscountPercent());
+                                discountValue.setText(cartOrder.getResponse().getDiscountAmount()+"%");
                                 currency =cartOrder.getResponse().getCurrency();
                                 total_services.setText(String.valueOf(cartOrder.getResponse().getCartItems().size()));
                                 MyCartAdapter myAdapter = new MyCartAdapter(MyCart.this,list,cartOrder.getResponse().getCurrency());
@@ -236,7 +240,11 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
         {
 
         }else{
-            total_tip.setText(tip);
+            try {
+                setTip(Integer.parseInt(tip));
+            }catch (Exception e){
+                total_tip.setText(tip);
+            }
         }
         String cart=  NetworkConsume.getInstance().getDefaults("coupon",  MyCart.this);
         if (cart == null || cart.equals("")){
@@ -244,6 +252,13 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
         }else {
             CartApi(cart);
         }
+    }
+
+    public void setTip(int tip) {
+        this.tip = tip;
+        total_tip.setText(String.valueOf(tip));
+        float tempNum = (float)this.finalAmount + (float)tip;
+        this.final_Total.setText(String.valueOf(tempNum) + " " + this.currency);
     }
 
     private void itemTouchLister() {
@@ -258,19 +273,19 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
         five.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                total_tip.setText("5");
+                setTip(5);
             }
         });
         ten.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                total_tip.setText("10");
+                setTip(10);
             }
         });
         twenty.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                total_tip.setText("20");
+                setTip(20);
             }
         });
 
@@ -294,7 +309,8 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
                 TextView discountVal = viewOrder.findViewById(R.id.discountValue);
                 TextView serviceTotal = viewOrder.findViewById(R.id.total_services);
                  editText = viewOrder.findViewById(R.id.et_tip);
-                finalTotal.setText(finalTotalstr+" "+currency);
+                float tempNum = (float)finalAmount + (float)tip;
+                finalTotal.setText(String.valueOf(tempNum) + " " + currency);
                 discountVal.setText(discount+"%");
                 serviceTotal.setText(servicTotalstr);
                 Button btnCancel = viewOrder.findViewById(R.id.CancelOrder);
@@ -369,7 +385,7 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
                 TextView textViewprice = viewCart.findViewById(R.id.tv_email);
                 textViewTitle.setText(list.get(position).getTitle());
                 textViewAddress.setText(list.get(position).getAddress());
-                textViewprice.setText(new DecimalFormat("##.#").format(list.get(position).getAmount())+" "+listResponse.get(position).getCurrency());
+                textViewprice.setText(list.get(position).getAmount()+" "+listResponse.get(position).getCurrency());
                 textDialogMsg.setText(list.get(position).getDescription());
                 ADD_Cart.setView(viewCart);
                 ADD_Cart.setCancelable(true);
@@ -496,6 +512,7 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
         request.setLong(gpsActivity.getLongitude());
         request.setTip(Integer.valueOf(total_tip.getText().toString()));
         request.setDiscountPercent(Integer.parseInt(discount));
+        request.setCode("");
         NetworkConsume.getInstance().getAuthAPI().CreateOrder(request).enqueue(new Callback<CreateOrderResp>() {
             @Override
             public void onResponse(Call<CreateOrderResp> call, Response<CreateOrderResp> response) {

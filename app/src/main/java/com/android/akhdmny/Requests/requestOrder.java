@@ -1,10 +1,24 @@
+
 package com.android.akhdmny.Requests;
 
 import com.android.akhdmny.ApiResponse.CartInsideResponse;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class requestOrder {
+public class RequestOrder {
+
+    @SerializedName("id")
+    @Expose
+    private String id;
+    @SerializedName("lat")
+    @Expose
+    private String lat;
+    @SerializedName("long")
+    @Expose
+    private String _long;
+    @SerializedName("orderDetails")
+    @Expose
+    private CartInsideResponse orderDetails;
 
     public String getId() {
         return id;
@@ -14,42 +28,28 @@ public class requestOrder {
         this.id = id;
     }
 
-    public double getLat() {
+    public String getLat() {
         return lat;
     }
 
-    public void setLat(double lat) {
+    public void setLat(String lat) {
         this.lat = lat;
     }
 
-    public double getLongitude() {
-        return longitude;
+    public String getLong() {
+        return _long;
     }
 
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
+    public void setLong(String _long) {
+        this._long = _long;
     }
 
-
-    public CartInsideResponse getResponse() {
-        return response;
+    public CartInsideResponse getOrderDetails() {
+        return orderDetails;
     }
 
-    public void setResponse(CartInsideResponse response) {
-        this.response = response;
+    public void setOrderDetails(CartInsideResponse orderDetails) {
+        this.orderDetails = orderDetails;
     }
 
-    @SerializedName("id")
-    @Expose
-    private String id;
-    @SerializedName("lat")
-    @Expose
-    private double lat;
-    @SerializedName("long")
-    @Expose
-    private double longitude;
-
-    @SerializedName("orderDetails")
-    @Expose
-    private CartInsideResponse response;
 }

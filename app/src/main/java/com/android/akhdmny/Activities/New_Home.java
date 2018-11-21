@@ -320,7 +320,7 @@ public class New_Home extends AppCompatActivity  implements OnMapReadyCallback,
 
             startRadarAnimation(latLng);
             //Animating the camera
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
         //Displaying current coordinates in toast
         //  Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }

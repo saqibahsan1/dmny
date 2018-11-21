@@ -63,15 +63,16 @@ public class Bid extends AppCompatActivity {
     TextView tvTitle;
     SharedPreferences prefs;
     BidAdapter adapter;
-    String id ="";
+    String id = "";
     ArrayList<DriverListInsideResponse> listInsideResponses;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.bid);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
-        id = NetworkConsume.getInstance().getDefaults("id",Bid.this);
+        id = NetworkConsume.getInstance().getDefaults("id", Bid.this);
         tvTitle = (TextView) toolbar.findViewById(R.id.tvTitle);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         tvTitle.setText(R.string.bid);
@@ -79,7 +80,7 @@ public class Bid extends AppCompatActivity {
         getSupportActionBar().setTitle(R.string.bid);
         listInsideResponses = new ArrayList<>();
         prefs = getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
-      //  BidAcceptApi();
+        //  BidAcceptApi();
         adapter = new BidAdapter(listInsideResponses, Bid.this, new ClickListener() {
             @Override
             public void onPositionClicked(int position) {
@@ -104,14 +105,15 @@ public class Bid extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         listner();
     }
-    private void TimeoutApi(){
+
+    private void TimeoutApi() {
         NetworkConsume.getInstance().ShowProgress(Bid.this);
-        NetworkConsume.getInstance().setAccessKey("Bearer "+prefs.getString("access_token","12"));
-        String orderId =NetworkConsume.getInstance().getDefaults("orderId",this);
+        NetworkConsume.getInstance().setAccessKey("Bearer " + prefs.getString("access_token", "12"));
+        String orderId = NetworkConsume.getInstance().getDefaults("orderId", this);
         NetworkConsume.getInstance().getAuthAPI().OrderTimeOut(orderId).enqueue(new Callback<OrderTimeOut>() {
             @Override
             public void onResponse(Call<OrderTimeOut> call, Response<OrderTimeOut> response) {
-                if (response.isSuccessful()){
+                if (response.isSuccessful()) {
                     OrderTimeOut timeOut = response.body();
                     Toast.makeText(Bid.this, timeOut.getResponse().getMessage(), Toast.LENGTH_SHORT).show();
 
@@ -119,27 +121,26 @@ public class Bid extends AppCompatActivity {
                             child("User").child(id);
                     ref.child("status").setValue(6);
 
-                    NetworkConsume.getInstance().setDefaults("orderId","",Bid.this);
-                    NetworkConsume.getInstance().setDefaults("D_model",null,Bid.this);
-                    NetworkConsume.getInstance().setDefaults("O_model",null,Bid.this);
-                    NetworkConsume.getInstance().setDefaults("U_model",null,Bid.this);
+                    NetworkConsume.getInstance().setDefaults("orderId", "", Bid.this);
+                    NetworkConsume.getInstance().setDefaults("D_model", null, Bid.this);
+                    NetworkConsume.getInstance().setDefaults("O_model", null, Bid.this);
+                    NetworkConsume.getInstance().setDefaults("U_model", null, Bid.this);
                     NetworkConsume.getInstance().HideProgress(Bid.this);
                     Intent intent = new Intent(Bid.this, MainActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                     finish();
-                }
-                else {
+                } else {
                     Gson gson = new Gson();
                     NetworkConsume.getInstance().HideProgress(Bid.this);
-                    NetworkConsume.getInstance().setDefaults("orderId","",Bid.this);
-                    LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
+                    NetworkConsume.getInstance().setDefaults("orderId", "", Bid.this);
+                    LoginApiError message = gson.fromJson(response.errorBody().charStream(), LoginApiError.class);
                     Toast.makeText(Bid.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
-                    if (message.getError().getMessage().get(0).equals("Unauthorized access_token")){
+                    if (message.getError().getMessage().get(0).equals("Unauthorized access_token")) {
                         SharedPreferences prefs = getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
                         prefs.edit().putString("access_token", "")
-                                .putString("avatar","")
-                                .putString("login","").commit();
+                                .putString("avatar", "")
+                                .putString("login", "").commit();
 
                         Intent intent = new Intent(Bid.this, login.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -152,31 +153,29 @@ public class Bid extends AppCompatActivity {
             @Override
             public void onFailure(Call<OrderTimeOut> call, Throwable t) {
                 NetworkConsume.getInstance().HideProgress(Bid.this);
-                NetworkConsume.getInstance().setDefaults("orderId","",Bid.this);
+                NetworkConsume.getInstance().setDefaults("orderId", "", Bid.this);
                 Toast.makeText(Bid.this, t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
 
-    private void listner(){
-        String orderId =   NetworkConsume.getInstance().getDefaults("orderId",Bid.this);
-        String id = NetworkConsume.getInstance().getDefaults("id",Bid.this);
+    private void listner() {
+        String orderId = NetworkConsume.getInstance().getDefaults("orderId", Bid.this);
+        String id = NetworkConsume.getInstance().getDefaults("id", Bid.this);
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Orders").child(orderId).child("acceptedDrivers");
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
                 listInsideResponses.clear();
-                for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()) {
+                for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
                     // BidAcceptApi();
                     DriverListInsideResponse insideResponse = dataSnapshot1.getValue(DriverListInsideResponse.class);
                     listInsideResponses.add(insideResponse);
 //                    recyclerView.notifyAll();
                     adapter.notifyDataSetChanged();
-
-
                 }
-
             }
 
             @Override
@@ -187,17 +186,16 @@ public class Bid extends AppCompatActivity {
     }
 
 
-
-    private void BidAcceptApi(){
+    private void BidAcceptApi() {
         NetworkConsume.getInstance().ShowProgress(Bid.this);
-        String orderId =   NetworkConsume.getInstance().getDefaults("orderId",Bid.this);
+        String orderId = NetworkConsume.getInstance().getDefaults("orderId", Bid.this);
         Network.getInstance().getAuthAPINew().BidApi(orderId).enqueue(new Callback<DriverList>() {
             @Override
             public void onResponse(Call<DriverList> call, Response<DriverList> response) {
-                if (response.isSuccessful()){
+                if (response.isSuccessful()) {
                     NetworkConsume.getInstance().HideProgress(Bid.this);
                     DriverList driverList = response.body();
-                    for (int i =0; i<driverList.getResponse().size(); i++) {
+                    for (int i = 0; i < driverList.getResponse().size(); i++) {
                         listInsideResponses.add(driverList.getResponse().get(i));
                     }
                     BidAdapter adapter = new BidAdapter(listInsideResponses, Bid.this, new ClickListener() {
@@ -218,7 +216,7 @@ public class Bid extends AppCompatActivity {
                     recyclerView.setAdapter(adapter);
 
 
-                }else {
+                } else {
                     NetworkConsume.getInstance().HideProgress(Bid.this);
                     Toast.makeText(Bid.this, R.string.error, Toast.LENGTH_SHORT).show();
                 }
@@ -232,38 +230,38 @@ public class Bid extends AppCompatActivity {
         });
     }
 
-    private void AcceptApi(int pos){
+    private void AcceptApi(int pos) {
         NetworkConsume.getInstance().ShowProgress(Bid.this);
-        NetworkConsume.getInstance().setAccessKey("Bearer "+prefs.getString("access_token","12"));
-        NetworkConsume.getInstance().getAuthAPI().AcceptBidApi(listInsideResponses.get(pos).getOrderId(),listInsideResponses.get(pos).getBid(),
+        NetworkConsume.getInstance().setAccessKey("Bearer " + prefs.getString("access_token", "12"));
+        NetworkConsume.getInstance().getAuthAPI().AcceptBidApi(listInsideResponses.get(pos).getOrderId(), listInsideResponses.get(pos).getBid(),
                 listInsideResponses.get(pos).getDriverId()).enqueue(new Callback<AcceptOrderApiModel>() {
             @Override
             public void onResponse(Call<AcceptOrderApiModel> call, Response<AcceptOrderApiModel> response) {
-                    if (response.isSuccessful()){
-                        AcceptOrderApiModel acceptOrderApiModel = response.body();
-                        Gson gson = new Gson();
-                        String driver = gson.toJson(acceptOrderApiModel.getResponse().getDriver());
-                        String user = gson.toJson(acceptOrderApiModel.getResponse().getUser());
-                        String order = gson.toJson(acceptOrderApiModel.getResponse().getOrder());
-                        NetworkConsume.getInstance().setDefaults("D_model",driver,Bid.this);
-                        NetworkConsume.getInstance().setDefaults("U_model",user,Bid.this);
-                        NetworkConsume.getInstance().setDefaults("O_model",order,Bid.this);
-                        startActivity(new Intent(Bid.this,MainActivity.class));
-                        finish();
-                        NetworkConsume.getInstance().HideProgress(Bid.this);
+                if (response.isSuccessful()) {
+                    AcceptOrderApiModel acceptOrderApiModel = response.body();
+                    Gson gson = new Gson();
+                    String driver = gson.toJson(acceptOrderApiModel.getResponse().getDriver());
+                    String user = gson.toJson(acceptOrderApiModel.getResponse().getUser());
+                    String order = gson.toJson(acceptOrderApiModel.getResponse().getOrder());
+                    NetworkConsume.getInstance().setDefaults("D_model", driver, Bid.this);
+                    NetworkConsume.getInstance().setDefaults("U_model", user, Bid.this);
+                    NetworkConsume.getInstance().setDefaults("O_model", order, Bid.this);
+                    startActivity(new Intent(Bid.this, MainActivity.class));
+                    finish();
+                    NetworkConsume.getInstance().HideProgress(Bid.this);
 
-                    }else {
-                        NetworkConsume.getInstance().HideProgress(Bid.this);
-                        Gson gson = new Gson();
-                        LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
-                        Toast.makeText(Bid.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
-                    }
+                } else {
+                    NetworkConsume.getInstance().HideProgress(Bid.this);
+                    Gson gson = new Gson();
+                    LoginApiError message = gson.fromJson(response.errorBody().charStream(), LoginApiError.class);
+                    Toast.makeText(Bid.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
+                }
 
             }
 
             @Override
             public void onFailure(Call<AcceptOrderApiModel> call, Throwable t) {
-                Log.w("err",t.getMessage());
+                Log.w("err", t.getMessage());
                 NetworkConsume.getInstance().HideProgress(Bid.this);
             }
         });
@@ -277,7 +275,7 @@ public class Bid extends AppCompatActivity {
 ////                finish();
 ////                return true;
 ////            default:
-                return super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
 //        }
 
     }

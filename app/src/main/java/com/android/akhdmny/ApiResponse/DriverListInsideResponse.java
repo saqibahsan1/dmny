@@ -16,7 +16,7 @@ public class DriverListInsideResponse {
     private String currency;
     @SerializedName("distance")
     @Expose
-    private Integer distance;
+    private String distance;
     @SerializedName("driverId")
     @Expose
     private Integer driverId;
@@ -31,7 +31,7 @@ public class DriverListInsideResponse {
     private Integer orderId;
     @SerializedName("rate")
     @Expose
-    private Integer rate;
+    private String rate;
 
     public Integer getBid() {
         return bid;
@@ -57,11 +57,11 @@ public class DriverListInsideResponse {
         this.currency = currency;
     }
 
-    public Integer getDistance() {
+    public String getDistance() {
         return distance;
     }
 
-    public void setDistance(Integer distance) {
+    public void setDistance(String distance) {
         this.distance = distance;
     }
 
@@ -97,11 +97,11 @@ public class DriverListInsideResponse {
         this.orderId = orderId;
     }
 
-    public Integer getRate() {
+    public String getRate() {
         return rate;
     }
 
-    public void setRate(Integer rate) {
+    public void setRate(String rate) {
         this.rate = rate;
     }
 }

@@ -58,7 +58,11 @@ public class BidAdapter extends RecyclerView.Adapter<BidAdapter.BidHolder> {
             holder.TxtViewAddress.setText(response.getCar());
         }
         if (response.getRate()!=null) {
-            holder.ratingBar.setRating(response.getRate());
+            try {
+                holder.ratingBar.setRating(Float.parseFloat(response.getRate()));
+            }catch (Exception e){
+                holder.ratingBar.setRating((float)4.5);
+            }
         }
         if (response.getImage() == null){
             Picasso.get().load(R.drawable.place_holder).error(R.drawable.place_holder).into(holder.imageView);

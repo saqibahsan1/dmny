@@ -82,6 +82,13 @@ public class TrackerService extends Service {
                     if (dataSnapshot1.getKey().equals("orderId")){
                         orderId = dataSnapshot1.getValue().toString();
                     }
+                    if (dataSnapshot1.getKey().equals("status") && dataSnapshot1.getValue().toString().equals("0")){
+                        NetworkConsume.getInstance().setDefaults("orderId",orderId,TrackerService.this);
+                        Intent start = new Intent(TrackerService.this,New_Home.class);
+                        start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(start);
+
+                    }
                     if (dataSnapshot1.getKey().equals("status") && dataSnapshot1.getValue().toString().equals("1")){
                         NetworkConsume.getInstance().setDefaults("orderId",orderId,TrackerService.this);
 
@@ -93,13 +100,6 @@ public class TrackerService extends Service {
                         Intent start = new Intent(TrackerService.this,Driver_Ratings.class);
                         start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-                        startActivity(start);
-
-                    }
-                    if (dataSnapshot1.getKey().equals("status") && dataSnapshot1.getValue().toString().equals("0")){
-                        NetworkConsume.getInstance().setDefaults("orderId",orderId,TrackerService.this);
-                        Intent start = new Intent(TrackerService.this,New_Home.class);
-                        start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(start);
 
                     }

@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                    // invalidateOptionsMenu();
                     if (activeMenu == R.id.home) {
                         String json = NetworkConsume.getInstance().getDefaults("U_model",MainActivity.this);
-                        if (json.equals("")){
+                        if (json == null){
                             btn_layout.setVisibility(View.VISIBLE);
 
                         }else {
@@ -446,7 +446,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                // btn_layout.setVisibility(View.VISIBLE);
 
                 String json = NetworkConsume.getInstance().getDefaults("U_model",MainActivity.this);
-                if (json.equals("")){
+                if (json == null){
                     btn_layout.setVisibility(View.VISIBLE);
                     btn.setVisibility(View.VISIBLE);
                 }else {

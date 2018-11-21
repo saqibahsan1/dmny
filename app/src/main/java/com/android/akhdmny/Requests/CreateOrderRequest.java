@@ -18,6 +18,10 @@ public class CreateOrderRequest {
     @SerializedName("tip")
     @Expose
     private Integer tip;
+    @SerializedName("code")
+    @Expose
+    private String code;
+
 
     public Double getLat() {
         return lat;
@@ -51,4 +55,11 @@ public class CreateOrderRequest {
         this.tip = tip;
     }
 
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getCode() {
+        return code;
+    }
 }
