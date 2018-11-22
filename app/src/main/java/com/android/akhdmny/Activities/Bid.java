@@ -246,8 +246,10 @@ public class Bid extends AppCompatActivity {
                     NetworkConsume.getInstance().setDefaults("D_model", driver, Bid.this);
                     NetworkConsume.getInstance().setDefaults("U_model", user, Bid.this);
                     NetworkConsume.getInstance().setDefaults("O_model", order, Bid.this);
-                    startActivity(new Intent(Bid.this, MainActivity.class));
+
+//                    startActivity(new Intent(Bid.this, MainActivity.class));
                     finish();
+
                     NetworkConsume.getInstance().HideProgress(Bid.this);
 
                 } else {

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,10 +18,12 @@ import android.widget.Toast;
 import com.android.akhdmny.Activities.Bid;
 import com.android.akhdmny.Activities.Driver_Ratings;
 import com.android.akhdmny.Activities.New_Home;
+import com.android.akhdmny.Interfaces.ObserverInterface;
 import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.NetworkManager.Network;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
 
+import com.android.akhdmny.Singletons.OrderManager;
 import com.arsy.maps_library.MapRipple;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.ChildEventListener;
@@ -39,6 +42,9 @@ public class TrackerService extends Service {
     private static final String TAG = TrackerService.class.getSimpleName();
     String orderId = "";
     boolean isOpen = false;
+
+    public ObserverInterface observerListener;
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -56,9 +62,13 @@ public class TrackerService extends Service {
         super.onCreate();
      //   requestLocationUpdates();
 
-
     }
 
+    public class LocalBinder extends Binder {
+        public TrackerService getServiceInstance(){
+            return TrackerService.this;
+        }
+    }
 
     protected BroadcastReceiver stopReceiver = new BroadcastReceiver() {
         @Override
@@ -74,7 +84,7 @@ public class TrackerService extends Service {
         String id = NetworkConsume.getInstance().getDefaults("id",TrackerService.this);
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").child("User")
                 .child(id);
-        ref.addValueEventListener(new ValueEventListener() {
+        OrderManager.getInstance().observer = ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
@@ -82,7 +92,13 @@ public class TrackerService extends Service {
                     if (dataSnapshot1.getKey().equals("orderId")){
                         orderId = dataSnapshot1.getValue().toString();
                     }
+                    if (dataSnapshot1.getKey().equals("status")) {
+                        if (observerListener != null) {
+                            observerListener.statusChanged(dataSnapshot1.getValue().toString());
+                        }
+                    }
                     if (dataSnapshot1.getKey().equals("status") && dataSnapshot1.getValue().toString().equals("0")){
+
                         NetworkConsume.getInstance().setDefaults("orderId",orderId,TrackerService.this);
                         Intent start = new Intent(TrackerService.this,New_Home.class);
                         start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

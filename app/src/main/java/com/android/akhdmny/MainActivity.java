@@ -2,11 +2,15 @@ package com.android.akhdmny;
 
 import android.Manifest;
 import android.app.Fragment;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Handler;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -38,7 +42,9 @@ import com.android.akhdmny.Fragments.FragmentOrder;
 import com.android.akhdmny.Fragments.FragmentHome;
 import com.android.akhdmny.Fragments.FragmentSettings;
 import com.android.akhdmny.Fragments.ServicesActivity;
+import com.android.akhdmny.Interfaces.ObserverInterface;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
+import com.android.akhdmny.Singletons.OrderManager;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.firebase.database.ChildEventListener;
@@ -51,6 +57,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
+import java.io.Serializable;
 import java.util.Locale;
 
 import butterknife.BindView;
@@ -93,6 +100,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final String TAG = MainActivity.class.getSimpleName();
     String lang;
     Gson gson;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -345,9 +354,43 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
       // listner();
     }
+
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            Toast.makeText(MainActivity.this, "onServiceConnected called", Toast.LENGTH_SHORT).show();
+            // We've binded to LocalService, cast the IBinder and get LocalService instance
+            TrackerService.LocalBinder binder = (TrackerService.LocalBinder) iBinder;
+            TrackerService myService = binder.getServiceInstance(); //Get instance of your service!
+            Log.d("connection", "Connected to service...");
+            myService.observerListener = new ObserverInterface() {
+                @Override
+                public String statusChanged(String status) {
+
+                    Log.d("observer status ", status);
+                    System.out.print("Status updated " + status);
+
+                    return null;
+                }
+            };
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+
+        }
+    };
+
     private void startTrackerService() {
-        startService(new Intent(MainActivity.this, TrackerService.class));
+        if (!OrderManager.getInstance().isObserverRunning()){
+
+            Intent intent = new Intent(MainActivity.this, TrackerService.class);
+            startService(intent);
+//            bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        }
     }
+
+
 
 
 //    private void listner(){

@@ -343,9 +343,9 @@ public class New_Home extends AppCompatActivity  implements OnMapReadyCallback,
                     if (mapRadar.isAnimationRunning()){
                         mapRadar.stopRadarAnimation();
                     }
-                    Intent intent = new Intent(New_Home.this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
+//                    Intent intent = new Intent(New_Home.this, MainActivity.class);
+//                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    startActivity(intent);
                     finish();
                 }
                 else {
