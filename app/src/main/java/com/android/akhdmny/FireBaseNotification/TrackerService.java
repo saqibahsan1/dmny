@@ -33,8 +33,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Objects;
+
 import static com.android.akhdmny.MainActivity.btn;
-import static com.android.akhdmny.MainActivity.btn_layout;
+//import static com.android.akhdmny.MainActivity.btn_layout;
 
 
 public class TrackerService extends Service {
@@ -89,30 +91,36 @@ public class TrackerService extends Service {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                 for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
-                    if (dataSnapshot1.getKey().equals("orderId")){
-                        orderId = dataSnapshot1.getValue().toString();
+                    if (Objects.equals(dataSnapshot1.getKey(), "orderId")){
+                        orderId = Objects.requireNonNull(dataSnapshot1.getValue()).toString();
                     }
-                    if (dataSnapshot1.getKey().equals("status")) {
+                    if (Objects.equals(dataSnapshot1.getKey(), "status")) {
                         if (observerListener != null) {
                             observerListener.statusChanged(dataSnapshot1.getValue().toString());
                         }
                     }
-                    if (dataSnapshot1.getKey().equals("status") && dataSnapshot1.getValue().toString().equals("0")){
+                    if (Objects.equals(dataSnapshot1.getKey(), "status") && dataSnapshot1.getValue().toString().equals("0")){
 
                         NetworkConsume.getInstance().setDefaults("orderId",orderId,TrackerService.this);
-                        Intent start = new Intent(TrackerService.this,New_Home.class);
-                        start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(start);
-
+//                        Intent start = new Intent(TrackerService.this,New_Home.class);
+//                        start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                        startActivity(start);
                     }
-                    if (dataSnapshot1.getKey().equals("status") && dataSnapshot1.getValue().toString().equals("1")){
+                    if (Objects.equals(dataSnapshot1.getKey(), "status") && dataSnapshot1.getValue().toString().equals("1")){
                         NetworkConsume.getInstance().setDefaults("orderId",orderId,TrackerService.this);
 
                             Intent start = new Intent(TrackerService.this, Bid.class);
-                            start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            start.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(start);
                     }
-                    if (dataSnapshot1.getKey().equals("status") && dataSnapshot1.getValue().toString().equals("3")){
+                    if (Objects.equals(dataSnapshot1.getKey(), "status") && dataSnapshot1.getValue().toString().equals("2")){
+                        NetworkConsume.getInstance().setDefaults("orderId",orderId,TrackerService.this);
+
+//                        Intent start = new Intent(TrackerService.this, Bid.class);
+//                        start.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                        startActivity(start);
+                    }
+                    if (Objects.equals(dataSnapshot1.getKey(), "status") && dataSnapshot1.getValue().toString().equals("3")){
                         Intent start = new Intent(TrackerService.this,Driver_Ratings.class);
                         start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
 

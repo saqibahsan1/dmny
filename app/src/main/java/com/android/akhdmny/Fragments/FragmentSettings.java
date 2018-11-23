@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.akhdmny.Activities.Chat;
 import com.android.akhdmny.Activities.Profile;
 import com.android.akhdmny.ApiResponse.LoginInsideResponse;
 import com.android.akhdmny.Authenticate.login;
@@ -85,8 +86,9 @@ public class FragmentSettings extends Fragment {
         relativeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getActivity(), Profile.class));
-                getActivity().overridePendingTransition(R.anim.slide_left_in,R.anim.slide_left_out);
+                startActivity(new Intent(getActivity(), Chat.class));
+//                startActivity(new Intent(getActivity(), Profile.class));
+//                getActivity().overridePendingTransition(R.anim.slide_left_in,R.anim.slide_left_out);
             }
         });
 

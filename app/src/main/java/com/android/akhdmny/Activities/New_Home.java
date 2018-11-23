@@ -57,7 +57,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static com.android.akhdmny.MainActivity.btn;
-import static com.android.akhdmny.MainActivity.btn_layout;
+//import static com.android.akhdmny.MainActivity.btn_layout;
 
 public class New_Home extends AppCompatActivity  implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,

@@ -19,6 +19,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -275,6 +276,7 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
                 final AlertDialog.Builder ADD_Cart = new AlertDialog.Builder(CategoryDetailActivity.this);
                 LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 View viewCart = inflater.inflate(R.layout.add_cart, null);
+                viewCart.getBackground().setAlpha(0);
                 ImageView imageView = viewCart.findViewById(R.id.img_Resturaunt);
                 Button btn = viewCart.findViewById(R.id.button_addToCart);
                 LinearLayout linearLayout = viewCart.findViewById(R.id.bg_Popup);
@@ -651,6 +653,23 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
 
     }
 
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar_service, menu);
+        MenuItem item = menu.findItem(R.id.button_item);
+        Button btn = item.getActionView().findViewById(R.id.btn_MyCart);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(CategoryDetailActivity.this, MyCart.class));
+                overridePendingTransition(R.anim.slide_left_in,R.anim.slide_left_out);
+            }
+        });
+
+        return true;
+    }
 
 
 }

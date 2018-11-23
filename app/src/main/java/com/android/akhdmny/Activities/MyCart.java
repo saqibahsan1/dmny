@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.renderscript.Allocation;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -39,6 +40,7 @@ import com.android.akhdmny.ApiResponse.CartApi.CartItem;
 import com.android.akhdmny.ApiResponse.createOrder.CreateOrderResp;
 import com.android.akhdmny.Authenticate.login;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
+import com.android.akhdmny.FireBaseNotification.TrackerService;
 import com.android.akhdmny.Fragments.ServicesActivity;
 import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
@@ -515,16 +517,20 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
         request.setCode("");
         NetworkConsume.getInstance().getAuthAPI().CreateOrder(request).enqueue(new Callback<CreateOrderResp>() {
             @Override
-            public void onResponse(Call<CreateOrderResp> call, Response<CreateOrderResp> response) {
+            public void onResponse(@NonNull Call<CreateOrderResp> call, @NonNull Response<CreateOrderResp> response) {
                 if (response.isSuccessful()){
                     CreateOrderResp resp = response.body();
-                    if (resp.getStatus())
-                    {
+                    assert resp != null;
+                    if (resp.getStatus()) {
                         NetworkConsume.getInstance().setDefaults("orderId",""+resp.getResponse().getOrderId(),MyCart.this);
                       //  startActivity(new Intent(MyCart.this,MainActivity.class));
-                        Intent i = new Intent(MyCart.this, MainActivity.class);
-                        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(i);
+//                        Intent i = new Intent(MyCart.this, MainActivity.class);
+//                        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//                        startActivity(i);
+
+                        Intent start = new Intent(MyCart.this,New_Home.class);
+                        start.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(start);
                         finish();
                         alertDialog.dismiss();
                         NetworkConsume.getInstance().HideProgress(MyCart.this);

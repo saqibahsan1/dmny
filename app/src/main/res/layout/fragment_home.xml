@@ -9,16 +9,60 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:gravity="fill"
+        android:orientation="vertical">
 
         <com.google.android.gms.maps.MapView
             android:id="@+id/map"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layout_weight="0.9" />
+
+        <LinearLayout
+            android:id="@+id/btn_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="bottom"
+            android:orientation="horizontal"
+            android:visibility="visible">
+
+            <Button
+                android:id="@+id/MLocation"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_weight="1"
+                android:background="@color/colorPrimaryDark"
+                android:drawableStart="@drawable/loc_btn_icon"
+                android:paddingStart="20dp"
+                android:text="@string/Btn_MyLoc"
+
+                android:textColor="@color/colorAccent"
+                android:textSize="16dp" />
+
+            <Button
+                android:id="@+id/Btn_Services"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_weight="1"
+                android:background="@color/colorPrimaryDark"
+                android:drawableStart="@drawable/service_btn_icon"
+                android:paddingStart="30dp"
+                android:paddingEnd="20dp"
+                android:text="@string/BtnServices"
+                android:textColor="@color/colorAccent"
+                android:textSize="@dimen/nav_header_vertical_spacing" />
+
+
+        </LinearLayout>
 
     </LinearLayout>
+
+
 
     <include layout="@layout/driver_details"/>
 

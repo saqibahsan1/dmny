@@ -115,10 +115,10 @@
     </style>
 
     <style name="BubbleTextFrame.Right">
-        <item name="android:background">@drawable/right_bubble</item>
+        <item name="android:background">@drawable/chat_bubble</item>
     </style>
     <style name="BubbleTextFrame.Left">
-        <item name="android:background">@drawable/left_bubble</item>
+        <item name="android:background">@drawable/chat_bubble</item>
     </style>
     <style name="alert_dialog_theme" parent="Theme.AppCompat.Light.Dialog">
         <item name="colorPrimary">@color/colorPrimary</item>

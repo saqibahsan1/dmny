@@ -20,6 +20,9 @@ import android.widget.Toast;
 
 import com.android.akhdmny.Adapter.BidAdapter;
 import com.android.akhdmny.ApiResponse.AcceptModel.AcceptOrderApiModel;
+import com.android.akhdmny.ApiResponse.AcceptModel.Driver;
+import com.android.akhdmny.ApiResponse.AcceptModel.Order;
+import com.android.akhdmny.ApiResponse.AcceptModel.User;
 import com.android.akhdmny.ApiResponse.DriverList;
 import com.android.akhdmny.ApiResponse.DriverListInsideResponse;
 import com.android.akhdmny.ApiResponse.FireBaseBids;
@@ -32,6 +35,7 @@ import com.android.akhdmny.NetworkManager.Network;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
 import com.android.akhdmny.R;
 import com.android.akhdmny.Service.ClickListener;
+import com.android.akhdmny.Singletons.CurrentOrder;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -246,8 +250,14 @@ public class Bid extends AppCompatActivity {
                     NetworkConsume.getInstance().setDefaults("D_model", driver, Bid.this);
                     NetworkConsume.getInstance().setDefaults("U_model", user, Bid.this);
                     NetworkConsume.getInstance().setDefaults("O_model", order, Bid.this);
+                    CurrentOrder order1 = CurrentOrder.getInstance();
+                    order1.driver = gson.fromJson(driver, Driver.class);
+                    order1.user = gson.fromJson(user, User.class);
+                    order1.order = gson.fromJson(user, Order.class);
 
-//                    startActivity(new Intent(Bid.this, MainActivity.class));
+                    Intent intent = new Intent(Bid.this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
                     finish();
 
                     NetworkConsume.getInstance().HideProgress(Bid.this);

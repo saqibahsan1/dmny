@@ -86,15 +86,18 @@
         android:layout_marginTop="10dp">
 
 
-            <EditText
-                android:id="@+id/et_searchText"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
-                android:background="@drawable/shape"
-                android:textColor="@android:color/black"
-                android:hint="@string/searchPlace" />
+        <EditText
+            android:id="@+id/et_searchText"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/shape"
+            android:hint="@string/searchPlace"
+            android:paddingLeft="8dp"
+            android:paddingRight="5dp"
+            android:textColor="@android:color/black" />
 
 
 
@@ -104,15 +107,17 @@
         android:layout_weight="0.4"
         android:layout_marginLeft="5dp"
         android:orientation="horizontal">
+
         <Button
-            android:layout_width="0dp"
-            android:layout_weight="0.4"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="5dp"
             android:id="@+id/search_btn"
-            android:textColor="@color/colorAccent"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="0.4"
             android:background="@color/colorPrimaryDark"
-            android:text="@string/BtnSearch"/>
+            android:text="@string/BtnSearch"
+            android:textColor="@color/colorAccent" />
     </LinearLayout>
 
     </LinearLayout>

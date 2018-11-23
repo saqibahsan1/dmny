@@ -72,13 +72,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Toolbar toolbar;
     @BindView(R.id.navigationView)
     NavigationView navigationView;
-    @BindView(R.id.MLocation)
-    Button MLocation;
+//    @BindView(R.id.MLocation)
+//    Button MLocation;
     TextView tvTitle;
-    @BindView(R.id.Btn_Services)
-    Button btn_services;
+//    @BindView(R.id.Btn_Services)
+//    Button btn_services;
     public static Button btn;
-    public static LinearLayout btn_layout;
+//    public static LinearLayout btn_layout;
     public static int Device_Width;
     String orderId = "";
     private static final int PERMISSION_CODE = 99;
@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NetworkConsume.getInstance().setDefaults("tip","",MainActivity.this);
         NetworkConsume.getInstance().setDefaults("coupon", "", MainActivity.this);
         tvTitle = (TextView) toolbar.findViewById(R.id.tvTitle);
-        btn_layout = findViewById(R.id.btn_layout);
+//        btn_layout = findViewById(R.id.btn_layout);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         try {
 
@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         }else{
             activeMenu = savedInstanceState.getInt(ID_MENU_ACTIVE);
-            btn_layout.setVisibility(View.GONE);
+//            btn_layout.setVisibility(View.GONE);
         }
         navigationView.setNavigationItemSelectedListener(this);
         View headerView = navigationView.getHeaderView(0);
@@ -198,21 +198,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (activeMenu == R.id.home) {
                         String json = NetworkConsume.getInstance().getDefaults("U_model",MainActivity.this);
                         if (json == null){
-                            btn_layout.setVisibility(View.VISIBLE);
+//                            btn_layout.setVisibility(View.VISIBLE);
 
                         }else {
-                            btn_layout.setVisibility(View.GONE);
+//                            btn_layout.setVisibility(View.GONE);
 
 
                         }
                     }else {
-                        btn_layout.setVisibility(View.GONE);
+//                        btn_layout.setVisibility(View.GONE);
                     }
 
 
                 } else if (slideOffset != 0)
                 {
-                    btn_layout.setVisibility(View.GONE);
+//                    btn_layout.setVisibility(View.GONE);
                 }
                 super.onDrawerSlide(drawerView, slideOffset);
             }
@@ -261,79 +261,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public static void showOrHide(boolean visibility){
         if (visibility){
-            btn_layout.setVisibility(View.VISIBLE);
+//            btn_layout.setVisibility(View.VISIBLE);
         }else {
-            btn_layout.setVisibility(View.GONE);
+//            btn_layout.setVisibility(View.GONE);
         }
 
     }
     private void clickLIstner(){
-        MLocation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (activeMenu == R.id.home) {
-                   fragmentHome.getCurrentLocation();
-                }else {
-                    Log.i("Hide","true");
-                }
-
-            }
-        });
-        btn_services.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this,ServicesActivity.class));
-                overridePendingTransition(R.anim.slide_left_in,R.anim.slide_left_out);
-                btn_layout.setVisibility(View.GONE);
-                activeMenu = R.id.Btn_Services;
-                btn.setVisibility(View.VISIBLE);
-
-            }
-        });
-    }
-
-//    private void listner(){
-//        String id = NetworkConsume.getInstance().getDefaults("id",MainActivity.this);
-//        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").child("User").
-//                child(id);
-//        ref.addChildEventListener(new ChildEventListener() {
+//        MLocation.setOnClickListener(new View.OnClickListener() {
 //            @Override
-//            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-//                Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
-//
-//            }
-//
-//            @Override
-//            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-//                Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
-//                if (dataSnapshot.getKey().equals("orderId")){
-//                    NetworkConsume.getInstance().setDefaults("orderId",dataSnapshot.getValue().toString(),MainActivity.this);
-//                }
-//                if (dataSnapshot.getKey().equals("status") && dataSnapshot.getValue().toString().equals("1")){
-//                    Intent start = new Intent(MainActivity.this,Bid.class);
-//                    start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                    startActivity(start);
+//            public void onClick(View v) {
+//                if (activeMenu == R.id.home) {
+//                   fragmentHome.getCurrentLocation();
+//                }else {
+//                    Log.i("Hide","true");
 //                }
 //
-//
-//            }
-//
-//            @Override
-//            public void onChildRemoved(DataSnapshot dataSnapshot) {
-//                Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
-//            }
-//
-//            @Override
-//            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-//                Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//                Log.w(TAG, "onCancelled", databaseError.toException());
 //            }
 //        });
-//    }
+//        btn_services.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                startActivity(new Intent(MainActivity.this,ServicesActivity.class));
+//                overridePendingTransition(R.anim.slide_left_in,R.anim.slide_left_out);
+//                btn_layout.setVisibility(View.GONE);
+//                activeMenu = R.id.Btn_Services;
+//                btn.setVisibility(View.VISIBLE);
+//
+//            }
+//        });
+    }
 
     @Override
     protected void onResume() {
@@ -345,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (activeMenu == R.id.home) {
             setFragment(fragmentHome);
 
-                btn_layout.setVisibility(View.VISIBLE);
+//                btn_layout.setVisibility(View.VISIBLE);
 
 
             tvTitle.setText(getString(R.string.Home));
@@ -490,11 +447,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 String json = NetworkConsume.getInstance().getDefaults("U_model",MainActivity.this);
                 if (json == null){
-                    btn_layout.setVisibility(View.VISIBLE);
-                    btn.setVisibility(View.VISIBLE);
-                }else {
-                    btn_layout.setVisibility(View.GONE);
+//                    btn_layout.setVisibility(View.VISIBLE);
                     btn.setVisibility(View.GONE);
+                }else {
+//                    btn_layout.setVisibility(View.GONE);
+                    btn.setVisibility(View.VISIBLE);
                 }
                 break;
             case R.id.orders:
@@ -502,25 +459,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 tvTitle.setText(R.string.order);
                 btn.setVisibility(View.GONE);
                 activeMenu = R.id.orders;
-                btn_layout.setVisibility(View.GONE);
+//                btn_layout.setVisibility(View.GONE);
                 break;
             case R.id.settings:
                 setFragment(fragmentSettings);
-                btn_layout.setVisibility(View.GONE);
+//                btn_layout.setVisibility(View.GONE);
                 tvTitle.setText(R.string.settings);
                 activeMenu = R.id.settings;
                 btn.setVisibility(View.GONE);
                 break;
             case R.id.complaints:
                 setFragment(fragmentComplaints);
-                btn_layout.setVisibility(View.GONE);
+//                btn_layout.setVisibility(View.GONE);
                 tvTitle.setText(R.string.complaint);
                 activeMenu = R.id.complaints;
                 btn.setVisibility(View.GONE);
                 break;
             case R.id.notifications:
                 setFragment(fragmentNotification);
-                btn_layout.setVisibility(View.GONE);
+//                btn_layout.setVisibility(View.GONE);
                 tvTitle.setText(R.string.notifications);
                 activeMenu = R.id.notifications;
                 btn.setVisibility(View.GONE);
@@ -529,7 +486,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                setFragment(fragmentContact);
                 tvTitle.setText(R.string.contact);
-                btn_layout.setVisibility(View.GONE);
+//                btn_layout.setVisibility(View.GONE);
                 activeMenu = R.id.contact;
                 btn.setVisibility(View.GONE);
                 break;

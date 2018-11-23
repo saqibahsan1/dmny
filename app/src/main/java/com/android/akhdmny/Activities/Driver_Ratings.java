@@ -83,6 +83,7 @@ public class Driver_Ratings extends AppCompatActivity {
                 Intent start = new Intent(Driver_Ratings.this,MainActivity.class);
                 start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(start);
+                finish();
             }
         });
     }

@@ -75,35 +75,32 @@ import pl.aprilapps.easyphotopicker.DefaultCallback;
 import pl.aprilapps.easyphotopicker.EasyImage;
 
 public class Chat extends AppCompatActivity {
-    private static final String TAG = "saqib test";
 
-    Button sendButton;
-    EditText messageArea;
-    SimpleDateFormat sdf;
-    Uri imageUri;
+    private static final String TAG = "Chat module test";
     public static final int READ_EXTERNAL_STORAGE = 0, MULTIPLE_PERMISSIONS = 10, REQUEST_WRITE_PERMISSION = 21;
-    //    @BindView(R.id.toolbar)
-//    Toolbar toolbar;
-    Uri mImageUri = Uri.EMPTY;
-    String id = "";
     String[] permissions = new String[]{
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.CAMERA};
     public LinearLayoutManager mLinearLayoutManager;
+    Button sendButton;
+    EditText messageArea;
+    SimpleDateFormat sdf;
+    Uri imageUri;
+    Uri mImageUri = Uri.EMPTY;
+    String id = "";
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
     @BindView(R.id.no_chat_text)
     TextView no_chat;
-
     @BindView(R.id.no_data_available_image)
     ImageView no_data_available_image;
-
     @BindView(R.id.addImages)
     ImageView addImages;
+
     private FirebaseRecyclerAdapter<Show_Chat_Conversation_Data_Items, Chat_Conversation_ViewHolder> mFirebaseAdapter;
-    FirebaseDatabase firebaseDatabase;
-    DatabaseReference myRef, myRef2;
+    FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    DatabaseReference myRef;
     Driver obj;
     User user;
     Order order;
@@ -113,59 +110,33 @@ public class Chat extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         ButterKnife.bind(this);
+
+        sendButton = findViewById(R.id.sendButton);
+        messageArea = (EditText) findViewById(R.id.messageArea);
+
         id = NetworkConsume.getInstance().getDefaults("id", Chat.this);
-//        setSupportActionBar(toolbar);
-//        tvTitle = (TextView) toolbar.findViewById(R.id.tvTitle);
-//        getSupportActionBar().setDisplayShowTitleEnabled(false);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        // tvTitle.setText("Chat");
+
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(Html.fromHtml("<font color=#FFFFFF>" + getString(R.string.chat) + "</font>"));
         }
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Gson gson = new Gson();
-        String d_model = NetworkConsume.getInstance().getDefaults("D_model", Chat.this);
-        String o_model = NetworkConsume.getInstance().getDefaults("O_model", Chat.this);
-        String u_model = NetworkConsume.getInstance().getDefaults("U_model", Chat.this);
-        if (d_model == null) {
-            Log.e("chat", "Empty data");
-        } else {
-            obj = gson.fromJson(d_model, Driver.class);
-            user = gson.fromJson(u_model, User.class);
-            order = gson.fromJson(o_model, Order.class);
-        }
-        firebaseDatabase = FirebaseDatabase.getInstance();
-        myRef = FirebaseDatabase.getInstance().getReference().child("Chat").
-                child("237").child("messages");
-//        myRef.keepSynced(true);
+        myRef = firebaseDatabase.getReference().child("Chat").child("237").child("messages");
+        myRef.keepSynced(true);
 
-        myRef2 = FirebaseDatabase.getInstance().getReference().child("Chat").
-                child("237").child("messages");
-//        myRef2.keepSynced(true);
-
-//        layout = (LinearLayout) findViewById(R.id.layout1);
-//        layout_2 = (RelativeLayout) findViewById(R.id.layout2);
-        sendButton = findViewById(R.id.sendButton);
-        messageArea = (EditText) findViewById(R.id.messageArea);
         messageArea.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
                 sendButton.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
                 sendButton.setTextColor(getResources().getColor(R.color.colorAccent));
             }
         });
+
         mLinearLayoutManager = new LinearLayoutManager(Chat.this);
         recyclerView.setLayoutManager(mLinearLayoutManager);
         mLinearLayoutManager.setStackFromEnd(true);
@@ -177,18 +148,14 @@ public class Chat extends AppCompatActivity {
                 String messageText = messageArea.getText().toString();
 
                 if (!messageText.equals("")) {
-                    String currentDateandTime = sdf.format(new Date());
                     ArrayMap<String, Object> map = new ArrayMap<>();
-//                    map.put("message", messageText);
-//                    map.put("sender", id);
                     map.put("body", messageText);
-
                     map.put("isDelivered", true);
                     map.put("isRead", true);
                     map.put("senderId", "21");
                     map.put("senderImage", "www.apple.com");
                     map.put("senderName", "Sample Name");
-                    map.put("time", currentDateandTime);
+                    map.put("time", sdf.format(new Date()));
                     map.put("type", 1);
                     String key = myRef.push().getKey();
                     map.put("id", key);
@@ -268,20 +235,18 @@ public class Chat extends AppCompatActivity {
                         while (!urlTask.isSuccessful()) ;
                         String currentDateandTime = sdf.format(new Date());
                         Uri downloadUrl = urlTask.getResult();
-                        ArrayMap<String, String> map = new ArrayMap<>();
-                        map.put("message", downloadUrl.toString());
-                        map.put("sender", id);
+                        ArrayMap<String, Object> map = new ArrayMap<>();
                         map.put("body", downloadUrl.toString());
-                        map.put("id", String.valueOf(obj.getId()));
-                        map.put("isDelivered", "true");
-                        map.put("isRead", "true");
-                        map.put("senderId", id);
-                        map.put("senderImage", "true");
-                        map.put("senderName", "id");
+                        map.put("isDelivered", true);
+                        map.put("isRead", true);
+                        map.put("senderId", "21");
+                        map.put("senderImage", "www.apple.com");
+                        map.put("senderName", "Sample Name");
                         map.put("time", currentDateandTime);
-                        map.put("type", "1");
-                        myRef.push().setValue(map);
-//                    myRef2.push().setValue(map);
+                        map.put("type", 1);
+                        String key = myRef.push().getKey();
+                        map.put("id", key);
+                        myRef.child(key).setValue(map);
                         NetworkConsume.getInstance().HideProgress(Chat.this);
                     }
                 });
@@ -324,7 +289,6 @@ public class Chat extends AppCompatActivity {
                 viewHolder.getMessage(model.getBody(), model.getTime(), String.valueOf(237), model.getType());
 
                 Log.d("LOGGED", "id : " + model.getId() + " body " + model.getBody());
-                //Log.d("LOGGED", "Message : " + model.getBody());
 
 
                 viewHolder.mView.setOnClickListener(new View.OnClickListener() {
@@ -358,49 +322,49 @@ public class Chat extends AppCompatActivity {
         };
         Log.d("LOGGED", "Set Layout : ");
         recyclerView.setAdapter(mFirebaseAdapter);
-//        myRef.addValueEventListener(new com.google.firebase.database.ValueEventListener() {
-//            @Override
-//            public void onDataChange(com.google.firebase.database.DataSnapshot dataSnapshot) {
-//                if (dataSnapshot.hasChildren()) {
-//                    //Log.d("LOGGED", "Data SnapShot : " +dataSnapshot.toString());
-//                    // progressBar.setVisibility(ProgressBar.GONE);
-//                    recyclerView.setVisibility(View.VISIBLE);
-//                    no_data_available_image.setVisibility(View.GONE);
-//                    no_chat.setVisibility(View.GONE);
-//                    recyclerView.postDelayed(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
-//                        }
-//                    }, 500);
-//                    recyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-//                        @Override
-//                        public void onLayoutChange(View v,
-//                                                   int left, int top, int right, int bottom,
-//                                                   int oldLeft, int oldTop, int oldRight, int oldBottom) {
-//                            if (bottom < oldBottom) {
-//                                recyclerView.postDelayed(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
-//                                    }
-//                                }, 100);
-//                            }
-//                        }
-//                    });
-//                } else {
-//                    //Log.d("LOGGED", "NO Data SnapShot : " +dataSnapshot.toString());
-//                    //  progressBar.setVisibility(ProgressBar.GONE);
-//                    recyclerView.setVisibility(View.VISIBLE);
-//                    no_data_available_image.setVisibility(View.GONE);
-//                    no_chat.setVisibility(View.GONE);
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//            }
-//        });
+        myRef.addValueEventListener(new com.google.firebase.database.ValueEventListener() {
+            @Override
+            public void onDataChange(com.google.firebase.database.DataSnapshot dataSnapshot) {
+                if (dataSnapshot.hasChildren()) {
+                    //Log.d("LOGGED", "Data SnapShot : " +dataSnapshot.toString());
+                    // progressBar.setVisibility(ProgressBar.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                    no_data_available_image.setVisibility(View.GONE);
+                    no_chat.setVisibility(View.GONE);
+                    recyclerView.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
+                        }
+                    }, 500);
+                    recyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                        @Override
+                        public void onLayoutChange(View v,
+                                                   int left, int top, int right, int bottom,
+                                                   int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                            if (bottom < oldBottom) {
+                                recyclerView.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
+                                    }
+                                }, 100);
+                            }
+                        }
+                    });
+                } else {
+                    //Log.d("LOGGED", "NO Data SnapShot : " +dataSnapshot.toString());
+                    //  progressBar.setVisibility(ProgressBar.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                    no_data_available_image.setVisibility(View.GONE);
+                    no_chat.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
     }
 
     private boolean checkPermissions() {
@@ -461,10 +425,7 @@ public class Chat extends AppCompatActivity {
         private void getSender(String title, String id, String DriverId, String time, Context context) {
 
             try {
-
-
                 if (title.equals(id)) {
-                    //Log.d("LOGGED", "getSender: ");
                     params.setMargins((MainActivity.Device_Width / 3), 5, 10, 10);
                     text_params.setMargins(15, 2, 0, 5);
                     sender.setLayoutParams(text_params);

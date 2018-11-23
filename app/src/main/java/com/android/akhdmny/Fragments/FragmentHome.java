@@ -31,16 +31,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.akhdmny.Activities.Bid;
 import com.android.akhdmny.Activities.Chat;
 import com.android.akhdmny.ApiResponse.AcceptModel.Driver;
 import com.android.akhdmny.ApiResponse.AcceptModel.User;
 import com.android.akhdmny.ApiResponse.TimeOut.OrderTimeOut;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
-import com.android.akhdmny.FireBaseNotification.TrackerService;
 import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
 import com.android.akhdmny.R;
+import com.android.akhdmny.Singletons.CurrentOrder;
 import com.arsy.maps_library.MapRadar;
 import com.arsy.maps_library.MapRipple;
 import com.google.android.gms.common.ConnectionResult;
@@ -66,24 +65,16 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
-import com.karumi.dexter.Dexter;
-import com.karumi.dexter.PermissionToken;
-import com.karumi.dexter.listener.PermissionDeniedResponse;
-import com.karumi.dexter.listener.PermissionGrantedResponse;
-import com.karumi.dexter.listener.PermissionRequest;
-import com.karumi.dexter.listener.single.PermissionListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -93,7 +84,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static com.android.akhdmny.MainActivity.btn;
-import static com.android.akhdmny.MainActivity.btn_layout;
+//import static com.android.akhdmny.MainActivity.btn_layout;
 import static com.android.akhdmny.MainActivity.showOrHide;
 
 
@@ -138,13 +129,24 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 
     @BindView(R.id.OrderCancel)
     Button CancelOrder;
-    String id ="";
+
+    @BindView(R.id.MLocation)
+    Button MLocation;
+
+    @BindView(R.id.Btn_Services)
+    Button btn_services;
+
+    @BindView(R.id.btn_layout)
+    LinearLayout btn_layout;
+
+    String id = "";
     Context context;
     MapView mMapView;
+    Marker currentLocationMarker;
 
     private GoogleApiClient mGoogleApiClient;
-    private double longitude,lat=0.0;
-    private double latitude,lon=0.0;
+    private double longitude, lat = 0.0;
+    private double latitude, lon = 0.0;
     private GoogleApiClient googleApiClient;
     private String TAG = "gps";
     public static final int REQUEST_CHECK_SETTINGS = 123;
@@ -163,6 +165,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
     private ValueAnimator lastPulseAnimator;
     private static final int PERMISSION_CALL = 22;
     String DriverNumber;
+
     public FragmentHome() {
 
     }
@@ -170,10 +173,10 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-       View view = inflater.inflate(R.layout.fragment_home, container, false);
-       ButterKnife.bind(this,view);
-        id = NetworkConsume.getInstance().getDefaults("id",getActivity());
-       context = getActivity();
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
+        ButterKnife.bind(this, view);
+        id = NetworkConsume.getInstance().getDefaults("id", getActivity());
+        context = getActivity();
 //        SupportMapFragment mapFragment = (SupportMapFragment)getActivity().()
 //                .findFragmentById(R.id.map);
 //        mapFragment.getMapAsync(this);
@@ -205,7 +208,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         CancelOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-              CancelOrder();
+                CancelOrder();
 
             }
         });
@@ -221,19 +224,48 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
                 startActivity(new Intent(getActivity(), Chat.class));
             }
         });
+
+        clickListner();
+
+        //addMarker
+
+
         return view;
     }
-    private void callEvent(){
+
+    private void clickListner() {
+        MLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getCurrentLocation();
+            }
+        });
+        btn_services.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getActivity(), ServicesActivity.class));
+                getActivity().overridePendingTransition(R.anim.slide_left_in, R.anim.slide_left_out);
+//                btn_layout.setVisibility(View.GONE);
+//                activeMenu = R.id.Btn_Services;
+//                btn.setVisibility(View.VISIBLE);
+
+            }
+        });
+    }
+
+
+    private void callEvent() {
         if (checkCallPermission()) {
             String uri = "tel:" + DriverNumber;
             Intent intent = new Intent(Intent.ACTION_CALL);
             intent.setData(Uri.parse(uri));
             startActivity(intent);
-        }else {
+        } else {
             requestPermissionForCall();
         }
 
     }
+
     private void requestPermissionForCall() {
 
         if (Build.VERSION.SDK_INT >= 23) {
@@ -242,8 +274,8 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 
     }
 
-    public boolean checkCallPermission(){
-        int callPerm = ContextCompat.checkSelfPermission(getActivity(),Manifest.permission.CALL_PHONE);
+    public boolean checkCallPermission() {
+        int callPerm = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CALL_PHONE);
 
         return callPerm == PackageManager.PERMISSION_GRANTED;
     }
@@ -258,6 +290,8 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
                 case LocationSettingsStatusCodes.SUCCESS:
                     // All location settings are satisfied. The client can initialize location
                     // requests here.
+                    makeCurrentLocationMarker();
+
                     break;
                 case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                     // Location settings are not satisfied. But could be fixed by showing the user
@@ -278,6 +312,27 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
             }
         }
     };
+
+    public void makeCurrentLocationMarker(){
+        if (currentLocationMarker == null && CurrentOrder.shared == null) {
+            currentLocationMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
+                    .anchor(0.5f, 0.5f)
+                    .title("current position")
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker))
+                    .draggable(true));
+            mMap.setMyLocationEnabled(false);
+            btn_layout.setVisibility(View.VISIBLE);
+        }else if (CurrentOrder.shared != null){
+            if (currentLocationMarker != null) {
+                currentLocationMarker.remove();
+            }
+            if (CurrentOrder.shared.order != null){
+
+            }
+            btn_layout.setVisibility(View.GONE);
+            mMap.setMyLocationEnabled(true);
+        }
+    }
 
 
     @Override
@@ -311,7 +366,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         NetworkConsume.getInstance().ShowProgress(getActivity());
 
         NetworkConsume.getInstance().setAccessKey("Bearer "+prefs.getString("access_token","12"));
-        String orderId =NetworkConsume.getInstance().getDefaults("orderId",getActivity());
+        String orderId = NetworkConsume.getInstance().getDefaults("orderId",getActivity());
         NetworkConsume.getInstance().getAuthAPI().cancelOrderApi(orderId).enqueue(new Callback<OrderTimeOut>() {
             @Override
             public void onResponse(Call<OrderTimeOut> call, Response<OrderTimeOut> response) {
@@ -320,8 +375,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 //                    NetworkConsume.getInstance().SnackBarSucccessStr(mapLayout,getActivity(),timeOut.getResponse().getMessage());
                     nestedScrollView.setVisibility(View.GONE);
                     showOrHide(true);
-                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").
-                            child("User").child(id);
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").child("User").child(id);
                     ref.child("status").setValue(6);
                     NetworkConsume.getInstance().HideProgress(getActivity());
                     NetworkConsume.getInstance().setDefaults("orderId","",getActivity());
@@ -353,13 +407,13 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         });
     }
 
-    protected Marker createMarker(double latitude, double longitude, String title,int Rid) {
+    protected Marker createMarker(double latitude, double longitude, String title) {
 
         return marker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(latitude, longitude))
                 .anchor(0.5f, 0.5f)
                 .title(title)
-                .icon(BitmapDescriptorFactory.fromResource(Rid))
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.car_icon))
                 .draggable(true));
     }
     public void getCurrentLocation() {
@@ -368,10 +422,8 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
             location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
         }
         if (location != null) {
-            //Getting longitude and latitude
             longitude = location.getLongitude();
             latitude = location.getLatitude();
-            //moving the map to location
             moveMap();
         }
     }
@@ -408,7 +460,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         List<LatLng> points = new ArrayList<>();
         if (marker != null){
             marker.remove();
-            createMarker(lat,lng,"driver",R.drawable.car_icon);
+            createMarker(lat,lng,"driver");
 
         }
         LatLng latLng = new LatLng(lat, lng);
@@ -437,13 +489,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         LatLng latLng = new LatLng(latitude, longitude);
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
-                .anchor(0.5f, 0.5f)
-                .title("current position")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker))
-                .draggable(true));
-
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(9));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
         try {
 
             Gson gson = new Gson();
@@ -456,13 +502,13 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
             } else
             {
 
-                btn_layout.setVisibility(View.GONE);
+//                btn_layout.setVisibility(View.GONE);
                 nestedScrollView.setVisibility(View.VISIBLE);
                 Driver obj = gson.fromJson(d_model, Driver.class);
                 DriverNumber = obj.getPhone();
                 User user = gson.fromJson(u_model, User.class);
                     listner(String.valueOf(obj.getId()));
-                    createMarker(obj.getLat(),obj.getLong(),obj.getName(),R.drawable.car_icon);
+                    createMarker(obj.getLat(),obj.getLong(),obj.getName());
 
                 Picasso.get()
                         .load(obj.getAvatar()).error(R.drawable.dummy_image)
