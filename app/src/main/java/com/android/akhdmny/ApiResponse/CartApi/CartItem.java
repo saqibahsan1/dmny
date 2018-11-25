@@ -6,214 +6,140 @@ import com.google.gson.annotations.SerializedName;
 
 public class CartItem {
 
-    @SerializedName("id")
-    @Expose
-    private Integer id;
-    @SerializedName("sessionid")
-    @Expose
-    private Object sessionid;
-    @SerializedName("service_id")
-    @Expose
-    private String serviceId;
-    @SerializedName("user_id")
-    @Expose
-    private Integer userId;
-    @SerializedName("title")
-    @Expose
-    private String title;
-    @SerializedName("description")
-    @Expose
-    private String description;
     @SerializedName("address")
     @Expose
     private String address;
-    @SerializedName("document")
+    @SerializedName("amount")
     @Expose
-    private Object document;
-    @SerializedName("image")
-    @Expose
-    private String image;
-    @SerializedName("voice")
-    @Expose
-    private String voice;
+    private float amount;
     @SerializedName("category_id")
     @Expose
     private Object categoryId;
-    @SerializedName("lat")
-    @Expose
-    private Double lat;
-    @SerializedName("long")
-    @Expose
-    private Double _long;
-    @SerializedName("amount")
-    @Expose
-    private Double amount;
-    @SerializedName("distance")
-    @Expose
-    private Double distance;
-    @SerializedName("type")
-    @Expose
-    private String type;
-    @SerializedName("updated_at")
-    @Expose
-    private String updatedAt;
     @SerializedName("created_at")
     @Expose
     private String createdAt;
-    @SerializedName("deleted_at")
+    @SerializedName("description")
     @Expose
-    private Object deletedAt;
+    private String description;
+    @SerializedName("distance")
+    @Expose
+    private float distance;
+    @SerializedName("document")
+    @Expose
+    private Object document;
+    @SerializedName("id")
+    @Expose
+    private int id;
+    @SerializedName("image")
+    @Expose
+    private String image;
+    @SerializedName("images")
+    @Expose
+    private String[] images;
+    @SerializedName("lat")
+    @Expose
+    private float lat;
+    @SerializedName("long")
+    @Expose
+    private float longField;
+    @SerializedName("title")
+    @Expose
+    private String title;
+    @SerializedName("type")
+    @Expose
+    private Object type;
+    @SerializedName("voice")
+    @Expose
+    private String voice;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Object getSessionid() {
-        return sessionid;
-    }
-
-    public void setSessionid(Object sessionid) {
-        this.sessionid = sessionid;
-    }
-
-    public String getServiceId() {
-        return serviceId;
-    }
-
-    public void setServiceId(String serviceId) {
-        this.serviceId = serviceId;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
+    public void setAddress(String address){
         this.address = address;
     }
-
-    public Object getDocument() {
-        return document;
+    public String getAddress(){
+        return this.address;
     }
-
-    public void setDocument(Object document) {
-        this.document = document;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public String getVoice() {
-        return voice;
-    }
-
-    public void setVoice(String voice) {
-        this.voice = voice;
-    }
-
-    public Object getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Object categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public Double getLat() {
-        return lat;
-    }
-
-    public void setLat(Double lat) {
-        this.lat = lat;
-    }
-
-    public Double getLong() {
-        return _long;
-    }
-
-    public void setLong(Double _long) {
-        this._long = _long;
-    }
-
-    public Double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Double amount) {
+    public void setAmount(float amount){
         this.amount = amount;
     }
-
-    public Double getDistance() {
-        return distance;
+    public float getAmount(){
+        return this.amount;
     }
-
-    public void setDistance(Double distance) {
-        this.distance = distance;
+    public void setCategoryId(Object categoryId){
+        this.categoryId = categoryId;
     }
-
-    public String getType() {
-        return type;
+    public Object getCategoryId(){
+        return this.categoryId;
     }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(String updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(String createdAt) {
+    public void setCreatedAt(String createdAt){
         this.createdAt = createdAt;
     }
-
-    public Object getDeletedAt() {
-        return deletedAt;
+    public String getCreatedAt(){
+        return this.createdAt;
     }
-
-    public void setDeletedAt(Object deletedAt) {
-        this.deletedAt = deletedAt;
+    public void setDescription(String description){
+        this.description = description;
     }
-
+    public String getDescription(){
+        return this.description;
+    }
+    public void setDistance(float distance){
+        this.distance = distance;
+    }
+    public float getDistance(){
+        return this.distance;
+    }
+    public void setDocument(Object document){
+        this.document = document;
+    }
+    public Object getDocument(){
+        return this.document;
+    }
+    public void setId(int id){
+        this.id = id;
+    }
+    public int getId(){
+        return this.id;
+    }
+    public void setImage(String image){
+        this.image = image;
+    }
+    public String getImage(){
+        return this.image;
+    }
+    public void setImages(String[] images){
+        this.images = images;
+    }
+    public String[] getImages(){
+        return this.images;
+    }
+    public void setLat(float lat){
+        this.lat = lat;
+    }
+    public float getLat(){
+        return this.lat;
+    }
+    public void setLongField(float longField){
+        this.longField = longField;
+    }
+    public float getLongField(){
+        return this.longField;
+    }
+    public void setTitle(String title){
+        this.title = title;
+    }
+    public String getTitle(){
+        return this.title;
+    }
+    public void setType(Object type){
+        this.type = type;
+    }
+    public Object getType(){
+        return this.type;
+    }
+    public void setVoice(String voice){
+        this.voice = voice;
+    }
+    public String getVoice(){
+        return this.voice;
+    }
 }

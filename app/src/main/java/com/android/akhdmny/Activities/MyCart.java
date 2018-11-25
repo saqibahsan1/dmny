@@ -357,10 +357,12 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
                 RecyclerView recyclerViewPopup = viewCart.findViewById(R.id.recycler_view);
                 recyclerViewPopup.setLayoutManager(new LinearLayoutManager(MyCart.this, LinearLayoutManager.HORIZONTAL, false));
                 recyclerViewPopup.setHasFixedSize(true);
-//                for (int i =0; i<list.get(position).getImage().size()-1;i++)
-//                {
-                    photos.add(list.get(position).getImage());
-
+//                for (int i =0; i<list.get(position).getImages().length-1;i++) {
+//                    photos.add(list.get(position).getImages());
+//                }
+                for (String o : list.get(position).getImages()) {
+                    photos.add(o);
+                }
 
                 ImageAdapterCart imagesAdapter = new ImageAdapterCart(MyCart.this, photos);
 

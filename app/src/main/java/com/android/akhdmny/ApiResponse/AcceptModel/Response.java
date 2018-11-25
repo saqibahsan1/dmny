@@ -1,65 +1,52 @@
 
 package com.android.akhdmny.ApiResponse.AcceptModel;
 
+import com.android.akhdmny.ApiResponse.MyOrderDetails.OrderDetail;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class Response {
 
-    @SerializedName("currency")
-    @Expose
-    private String currency;
-    @SerializedName("message")
-    @Expose
-    private String message;
-    @SerializedName("order")
-    @Expose
-    private Order order;
-    @SerializedName("user")
-    @Expose
-    private User user;
-    @SerializedName("driver")
-    @Expose
+    @SerializedName("driverId")
+    private int driverId;
+    @SerializedName("driverInfo")
     private Driver driver;
+    @SerializedName("orderDetails")
+    private OrderDetail order;
+    @SerializedName("userId")
+    private int userId;
+    @SerializedName("userInfo")
+    private User user;
 
-    public String getCurrency() {
-        return currency;
+    public void setDriverId(int driverId){
+        this.driverId = driverId;
     }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
+    public int getDriverId(){
+        return this.driverId;
     }
-
-    public String getMessage() {
-        return message;
+    public void setDriver(Driver driver){
+        this.driver = driver;
     }
-
-    public void setMessage(String message) {
-        this.message = message;
+    public Driver getDriver(){
+        return this.driver;
     }
-
-    public Order getOrder() {
-        return order;
-    }
-
-    public void setOrder(Order order) {
+    public void setOrder(OrderDetail order){
         this.order = order;
     }
-
-    public User getUser() {
-        return user;
+    public OrderDetail getOrder(){
+        return this.order;
     }
-
-    public void setUser(User user) {
+    public void setUserId(int userId){
+        this.userId = userId;
+    }
+    public int getUserId(){
+        return this.userId;
+    }
+    public void setUser(User user){
         this.user = user;
     }
-
-    public Driver getDriver() {
-        return driver;
-    }
-
-    public void setDriver(Driver driver) {
-        this.driver = driver;
+    public User getUser(){
+        return this.user;
     }
 
 }

@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -27,14 +28,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.akhdmny.Activities.Bid;
 import com.android.akhdmny.Activities.Chat;
+import com.android.akhdmny.ApiResponse.AcceptModel.AcceptOrderApiModel;
 import com.android.akhdmny.ApiResponse.AcceptModel.Driver;
 import com.android.akhdmny.ApiResponse.AcceptModel.User;
 import com.android.akhdmny.ApiResponse.TimeOut.OrderTimeOut;
+import com.android.akhdmny.Authenticate.login;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
 import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
@@ -53,6 +58,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -75,6 +81,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -101,7 +108,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
     @BindView(R.id.driver_Image)
     CircleImageView driver_Image;
     @BindView(R.id.car_Image)
-    CircleImageView car_Image;
+    ImageView car_Image;
 
     @BindView(R.id.carModel)
     TextView carModel;
@@ -109,8 +116,8 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
     @BindView(R.id.carNumber)
     TextView carNumber;
 
-    @BindView(R.id.mapLayout)
-    LinearLayout mapLayout;
+//    @BindView(R.id.mapLayout)
+//    LinearLayout mapLayout;
 
     @BindView(R.id.driverName)
     TextView driverName;
@@ -124,8 +131,8 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
     @BindView(R.id.driverChat)
     Button driverChat;
 
-    @BindView(R.id.nestedScrollView)
-    NestedScrollView nestedScrollView;
+    @BindView(R.id.current_order_view)
+    ConstraintLayout nestedScrollView;
 
     @BindView(R.id.OrderCancel)
     Button CancelOrder;
@@ -165,6 +172,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
     private ValueAnimator lastPulseAnimator;
     private static final int PERMISSION_CALL = 22;
     String DriverNumber;
+    Boolean isOrderLoaded = false;
 
     public FragmentHome() {
 
@@ -177,12 +185,8 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         ButterKnife.bind(this, view);
         id = NetworkConsume.getInstance().getDefaults("id", getActivity());
         context = getActivity();
-//        SupportMapFragment mapFragment = (SupportMapFragment)getActivity().()
-//                .findFragmentById(R.id.map);
-//        mapFragment.getMapAsync(this);
         mMapView = (MapView) view.findViewById(R.id.map);
         mMapView.onCreate(savedInstanceState);
-        //listnerBid();
         prefs = getActivity().getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
         mMapView.getMapAsync(this);
         mMapView.onResume();
@@ -209,7 +213,6 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
             @Override
             public void onClick(View v) {
                 CancelOrder();
-
             }
         });
         driverCall.setOnClickListener(new View.OnClickListener() {
@@ -224,11 +227,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
                 startActivity(new Intent(getActivity(), Chat.class));
             }
         });
-
         clickListner();
-
-        //addMarker
-
 
         return view;
     }
@@ -245,10 +244,6 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
             public void onClick(View v) {
                 startActivity(new Intent(getActivity(), ServicesActivity.class));
                 getActivity().overridePendingTransition(R.anim.slide_left_in, R.anim.slide_left_out);
-//                btn_layout.setVisibility(View.GONE);
-//                activeMenu = R.id.Btn_Services;
-//                btn.setVisibility(View.VISIBLE);
-
             }
         });
     }
@@ -256,10 +251,13 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 
     private void callEvent() {
         if (checkCallPermission()) {
-            String uri = "tel:" + DriverNumber;
-            Intent intent = new Intent(Intent.ACTION_CALL);
-            intent.setData(Uri.parse(uri));
-            startActivity(intent);
+            if (CurrentOrder.getInstance().driver != null) {
+                DriverNumber = CurrentOrder.getInstance().driver.getPhone();
+                String uri = "tel:" + DriverNumber;
+                Intent intent = new Intent(Intent.ACTION_CALL);
+                intent.setData(Uri.parse(uri));
+                startActivity(intent);
+            }
         } else {
             requestPermissionForCall();
         }
@@ -313,25 +311,25 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         }
     };
 
-    public void makeCurrentLocationMarker(){
-        if (currentLocationMarker == null && CurrentOrder.shared == null) {
-            currentLocationMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
-                    .anchor(0.5f, 0.5f)
-                    .title("current position")
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker))
-                    .draggable(true));
-            mMap.setMyLocationEnabled(false);
-            btn_layout.setVisibility(View.VISIBLE);
-        }else if (CurrentOrder.shared != null){
-            if (currentLocationMarker != null) {
-                currentLocationMarker.remove();
-            }
-            if (CurrentOrder.shared.order != null){
-
-            }
-            btn_layout.setVisibility(View.GONE);
-            mMap.setMyLocationEnabled(true);
-        }
+    public void makeCurrentLocationMarker() {
+//        if (currentLocationMarker == null && CurrentOrder.shared == null) {
+//            currentLocationMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude))
+//                    .anchor(0.5f, 0.5f)
+//                    .title("current position")
+//                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker))
+//                    .draggable(true));
+//            mMap.setMyLocationEnabled(false);
+//            btn_layout.setVisibility(View.VISIBLE);
+//        } else if (CurrentOrder.shared != null) {
+//            if (currentLocationMarker != null) {
+//                currentLocationMarker.remove();
+//            }
+//            if (CurrentOrder.shared.order != null) {
+//
+//            }
+//            btn_layout.setVisibility(View.GONE);
+//            mMap.setMyLocationEnabled(true);
+//        }
     }
 
 
@@ -362,15 +360,15 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 
     }
 
-    private void CancelOrder(){
+    private void CancelOrder() {
         NetworkConsume.getInstance().ShowProgress(getActivity());
 
-        NetworkConsume.getInstance().setAccessKey("Bearer "+prefs.getString("access_token","12"));
-        String orderId = NetworkConsume.getInstance().getDefaults("orderId",getActivity());
+        NetworkConsume.getInstance().setAccessKey("Bearer " + prefs.getString("access_token", "12"));
+        String orderId = NetworkConsume.getInstance().getDefaults("orderId", getActivity());
         NetworkConsume.getInstance().getAuthAPI().cancelOrderApi(orderId).enqueue(new Callback<OrderTimeOut>() {
             @Override
             public void onResponse(Call<OrderTimeOut> call, Response<OrderTimeOut> response) {
-                if (response.isSuccessful()){
+                if (response.isSuccessful()) {
                     OrderTimeOut timeOut = response.body();
 //                    NetworkConsume.getInstance().SnackBarSucccessStr(mapLayout,getActivity(),timeOut.getResponse().getMessage());
                     nestedScrollView.setVisibility(View.GONE);
@@ -378,11 +376,11 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
                     DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").child("User").child(id);
                     ref.child("status").setValue(6);
                     NetworkConsume.getInstance().HideProgress(getActivity());
-                    NetworkConsume.getInstance().setDefaults("orderId","",getActivity());
-                    NetworkConsume.getInstance().setDefaults("D_model","",getActivity());
-                    NetworkConsume.getInstance().setDefaults("O_model","",getActivity());
-                    NetworkConsume.getInstance().setDefaults("U_model","",getActivity());
-                    if(mMap != null){ //prevent crashing if the map doesn't exist yet (eg. on starting activity)
+                    NetworkConsume.getInstance().setDefaults("orderId", "", getActivity());
+                    NetworkConsume.getInstance().setDefaults("D_model", "", getActivity());
+                    NetworkConsume.getInstance().setDefaults("O_model", "", getActivity());
+                    NetworkConsume.getInstance().setDefaults("U_model", "", getActivity());
+                    if (mMap != null) { //prevent crashing if the map doesn't exist yet (eg. on starting activity)
                         mMap.clear();
                         getCurrentLocation();
                         btn.setVisibility(View.VISIBLE);
@@ -391,10 +389,10 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 //                    if (mapRadar.isAnimationRunning()){
 //                        mapRipple.stopRippleMapAnimation();
 //                    }
-                }else {
+                } else {
                     NetworkConsume.getInstance().HideProgress(getActivity());
                     Gson gson = new Gson();
-                    LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
+                    LoginApiError message = gson.fromJson(response.errorBody().charStream(), LoginApiError.class);
                     Toast.makeText(getActivity(), message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -416,25 +414,21 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.car_icon))
                 .draggable(true));
     }
+
     public void getCurrentLocation() {
-        Location location = null;
-        if (checkPermission()) {
-            location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        }
-        if (location != null) {
-            longitude = location.getLongitude();
-            latitude = location.getLatitude();
-            moveMap();
-        }
+        LatLng latLng = new LatLng(latitude, longitude);
+        CameraUpdate location = CameraUpdateFactory.newLatLngZoom(latLng, 17);
+        mMap.animateCamera(location);
     }
-    private void listner(String id){
+
+    private void listener(String id) {
 
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Tracking").child(id);
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                for (DataSnapshot dataSnapshot1: dataSnapshot.getChildren()) {
+                for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
                     if (dataSnapshot1.getKey().equals("latitude")) {
                         lat = Double.valueOf(dataSnapshot1.getValue().toString());
                     }
@@ -454,131 +448,167 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         });
 
     }
-    public void drawRoute(double lat,double lng) {
+
+    public void drawRoute(double lat, double lng) {
         PolylineOptions lineOptions = new PolylineOptions();
-        Polyline polyline ;
+        Polyline polyline;
         List<LatLng> points = new ArrayList<>();
-        if (marker != null){
+        if (marker != null) {
             marker.remove();
-            createMarker(lat,lng,"driver");
+            createMarker(lat, lng, "driver");
 
         }
         LatLng latLng = new LatLng(lat, lng);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-            lineOptions.add(new LatLng(lat, lng));
-            points.add(latLng);
+        lineOptions.add(new LatLng(lat, lng));
+        points.add(latLng);
 
 
-           // createMarker(lat,lng,"Driver");
+        // createMarker(lat,lng,"Driver");
 
         lineOptions.width(12);
         lineOptions.addAll(points);
         lineOptions.clickable(true);
         lineOptions.color(Color.RED);
         polyline = mMap.addPolyline(lineOptions);
-         points = polyline.getPoints();
+        points = polyline.getPoints();
         points.add(latLng);
         polyline.setPoints(points);
 
-         mMap.addPolyline(lineOptions);
+        mMap.addPolyline(lineOptions);
     }
-    private void moveMap() {
-        //String to display current latitude and longitude
-        String msg = latitude + ", " + longitude;
-        //Creating a LatLng Object to store Coordinates
-        LatLng latLng = new LatLng(latitude, longitude);
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
-        try {
 
-            Gson gson = new Gson();
-            String d_model = NetworkConsume.getInstance().getDefaults("D_model",getActivity());
-            String o_model = NetworkConsume.getInstance().getDefaults("O_model",getActivity());
-            String u_model = NetworkConsume.getInstance().getDefaults("U_model",getActivity());
-            if (d_model.equals("")){
-                nestedScrollView.setVisibility(View.GONE);
-//                btn_layout.setVisibility(View.VISIBLE);
-            } else
-            {
-
-//                btn_layout.setVisibility(View.GONE);
-                nestedScrollView.setVisibility(View.VISIBLE);
-                Driver obj = gson.fromJson(d_model, Driver.class);
-                DriverNumber = obj.getPhone();
-                User user = gson.fromJson(u_model, User.class);
-                    listner(String.valueOf(obj.getId()));
-                    createMarker(obj.getLat(),obj.getLong(),obj.getName());
-
-                Picasso.get()
-                        .load(obj.getAvatar()).error(R.drawable.dummy_image)
-                        .fit()
-                        .into(driver_Image);
-
-                Picasso.get()
-                        .load(user.getAvatar()).error(R.drawable.dummy_image)
-                        .fit()
-                        .into(driver_Image);
-                driverName.setText(obj.getName());
-                driverRating.setText("5/"+obj.getRating());
-                carModel.setText(obj.getCarCompany()+" "+obj.getCarModel()
-                        +" "+obj.getCarColor());
-                carNumber.setText(obj.getCarNo());
-//            View nestedScrollView = (View) view.findViewById(R.id.nestedScrollView);
-                mBottomSheetBehaviour = BottomSheetBehavior.from(nestedScrollView);
-
-                //Remove this line to disable peek
-                mBottomSheetBehaviour.setPeekHeight(200);
-                mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
-                mBottomSheetBehaviour.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-                    @Override
-                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                        String state = "";
-
-                        switch (newState) {
-                            case BottomSheetBehavior.STATE_DRAGGING: {
-                                state = "DRAGGING";
-                                mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
-                                break;
-                            }
-                            case BottomSheetBehavior.STATE_SETTLING: {
-                                state = "SETTLING";
-                                mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
-                                break;
-                            }
-                            case BottomSheetBehavior.STATE_EXPANDED: {
-                                state = "EXPANDED";
-
-                                break;
-                            }
-                            case BottomSheetBehavior.STATE_COLLAPSED: {
-                                state = "COLLAPSED";
-                                mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
-                                break;
-                            }
-                            case BottomSheetBehavior.STATE_HIDDEN: {
-                                state = "HIDDEN";
-                                mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
-                                break;
-                            }
-                        }
-
-                        //  Toast.makeText(getActivity(), "Bottom Sheet State Changed to: " + state, Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-
-                    }
-                });
-
-            }
-        }catch (Exception e){
-          //  Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+    private void setupOrder(){
+        if (CurrentOrder.shared == null ){
+            setupOrderFields(false);
+        }else{
+            setupOrderFields(true);
         }
+    }
 
-        //Displaying current coordinates in toast
-        //  Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    private void setupOrderFields(Boolean isVisible){
+        LatLng latLng = new LatLng(latitude, longitude);
+        CameraUpdate location = CameraUpdateFactory.newLatLngZoom(latLng, 17);
+        mMap.animateCamera(location);
+
+
+        if(isVisible) {
+            Driver obj = CurrentOrder.getInstance().driver;
+            if(obj != null) {
+                DriverNumber = obj.getPhone();
+                driverName.setText(obj.getName());
+                driverRating.setText("5/" + obj.getRating());
+                Picasso.get().load(obj.getAvatar()).error(R.drawable.dummy_image).fit().into(driver_Image);
+                driver_Image.setBorderColor(Color.BLACK);
+                driver_Image.setBorderWidth(1);
+                carModel.setText(obj.getCarCompany() + " " + obj.getCarModel() + " " + obj.getCarColor());
+                carNumber.setText(obj.getCarNo());
+                listener(String.valueOf(obj.getId()));
+                if (currentLocationMarker != null) {
+                    currentLocationMarker.remove();
+                }
+                mMap.setMyLocationEnabled(true);
+                btn_layout.setVisibility(View.GONE);
+                btn.setVisibility(View.GONE);
+                nestedScrollView.setVisibility(View.VISIBLE);
+            }else{
+                mMap.setMyLocationEnabled(false);
+                btn_layout.setVisibility(View.VISIBLE);
+                btn.setVisibility(View.VISIBLE);
+                nestedScrollView.setVisibility(View.GONE);
+                if (currentLocationMarker == null) {
+                    currentLocationMarker = mMap.addMarker(new MarkerOptions().position(latLng)
+                            .anchor(0.5f, 0.5f)
+                            .title("current position")
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker))
+                            .draggable(true));
+                }
+            }
+        }else{
+            mMap.setMyLocationEnabled(false);
+            btn_layout.setVisibility(View.VISIBLE);
+            btn.setVisibility(View.VISIBLE);
+            nestedScrollView.setVisibility(View.GONE);
+            if (currentLocationMarker == null) {
+                currentLocationMarker = mMap.addMarker(new MarkerOptions().position(latLng)
+                        .anchor(0.5f, 0.5f)
+                        .title("current position")
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker))
+                        .draggable(true));
+            }
+        }
+    }
+
+    private void moveMap() {
+        LatLng latLng = new LatLng(latitude, longitude);
+        CameraUpdate location = CameraUpdateFactory.newLatLngZoom(latLng, 17);
+        mMap.animateCamera(location);
+
+        if (!isOrderLoaded) {
+//            isOrderLoaded = true;
+            try {
+                Gson gson = new Gson();
+                String d_model = NetworkConsume.getInstance().getDefaults("D_model", getActivity());
+                String o_model = NetworkConsume.getInstance().getDefaults("O_model", getActivity());
+                String u_model = NetworkConsume.getInstance().getDefaults("U_model", getActivity());
+
+                if (Objects.equals(d_model, "")) {
+
+                    nestedScrollView.setVisibility(View.GONE);
+                    btn_layout.setVisibility(View.VISIBLE);
+                    btn.setVisibility(View.VISIBLE);
+                    if (currentLocationMarker == null) {
+                        currentLocationMarker = mMap.addMarker(new MarkerOptions().position(latLng)
+                                .anchor(0.5f, 0.5f)
+                                .title("current position")
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker))
+                                .draggable(true));
+                        mMap.setMyLocationEnabled(false);
+                    }
+                } else {
+
+                    if (currentLocationMarker != null) {
+                        currentLocationMarker.remove();
+                    }
+
+                    btn_layout.setVisibility(View.GONE);
+                    nestedScrollView.setVisibility(View.VISIBLE);
+                    btn.setVisibility(View.INVISIBLE);
+
+                    Driver obj = gson.fromJson(d_model, Driver.class);
+                    DriverNumber = obj.getPhone();
+                    User user = gson.fromJson(u_model, User.class);
+                    listener(String.valueOf(obj.getId()));
+                    createMarker(obj.getLat(), obj.getLong(), obj.getName());
+                    driver_Image.setBorderColor(Color.BLACK);
+                    driver_Image.setBorderWidth(1);
+                    Picasso.get()
+                            .load(obj.getAvatar()).error(R.drawable.dummy_image)
+                            .fit()
+                            .into(driver_Image);
+
+                    driverName.setText(obj.getName());
+                    driverRating.setText("5/" + obj.getRating());
+                    carModel.setText(obj.getCarCompany() + " " + obj.getCarModel()
+                            + " " + obj.getCarColor());
+                    carNumber.setText(obj.getCarNo());
+                }
+            } catch (Exception e) {
+                Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+                nestedScrollView.setVisibility(View.GONE);
+                btn_layout.setVisibility(View.VISIBLE);
+                btn.setVisibility(View.VISIBLE);
+                if (currentLocationMarker == null) {
+                    currentLocationMarker = mMap.addMarker(new MarkerOptions().position(latLng)
+                            .anchor(0.5f, 0.5f)
+                            .title("current position")
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker))
+                            .draggable(true));
+                    mMap.setMyLocationEnabled(false);
+                }
+            }
+        }
     }
 
 
@@ -593,7 +623,16 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        getCurrentLocation();
+        Location location = null;
+        if (checkPermission()) {
+            location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        }
+        if (location != null) {
+            longitude = location.getLongitude();
+            latitude = location.getLatitude();
+            setupOrder();
+            getCurrentLocation();
+        }
     }
 
     @Override
@@ -608,7 +647,6 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         //Setting onMarkerDragListener to track the marker drag
 
         mMap.setOnMarkerDragListener(this);
-        //Adding a long click listener to the map
         mMap.setOnMapLongClickListener(this);
 
         if (checkPermission()) {
@@ -635,6 +673,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         }
 
     }
+
     private void requestPermission() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -646,6 +685,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         }
 
     }
+
     public boolean checkPermission() {
 
         int FirstPermissionResult = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION);
@@ -658,7 +698,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 
     @Override
     public void onAttach(Activity activity) {
-        myContext=(FragmentActivity) activity;
+        myContext = (FragmentActivity) activity;
         super.onAttach(activity);
     }
 
@@ -706,6 +746,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         super.onSaveInstanceState(outState);
         mMapView.onSaveInstanceState(outState);
     }
+
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
@@ -741,7 +782,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         longitude = marker.getPosition().longitude;
 
         //Moving the map
-        moveMap();
+//        moveMap();
 
     }
 

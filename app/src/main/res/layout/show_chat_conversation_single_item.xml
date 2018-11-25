@@ -4,10 +4,6 @@
 
     style="@style/WidgetTextMessage.Left">
 
-
-
-
-
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/msg_image_avatar_left"
         android:visibility="gone"
@@ -33,13 +29,6 @@
 
                 android:text="DEMO"
                 android:textColor="@color/colorAccent"
-                />
-
-            <TextView
-                android:id="@+id/fetch_chat_messgae"
-                style="@style/TextViewTextMsg.Right"
-                android:text="DEMO"
-
                 />
 
             <ImageView

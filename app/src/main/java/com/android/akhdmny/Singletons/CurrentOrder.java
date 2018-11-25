@@ -3,6 +3,7 @@ package com.android.akhdmny.Singletons;
 import com.android.akhdmny.ApiResponse.AcceptModel.Driver;
 import com.android.akhdmny.ApiResponse.AcceptModel.Order;
 import com.android.akhdmny.ApiResponse.AcceptModel.User;
+import com.android.akhdmny.ApiResponse.MyOrderDetails.OrderDetail;
 
 public class CurrentOrder {
 
@@ -10,8 +11,10 @@ public class CurrentOrder {
 
     public Driver driver;
     public User user;
-    public Order order;
+    public OrderDetail order;
     public int orderId;
+    public int userId;
+    public int driverId;
 
 
     public static CurrentOrder getInstance(){

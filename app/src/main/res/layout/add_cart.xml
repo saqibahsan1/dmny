@@ -1,38 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bg_Popup"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/bg_Popup"
-    android:background="@android:color/transparent"
+    android:background="@color/common_google_signin_btn_text_dark_disabled"
     android:orientation="vertical">
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="5dp">
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="5dp"
+        app:cardCornerRadius="5dp"
+        app:cardElevation="5dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="2dp">
+            android:layout_height="wrap_content">
 
             <ImageView
                 android:id="@+id/img_Resturaunt"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
                 android:padding="4dp" />
 
             <TextView
                 android:id="@+id/Tv_title"
-                android:layout_width="120dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
                 android:layout_marginStart="5dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="10dp"
+                android:layout_toStartOf="@+id/tv_email"
                 android:layout_toEndOf="@id/img_Resturaunt"
                 android:text="Title"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                 android:textColor="#000000" />
-
 
 
             <TextView
@@ -41,23 +53,24 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/Tv_title"
                 android:layout_marginStart="5dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="8dp"
                 android:layout_toEndOf="@id/img_Resturaunt"
                 android:text="Address"
-                android:textColor="#000000"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Small.Inverse"
+                android:textColor="#000000"
                 android:textStyle="normal" />
 
             <TextView
                 android:id="@+id/tv_email"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
                 android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="5dp"
                 android:text="price"
-                android:textSize="16sp"
                 android:textColor="@android:color/black"
-                 />
+                android:textSize="16sp" />
 
         </RelativeLayout>
 
@@ -78,62 +91,63 @@
             android:orientation="vertical">
 
 
-
             <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp">
+                android:layout_margin="5dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="5dp">
 
-            <EditText
-                android:id="@+id/textDialog"
-                android:layout_width="match_parent"
-                android:layout_height="250dp"
-                android:layout_centerHorizontal="true"
-                android:layout_margin="10dp"
-                android:layout_marginBottom="10dp"
-                android:layout_marginTop="10dp"
-                android:gravity="start"
-                android:hint="@string/Message"/>
+                <EditText
+                    android:id="@+id/textDialog"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_margin="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:gravity="start"
+                    android:hint="@string/Message" />
             </android.support.v7.widget.CardView>
 
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="69dp"
-                android:layout_height="69dp"
-                android:layout_gravity="start"
-                android:layout_marginStart="20dp"
                 android:id="@+id/recordAudio"
-                android:src="@drawable/sound"/>
-
-            <ImageView
                 android:layout_width="69dp"
                 android:layout_height="69dp"
                 android:layout_gravity="start"
                 android:layout_marginStart="20dp"
-                android:visibility="gone"
-                android:id="@+id/PlayAudio"
-                android:src="@drawable/ic_play"/>
+                android:src="@drawable/sound" />
 
             <ImageView
+                android:id="@+id/PlayAudio"
+                android:layout_width="69dp"
+                android:layout_height="69dp"
+                android:layout_gravity="start"
+                android:layout_marginStart="20dp"
+                android:src="@drawable/ic_play"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/addImages"
                 android:layout_width="69dp"
                 android:layout_height="69dp"
                 android:layout_gravity="start"
                 android:layout_marginStart="5dp"
-                android:id="@+id/addImages"
-                android:src="@drawable/image_caputure"/>
+                android:src="@drawable/image_caputure" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recycler_view"
                 android:layout_width="wrap_content"
-                android:layout_marginStart="5dp"
-                android:visibility="visible"
                 android:layout_height="wrap_content"
-                />
+                android:layout_marginStart="5dp"
+                android:visibility="visible" />
 
         </LinearLayout>
 
@@ -141,21 +155,20 @@
             android:id="@+id/seek_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimaryDark"
-            android:visibility="gone"
             android:layout_marginLeft="@dimen/twenty"
-            android:layout_marginRight="@dimen/twenty"
             android:layout_marginTop="@dimen/google_1x"
-            />
+            android:layout_marginRight="@dimen/twenty"
+            android:background="@color/colorPrimaryDark"
+            android:visibility="gone" />
 
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/nav_header_vertical_spacing"
             android:layout_marginBottom="10dp"
             android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:layout_marginTop="@dimen/nav_header_vertical_spacing"
             android:weightSum="4">
 
 
@@ -163,14 +176,13 @@
                 android:id="@+id/button_addToCart"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
-                android:text="@string/BtnaddToCart"
-                android:background="@drawable/primary"
-                android:textColor="@android:color/white"
-                android:layout_weight="2"
-                android:paddingLeft="10dp"
                 android:layout_marginBottom="20dp"
-                android:paddingRight="10dp"/>
-
+                android:layout_weight="2"
+                android:background="@drawable/primary"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:text="@string/BtnaddToCart"
+                android:textColor="@android:color/white" />
 
 
         </LinearLayout>

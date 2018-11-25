@@ -18,11 +18,13 @@ import android.widget.Toast;
 import com.android.akhdmny.Activities.Bid;
 import com.android.akhdmny.Activities.Driver_Ratings;
 import com.android.akhdmny.Activities.New_Home;
+import com.android.akhdmny.ApiResponse.AcceptModel.AcceptOrderApiModel;
 import com.android.akhdmny.Interfaces.ObserverInterface;
 import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.NetworkManager.Network;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
 
+import com.android.akhdmny.Singletons.CurrentOrder;
 import com.android.akhdmny.Singletons.OrderManager;
 import com.arsy.maps_library.MapRipple;
 import com.google.android.gms.maps.model.LatLng;
@@ -34,6 +36,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static com.android.akhdmny.MainActivity.btn;
 //import static com.android.akhdmny.MainActivity.btn_layout;
@@ -116,14 +122,13 @@ public class TrackerService extends Service {
                     if (Objects.equals(dataSnapshot1.getKey(), "status") && dataSnapshot1.getValue().toString().equals("2")){
                         NetworkConsume.getInstance().setDefaults("orderId",orderId,TrackerService.this);
 
-//                        Intent start = new Intent(TrackerService.this, Bid.class);
-//                        start.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                        startActivity(start);
+                        getOrderDetails();
+
                     }
                     if (Objects.equals(dataSnapshot1.getKey(), "status") && dataSnapshot1.getValue().toString().equals("3")){
                         Intent start = new Intent(TrackerService.this,Driver_Ratings.class);
                         start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
+                        FirebaseDatabase.getInstance().getReference("CurrentOrder").child("User").child(id).child("status").setValue(6);
                         startActivity(start);
 
                     }
@@ -133,9 +138,7 @@ public class TrackerService extends Service {
                         NetworkConsume.getInstance().setDefaults("D_model","",TrackerService.this);
                         NetworkConsume.getInstance().setDefaults("O_model","",TrackerService.this);
                         NetworkConsume.getInstance().setDefaults("U_model","",TrackerService.this);
-                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").
-                                child("User").child(id);
-                        ref.child("status").setValue(6);
+                        FirebaseDatabase.getInstance().getReference("CurrentOrder").child("User").child(id).child("status").setValue(6);
                         Toast.makeText(TrackerService.this, "Your Order has been cancelled", Toast.LENGTH_SHORT).show();
                         start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(start);
@@ -172,47 +175,48 @@ public class TrackerService extends Service {
 
             }
         });
-//        ref.addChildEventListener(new ChildEventListener() {
-//            @Override
-//            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-//                Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
-//            }
-//
-//            @Override
-//            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-//                Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
-//                if (dataSnapshot.getKey().equals("orderId")){
-//                    NetworkConsume.getInstance().setDefaults("orderId",dataSnapshot.getValue().toString(),TrackerService.this);
-//                }
-//                if (dataSnapshot.getKey().equals("status") && dataSnapshot.getValue().toString().equals("0")){
-//                    Intent start = new Intent(TrackerService.this,AcceptOrderActivity.class);
-//                    start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                   startActivity(start);
-//                }
-//                if (dataSnapshot.getKey().equals("status") && dataSnapshot.getValue().toString().equals("2")){
-//                    Intent start = new Intent(TrackerService.this,DriverOrders.class);
-//                    start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                    startActivity(start);
-//                    requestLocationUpdatesOnRoute();
-//                }
-//
-//            }
-//
-//            @Override
-//            public void onChildRemoved(DataSnapshot dataSnapshot) {
-//                Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
-//            }
-//
-//            @Override
-//            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-//                Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//                Log.w(TAG, "onCancelled", databaseError.toException());
-//            }
-//        });
+    }
+
+
+    private void getOrderDetails(){
+        SharedPreferences prefs = TrackerService.this.getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
+//        NetworkConsume.getInstance().ShowProgress(TrackerService.this);
+        NetworkConsume.getInstance().setAccessKey("Bearer " + prefs.getString("access_token", "12"));
+        String orderId = NetworkConsume.getInstance().getDefaults("orderId", TrackerService.this);
+        NetworkConsume.getInstance().getAuthAPI().GetOrderDetails(orderId).enqueue(new Callback<AcceptOrderApiModel>() {
+            @Override
+            public void onResponse(@NonNull Call<AcceptOrderApiModel> call, @NonNull Response<AcceptOrderApiModel> response) {
+                if (response.isSuccessful()){
+                    AcceptOrderApiModel orderDetails = response.body();
+                    if (orderDetails != null) {
+                        CurrentOrder.getInstance().driver = orderDetails.getResponse().getDriver();
+                        CurrentOrder.getInstance().user = orderDetails.getResponse().getUser();
+                        CurrentOrder.getInstance().order = orderDetails.getResponse().getOrder();
+                        CurrentOrder.getInstance().userId = orderDetails.getResponse().getUserId();
+                        CurrentOrder.getInstance().driverId = orderDetails.getResponse().getDriverId();
+                        CurrentOrder.getInstance().orderId = orderDetails.getResponse().getOrder().getOrderId();
+
+                        Log.i("GetOrderDetails",  "success");
+
+                        Intent start = new Intent(TrackerService.this, MainActivity.class);
+                        start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(start);
+
+                    }else{
+//                        NetworkConsume.getInstance().HideProgress(TrackerService.this);
+                    }
+                }else{
+//                    NetworkConsume.getInstance().HideProgress(TrackerService.this);
+                }
+            }
+            @Override
+            public void onFailure(@NonNull Call<AcceptOrderApiModel> call, @NonNull Throwable t) {
+//                NetworkConsume.getInstance().HideProgress(TrackerService.this);
+                Toast.makeText(TrackerService.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.i("GetOrderDetails", t.getMessage() + " error");
+
+            }
+        });
     }
 
 

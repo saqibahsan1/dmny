@@ -38,6 +38,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -66,6 +67,7 @@ public class New_Home extends AppCompatActivity  implements OnMapReadyCallback,
         GoogleMap.OnMarkerDragListener,
         GoogleMap.OnMapLongClickListener {
 
+//    private static final Object Color = ;
     private GoogleMap mMap;
     public static final int RequestPermissionCode = 99;
     GoogleApiClient mGoogleApiClient;
@@ -90,6 +92,7 @@ public class New_Home extends AppCompatActivity  implements OnMapReadyCallback,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_home);
         ButterKnife.bind(this);
+        
         id = NetworkConsume.getInstance().getDefaults("id",New_Home.this);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -109,8 +112,6 @@ public class New_Home extends AppCompatActivity  implements OnMapReadyCallback,
             }
         });
         mLocationRequest = new LocationRequest();
-//        mLocationRequest.setNumUpdates(1);
-//        mLocationRequest.setExpirationTime(6000);
         mLocationRequest.setInterval(INTERVAL);
         mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -127,6 +128,19 @@ public class New_Home extends AppCompatActivity  implements OnMapReadyCallback,
         mapRadar.withOuterCircleTransparency(0.5f);
         mapRadar.withRadarTransparency(0.5f);
         mapRadar.startRadarAnimation();
+    }
+    
+    private void startRippleAnimation(LatLng latLng){
+//        moveMap();
+        MapRipple mapRipple = new MapRipple(mMap, latLng, this);
+        mapRipple.withNumberOfRipples(3);
+        mapRipple.withFillColor(Color.BLUE);
+//        mapRipple.withStrokeColor(Color.BLACK);
+        mapRipple.withStrokewidth(10);   // 10dp
+        mapRipple.withDistance(1000);   // 2000 metres radius
+        mapRipple.withRippleDuration(8000);    //12000ms
+        mapRipple.withTransparency(0.2f);
+        mapRipple.startRippleMapAnimation();
     }
 
 
@@ -225,7 +239,6 @@ public class New_Home extends AppCompatActivity  implements OnMapReadyCallback,
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setOnMarkerDragListener(this);
-        //Adding a long click listener to the map
         mMap.setOnMapLongClickListener(this);
 
         if (checkPermission()) {
@@ -302,28 +315,12 @@ public class New_Home extends AppCompatActivity  implements OnMapReadyCallback,
         }
     }
     private void moveMap() {
-        //String to display current latitude and longitude
-        String msg = latitude + ", " + longitude;
-
-        //Creating a LatLng Object to store Coordinates
         LatLng latLng = new LatLng(latitude, longitude);
-
-        //Adding marker to map
-        mMap.addMarker(new MarkerOptions()
-                .position(latLng) //setting position
-                .draggable(true)
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker))//Making the marker draggable
-                .title("Current Location")); //Adding a title
-
-        //Moving the camera
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-
-            startRadarAnimation(latLng);
-            //Animating the camera
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
-        //Displaying current coordinates in toast
-        //  Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+        CameraUpdate location = CameraUpdateFactory.newLatLngZoom(latLng, 15);
+        mMap.animateCamera(location);
+        startRippleAnimation(latLng);
     }
+
     private void TimeoutApi(){
         NetworkConsume.getInstance().setAccessKey("Bearer "+prefs.getString("access_token","12"));
         String orderId =NetworkConsume.getInstance().getDefaults("orderId",this);
@@ -335,13 +332,14 @@ public class New_Home extends AppCompatActivity  implements OnMapReadyCallback,
                     Toast.makeText(New_Home.this, timeOut.getResponse().getMessage(), Toast.LENGTH_SHORT).show();
                     mMap.clear();
 
-                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").
-                            child("User").child(id);
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").child("User").child(id);
                     ref.child("status").setValue(6);
-                    getCurrentLocation();
+//                    getCurrentLocation();
                     NetworkConsume.getInstance().setDefaults("orderId","",New_Home.this);
-                    if (mapRadar.isAnimationRunning()){
-                        mapRadar.stopRadarAnimation();
+                    if (mapRadar != null) {
+                        if (mapRadar.isAnimationRunning()) {
+                            mapRadar.stopRadarAnimation();
+                        }
                     }
 //                    Intent intent = new Intent(New_Home.this, MainActivity.class);
 //                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);

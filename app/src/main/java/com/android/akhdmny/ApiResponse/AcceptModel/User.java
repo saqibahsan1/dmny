@@ -39,12 +39,7 @@ public class User {
     @SerializedName("country")
     @Expose
     private String country;
-    @SerializedName("lat")
-    @Expose
-    private Integer lat;
-    @SerializedName("long")
-    @Expose
-    private Integer _long;
+
 
     public Integer getId() {
         return id;
@@ -134,20 +129,6 @@ public class User {
         this.country = country;
     }
 
-    public Integer getLat() {
-        return lat;
-    }
 
-    public void setLat(Integer lat) {
-        this.lat = lat;
-    }
-
-    public Integer getLong() {
-        return _long;
-    }
-
-    public void setLong(Integer _long) {
-        this._long = _long;
-    }
 
 }

@@ -276,7 +276,6 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
                 final AlertDialog.Builder ADD_Cart = new AlertDialog.Builder(CategoryDetailActivity.this);
                 LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 View viewCart = inflater.inflate(R.layout.add_cart, null);
-                viewCart.getBackground().setAlpha(0);
                 ImageView imageView = viewCart.findViewById(R.id.img_Resturaunt);
                 Button btn = viewCart.findViewById(R.id.button_addToCart);
                 LinearLayout linearLayout = viewCart.findViewById(R.id.bg_Popup);

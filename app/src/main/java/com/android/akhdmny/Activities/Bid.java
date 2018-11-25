@@ -26,6 +26,7 @@ import com.android.akhdmny.ApiResponse.AcceptModel.User;
 import com.android.akhdmny.ApiResponse.DriverList;
 import com.android.akhdmny.ApiResponse.DriverListInsideResponse;
 import com.android.akhdmny.ApiResponse.FireBaseBids;
+import com.android.akhdmny.ApiResponse.MyOrderDetails.OrderDetail;
 import com.android.akhdmny.ApiResponse.TimeOut.OrderTimeOut;
 import com.android.akhdmny.Authenticate.login;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
@@ -240,26 +241,22 @@ public class Bid extends AppCompatActivity {
         NetworkConsume.getInstance().getAuthAPI().AcceptBidApi(listInsideResponses.get(pos).getOrderId(), listInsideResponses.get(pos).getBid(),
                 listInsideResponses.get(pos).getDriverId()).enqueue(new Callback<AcceptOrderApiModel>() {
             @Override
-            public void onResponse(Call<AcceptOrderApiModel> call, Response<AcceptOrderApiModel> response) {
+            public void onResponse(@NonNull Call<AcceptOrderApiModel> call, @NonNull Response<AcceptOrderApiModel> response) {
                 if (response.isSuccessful()) {
-                    AcceptOrderApiModel acceptOrderApiModel = response.body();
-                    Gson gson = new Gson();
-                    String driver = gson.toJson(acceptOrderApiModel.getResponse().getDriver());
-                    String user = gson.toJson(acceptOrderApiModel.getResponse().getUser());
-                    String order = gson.toJson(acceptOrderApiModel.getResponse().getOrder());
-                    NetworkConsume.getInstance().setDefaults("D_model", driver, Bid.this);
-                    NetworkConsume.getInstance().setDefaults("U_model", user, Bid.this);
-                    NetworkConsume.getInstance().setDefaults("O_model", order, Bid.this);
-                    CurrentOrder order1 = CurrentOrder.getInstance();
-                    order1.driver = gson.fromJson(driver, Driver.class);
-                    order1.user = gson.fromJson(user, User.class);
-                    order1.order = gson.fromJson(user, Order.class);
+                    AcceptOrderApiModel orderDetails = response.body();
+                    if (orderDetails != null) {
+                        CurrentOrder.getInstance().driver = orderDetails.getResponse().getDriver();
+                        CurrentOrder.getInstance().user = orderDetails.getResponse().getUser();
+                        CurrentOrder.getInstance().order = orderDetails.getResponse().getOrder();
+                        CurrentOrder.getInstance().userId = orderDetails.getResponse().getUserId();
+                        CurrentOrder.getInstance().driverId = orderDetails.getResponse().getDriverId();
+                        CurrentOrder.getInstance().orderId = orderDetails.getResponse().getOrder().getOrderId();
 
-                    Intent intent = new Intent(Bid.this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(intent);
-                    finish();
-
+                        Intent intent = new Intent(Bid.this, MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
+                        finish();
+                    }
                     NetworkConsume.getInstance().HideProgress(Bid.this);
 
                 } else {

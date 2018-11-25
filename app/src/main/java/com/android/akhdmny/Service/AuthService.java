@@ -75,6 +75,9 @@ public interface AuthService {
     @GET("/akhdmny/public/api/user/accept-bid")
     Call<AcceptOrderApiModel> AcceptBidApi(@Query("order_id") int OrderId, @Query("bid") int Bid, @Query("driver_id") int DriverId);
 
+    @GET("/akhdmny/public/api/user/get-order-detail")
+    Call<AcceptOrderApiModel> GetOrderDetails(@Query("order_id") String OrderId);
+
     @POST("/createOrder")
     Call<OrderId> OrderRequest(@Body RequestOrder order);
 
