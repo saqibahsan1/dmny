@@ -1,6 +1,7 @@
 package com.android.akhdmny.Activities;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.util.ArrayMap;
 import android.support.v7.app.AppCompatActivity;
@@ -13,8 +14,16 @@ import android.widget.EditText;
 import com.android.akhdmny.Adapter.MessageListAdapter;
 import com.android.akhdmny.ApiResponse.AcceptModel.User;
 import com.android.akhdmny.Models.Message;
+import com.android.akhdmny.NetworkManager.NetworkConsume;
 import com.android.akhdmny.R;
 import com.android.akhdmny.Singletons.CurrentOrder;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,16 +36,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-public class MessageListActivity extends AppCompatActivity {
+public class MessageListActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     private EditText editText;
     private MessageListAdapter mMessageAdapter;
+    private RecyclerView mMessageRecycler;
     private List<Message> messageList = new ArrayList<>();
     private DatabaseReference ref;
     private SimpleDateFormat formatter;
     private User user = CurrentOrder.getInstance().user;
     private ValueEventListener valueEventListner;
-
+    private GoogleApiClient mGoogleApiClient;
+    Place place;
 
     @SuppressLint("SimpleDateFormat")
     @Override
@@ -45,17 +56,17 @@ public class MessageListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_message_list);
 
         formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        RecyclerView mMessageRecycler = findViewById(R.id.reyclerview_message_list);
+        mMessageRecycler = findViewById(R.id.reyclerview_message_list);
         mMessageAdapter = new MessageListAdapter(this, messageList, "31");
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mMessageRecycler.setLayoutManager(linearLayoutManager);
         mMessageRecycler.setAdapter(mMessageAdapter);
 
+
         editText = findViewById(R.id.edittext_chatbox);
         Button sendButton = findViewById(R.id.button_chatbox_send);
         sendButton.setOnClickListener(view -> {
-            mMessageAdapter.notifyDataSetChanged();
             Message message = new Message();
             message.setBody(editText.getText().toString());
             message.setType(1);
@@ -63,6 +74,14 @@ public class MessageListActivity extends AppCompatActivity {
             editText.setText("");
         });
 
+        setupButtons();
+
+        mGoogleApiClient = new GoogleApiClient
+                .Builder(this)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .enableAutoManage(this, this)
+                .build();
 
         ref = FirebaseDatabase.getInstance().getReference().child("Chat").child("270").child("messages");
         getFirebaseMessage();
@@ -93,6 +112,7 @@ public class MessageListActivity extends AppCompatActivity {
                     }
                 }
                 mMessageAdapter.notifyDataSetChanged();
+                mMessageRecycler.scrollToPosition(messageList.size() - 1 );
             }
 
             @Override
@@ -101,6 +121,32 @@ public class MessageListActivity extends AppCompatActivity {
             }
         };
         ref.addValueEventListener(valueEventListner);
+    }
+
+    private void setupButtons(){
+
+        Button camera_button = findViewById(R.id.camera_button);
+        Button audio_button = findViewById(R.id.audio_button);
+        Button location_button = findViewById(R.id.location_button);
+
+        camera_button.setOnClickListener(view -> {
+
+        });
+        audio_button.setOnClickListener(view -> {
+
+        });
+        location_button.setOnClickListener(view -> {
+
+            NetworkConsume.getInstance().ShowProgress(MessageListActivity.this);
+            PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+            try {
+                startActivityForResult(builder.build(MessageListActivity.this), 1);
+            } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
+                e.printStackTrace();
+            }
+
+        });
+
     }
 
     private void sendMessage(int type){
@@ -150,4 +196,33 @@ public class MessageListActivity extends AppCompatActivity {
         return;
     }
 
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                place = PlacePicker.getPlace(this, data);
+                StringBuilder stBuilder = new StringBuilder();
+                String latitude = String.valueOf(place.getLatLng().latitude);
+                String longitude = String.valueOf(place.getLatLng().longitude);
+
+                Message message = new Message();
+                message.setBody(latitude + "," + longitude);
+                message.setType(2);
+                sendMessage(message);
+                NetworkConsume.getInstance().HideProgress(MessageListActivity.this);
+            }
+        }
+    }
 }
