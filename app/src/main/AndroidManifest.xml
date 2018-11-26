@@ -131,6 +131,10 @@
             android:value="com.android.akhdmny.MainActivity" />
         </activity>
 
+        <activity android:name=".Activities.MessageListActivity"
+            android:screenOrientation="portrait">
+        </activity>
+
     </application>
 
 </manifest>

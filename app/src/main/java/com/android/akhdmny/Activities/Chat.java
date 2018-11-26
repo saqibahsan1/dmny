@@ -410,7 +410,7 @@ public class Chat extends AppCompatActivity {
     }
 
     public static class Chat_Conversation_ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView message, sender, timeChat;
+        private final TextView sender, timeChat;
         private final ImageView chat_image_incoming, chat_image_outgoing;
         private final CircleImageView leftImage, RightImage;
         View mView;
@@ -422,7 +422,7 @@ public class Chat extends AppCompatActivity {
             super(itemView);
             //Log.d("LOGGED", "ON Chat_Conversation_ViewHolder : " );
             mView = itemView;
-            message = (TextView) mView.findViewById(R.id.fetch_chat_messgae);
+//            message = (TextView) mView.findViewById(R.id.fetch_chat_messgae);
             sender = (TextView) mView.findViewById(R.id.fetch_chat_sender);
             timeChat = (TextView) mView.findViewById(R.id.timeChat);
             leftImage = mView.findViewById(R.id.msg_image_avatar_left);
@@ -462,7 +462,7 @@ public class Chat extends AppCompatActivity {
                     mView.setLayoutParams(params);
                     sender.setTextColor(context.getResources().getColor(R.color.black));
                     timeChat.setTextColor(context.getResources().getColor(R.color.black));
-                    message.setTextColor(context.getResources().getColor(R.color.black));
+//                    message.setTextColor(context.getResources().getColor(R.color.black));
 
                     layout.setBackgroundResource(R.drawable.left_bubble);
 //                userImage.setLayoutParams(params);
@@ -486,25 +486,25 @@ public class Chat extends AppCompatActivity {
 
                     if (!sender.getText().equals(id)) {
                         text_params.setMargins(15, 2, 22, 15);
-                        message.setTextColor(Color.parseColor("#FFFFFF"));
+//                        message.setTextColor(Color.parseColor("#FFFFFF"));
                     } else {
                         text_params.setMargins(15, 2, 22, 15);
-                        message.setTextColor(Color.parseColor("#000000"));
+//                        message.setTextColor(Color.parseColor("#000000"));
                     }
 
-                    message.setLayoutParams(text_params);
+//                    message.setLayoutParams(text_params);
                     sender.setLayoutParams(text_params);
 
-                    message.setText(title);
+//                    message.setText(title);
 
-                    message.setVisibility(View.VISIBLE);
+//                    message.setVisibility(View.VISIBLE);
                     timeChat.setText(time);
 //                    chat_image_incoming.setVisibility(View.GONE);
 //                    chat_image_outgoing.setVisibility(View.GONE);
                 } else if (type == 3) {
                     if (chat_image_outgoing.getVisibility() == View.VISIBLE && chat_image_incoming.getVisibility() == View.GONE) {
                         chat_image_outgoing.setVisibility(View.VISIBLE);
-                        message.setVisibility(View.GONE);
+//                        message.setVisibility(View.GONE);
                         Glide.with(itemView.getContext())
                                 .load(title)
                                 .crossFade()
@@ -514,7 +514,7 @@ public class Chat extends AppCompatActivity {
                                 .into(chat_image_outgoing);
                     } else {
 //                        chat_image_incoming.setVisibility(View.VISIBLE);
-                        message.setVisibility(View.GONE);
+//                        message.setVisibility(View.GONE);
                         Glide.with(itemView.getContext())
                                 .load(title)
                                 .crossFade()

@@ -33,13 +33,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.akhdmny.Activities.Bid;
-import com.android.akhdmny.Activities.Chat;
-import com.android.akhdmny.ApiResponse.AcceptModel.AcceptOrderApiModel;
+import com.android.akhdmny.Activities.MessageListActivity;
 import com.android.akhdmny.ApiResponse.AcceptModel.Driver;
 import com.android.akhdmny.ApiResponse.AcceptModel.User;
 import com.android.akhdmny.ApiResponse.TimeOut.OrderTimeOut;
-import com.android.akhdmny.Authenticate.login;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
 import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
@@ -224,7 +221,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         driverChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getActivity(), Chat.class));
+                startActivity(new Intent(getActivity(), MessageListActivity.class));
             }
         });
         clickListner();
