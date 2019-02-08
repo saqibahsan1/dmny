@@ -515,7 +515,7 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
         request.setLat(gpsActivity.getLatitude());
         request.setLong(gpsActivity.getLongitude());
         request.setTip(Integer.valueOf(total_tip.getText().toString()));
-        request.setDiscountPercent(Integer.parseInt(discount));
+//        request.setDiscountPercent(Integer.parseInt(discount));
         request.setCode("");
         NetworkConsume.getInstance().getAuthAPI().CreateOrder(request).enqueue(new Callback<CreateOrderResp>() {
             @Override

@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -131,7 +132,7 @@ public class ParcelActivity extends AppCompatActivity implements GoogleApiClient
         mHandler = new Handler();
         setSupportActionBar(toolbar);
         tvTitle = toolbar.findViewById(R.id.tvTitle);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         tvTitle.setText("Parcel");
         prefs = getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);

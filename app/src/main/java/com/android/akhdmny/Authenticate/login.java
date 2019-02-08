@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -104,24 +105,25 @@ public class login extends AppCompatActivity {
         NetworkConsume.getInstance().ShowProgress(login.this);
         NetworkConsume.getInstance().getAuthAPI().LoginApi(request).enqueue(new Callback<LoginApiResponse>() {
             @Override
-            public void onResponse(Call<LoginApiResponse> call, Response<LoginApiResponse> response) {
+            public void onResponse(@NonNull Call<LoginApiResponse> call, @NonNull Response<LoginApiResponse> response) {
                 if (response.isSuccessful()) {
                     LoginApiResponse apiResponse = response.body();
-                    UserDetails.username = apiResponse.getResponse().getId();
-                    Gson gson = new Gson();
-                    String json = gson.toJson(apiResponse.getResponse());
-                    NetworkConsume.getInstance().setDefaults("login",json,login.this);
-                    NetworkConsume.getInstance().setDefaults("id",String.valueOf(apiResponse.getResponse().getId()),login.this);
-                    SharedPreferences prefs = getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
-                    prefs.edit().putString("access_token", apiResponse.getResponse().getAccessToken())
-                            .putString("avatar",apiResponse.getResponse().getAvatar()).commit();
-                    startActivity(new Intent(login.this,MainActivity.class));
+                    if (apiResponse != null) {
+                        UserDetails.username = apiResponse.getResponse().getId();
+                        Gson gson = new Gson();
+                        String json = gson.toJson(apiResponse.getResponse());
+                        NetworkConsume.getInstance().setDefaults("login", json, login.this);
+                        NetworkConsume.getInstance().setDefaults("id", String.valueOf(apiResponse.getResponse().getId()), login.this);
+                        SharedPreferences prefs = getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
+                        prefs.edit().putString("access_token", apiResponse.getResponse().getAccessToken())
+                                .putString("avatar", apiResponse.getResponse().getAvatar()).apply();
+                        startActivity(new Intent(login.this, MainActivity.class));
 //                    rotateLoading.stop();
 
-                    finish();
-                    overridePendingTransition(R.anim.slide_left_in,R.anim.slide_left_out);
-                  NetworkConsume.getInstance().HideProgress(login.this);
-
+                        finish();
+                        overridePendingTransition(R.anim.slide_left_in, R.anim.slide_left_out);
+                        NetworkConsume.getInstance().HideProgress(login.this);
+                    }
                 }else {
                    // rotateLoading.stop();
                     NetworkConsume.getInstance().HideProgress(login.this);

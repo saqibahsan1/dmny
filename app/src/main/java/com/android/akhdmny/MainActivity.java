@@ -296,7 +296,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onResume() {
         super.onResume();
         activeMenu = R.id.home;
-        String d_model = NetworkConsume.getInstance().getDefaults("D_model",MainActivity.this);
 
             startTrackerService();
         if (activeMenu == R.id.home) {

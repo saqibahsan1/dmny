@@ -120,7 +120,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
 
                     }else if (message.getType() == 2){
                         Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
-                                Uri.parse("http://maps.google.com/maps?saddr=20.344,34.34&daddr=20.5666,45.345"));
+                                Uri.parse("http://maps.google.com/maps?q=" + message.getBody() + "&mode=b"));
                         mContext.startActivity(intent);
                     }
                 }
@@ -159,9 +159,14 @@ public class MessageListAdapter extends RecyclerView.Adapter {
                 if (type == 4){
                     params.width = (int) (100 * scale + 0.5f);
                     params.height = (int) (40 * scale + 0.5f);
-                }else {
+                    contentImage.setImageDrawable(mContext.getResources().getDrawable(R.drawable.audio_button_image));
+                }else if (type == 3) {
                     params.height = (int) (240 * scale + 0.5f);
                     params.width = (int) (240 * scale + 0.5f);
+                } else if (type == 2){
+                    params.height = (int) (240 * scale + 0.5f);
+                    params.width = (int) (240 * scale + 0.5f);
+                    contentImage.setImageDrawable(mContext.getResources().getDrawable(R.drawable.icons8_marker2));
                 }
                 contentImage.setLayoutParams(params);
             }
@@ -205,7 +210,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
 
                     }else if (message.getType() == 2){
                         Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
-                                Uri.parse("http://maps.google.com/maps?saddr=20.344,34.34&daddr=20.5666,45.345"));
+                                Uri.parse("http://maps.google.com/maps?q=" + message.getBody() + "&mode=b"));
                         mContext.startActivity(intent);
                     }
                 }
@@ -238,9 +243,14 @@ public class MessageListAdapter extends RecyclerView.Adapter {
                 if (type == 4){
                     params.width = (int) (100 * scale + 0.5f);
                     params.height = (int) (40 * scale + 0.5f);
-                }else {
+                    contentImage.setImageDrawable(mContext.getResources().getDrawable(R.drawable.audio_button_image));
+                }else if (type == 3) {
                     params.height = (int) (240 * scale + 0.5f);
                     params.width = (int) (240 * scale + 0.5f);
+                } else if (type == 2){
+                    params.height = (int) (240 * scale + 0.5f);
+                    params.width = (int) (240 * scale + 0.5f);
+                    contentImage.setImageDrawable(mContext.getResources().getDrawable(R.drawable.icons8_marker2));
                 }
                 contentImage.setLayoutParams(params);
             }

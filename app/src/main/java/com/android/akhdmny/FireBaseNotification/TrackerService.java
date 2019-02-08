@@ -90,6 +90,7 @@ public class TrackerService extends Service {
 
     private void listner(){
         String id = NetworkConsume.getInstance().getDefaults("id",TrackerService.this);
+//        String id = "31";
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").child("User")
                 .child(id);
         OrderManager.getInstance().observer = ref.addValueEventListener(new ValueEventListener() {
@@ -126,30 +127,25 @@ public class TrackerService extends Service {
 
                     }
                     if (Objects.equals(dataSnapshot1.getKey(), "status") && dataSnapshot1.getValue().toString().equals("3")){
+                        CurrentOrder.shared = null;
                         Intent start = new Intent(TrackerService.this,Driver_Ratings.class);
                         start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         FirebaseDatabase.getInstance().getReference("CurrentOrder").child("User").child(id).child("status").setValue(6);
                         startActivity(start);
 
                     }
-                    if (dataSnapshot1.getKey().equals("status") && dataSnapshot1.getValue().toString().equals("4")){
+                    if (Objects.equals(dataSnapshot1.getKey(), "status") && dataSnapshot1.getValue().toString().equals("4")){
+                        CurrentOrder.shared = null;
                         Intent start = new Intent(TrackerService.this,MainActivity.class);
-                        NetworkConsume.getInstance().setDefaults("orderId","",TrackerService.this);
-                        NetworkConsume.getInstance().setDefaults("D_model","",TrackerService.this);
-                        NetworkConsume.getInstance().setDefaults("O_model","",TrackerService.this);
-                        NetworkConsume.getInstance().setDefaults("U_model","",TrackerService.this);
                         FirebaseDatabase.getInstance().getReference("CurrentOrder").child("User").child(id).child("status").setValue(6);
                         Toast.makeText(TrackerService.this, "Your Order has been cancelled", Toast.LENGTH_SHORT).show();
                         start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(start);
 
                     }
-                    if (dataSnapshot1.getKey().equals("status") && dataSnapshot1.getValue().toString().equals("5")){
+                    if (Objects.equals(dataSnapshot1.getKey(), "status") && dataSnapshot1.getValue().toString().equals("5")){
+                        CurrentOrder.shared = null;
                         Intent start = new Intent(TrackerService.this,MainActivity.class);
-                        NetworkConsume.getInstance().setDefaults("orderId","",TrackerService.this);
-                        NetworkConsume.getInstance().setDefaults("D_model","",TrackerService.this);
-                        NetworkConsume.getInstance().setDefaults("O_model","",TrackerService.this);
-                        NetworkConsume.getInstance().setDefaults("U_model","",TrackerService.this);
                         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").
                                 child("User").child(id);
                         ref.child("status").setValue(6);
