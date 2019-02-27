@@ -18,6 +18,9 @@ public class CreateOrderRequest {
     @SerializedName("tip")
     @Expose
     private Integer tip;
+    @SerializedName("is_bid")
+    @Expose
+    private Integer isBid;
     @SerializedName("code")
     @Expose
     private String code;
@@ -61,5 +64,14 @@ public class CreateOrderRequest {
 
     public String getCode() {
         return code;
+    }
+
+
+    public Integer getIsBid() {
+        return isBid;
+    }
+
+    public void setIsBid(Integer isBid) {
+        this.isBid = isBid;
     }
 }

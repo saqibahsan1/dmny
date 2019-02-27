@@ -9,6 +9,7 @@ public class Cordinates {
     public CoordinatesModel model;
     public String currency;
     public int isBid;
+    public String Reason;
     private Cordinates(){ }
 
     public static Cordinates getInstance(){

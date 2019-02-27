@@ -358,7 +358,7 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
 //                        if (editText.getText().toString().equals("")){
 //                            Toast.makeText(MyCart.this, "Please enter a tip...", Toast.LENGTH_SHORT).show();
 //                        }else {
-                            createOrderApi();
+                            createOrderApi(Integer.parseInt(discountVal.getText().toString()));
                         //}
 
 
@@ -538,12 +538,14 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
         mHandler.postDelayed(mRunnable,50);
     }
 
-    private void createOrderApi(){
+    private void createOrderApi(int discount){
         NetworkConsume.getInstance().ShowProgress(MyCart.this);
         CreateOrderRequest request = new CreateOrderRequest();
         request.setLat(Cordinates.getInstance().model.getLatitude());
         request.setLong(Cordinates.getInstance().model.getLongitude());
         request.setTip(Integer.valueOf(total_tip.getText().toString()));
+        request.setDiscountPercent(discount);
+        request.setIsBid(Cordinates.getInstance().isBid);
 //        request.setDiscountPercent(Integer.parseInt(discount));
         request.setCode("");
         NetworkConsume.getInstance().getAuthAPI().CreateOrder(request).enqueue(new Callback<CreateOrderResp>() {

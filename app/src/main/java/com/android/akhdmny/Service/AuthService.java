@@ -20,6 +20,7 @@ import com.android.akhdmny.ApiResponse.RegisterResponse;
 import com.android.akhdmny.ApiResponse.TimeOut.OrderTimeOut;
 import com.android.akhdmny.ApiResponse.UpdateTokenResponse;
 import com.android.akhdmny.ApiResponse.createOrder.CreateOrderResp;
+import com.android.akhdmny.Models.CancelReasonModel;
 import com.android.akhdmny.Requests.CategoryDetailsRequest;
 import com.android.akhdmny.Requests.CreateOrderRequest;
 import com.android.akhdmny.Requests.LoginRequest;
@@ -86,6 +87,9 @@ public interface AuthService {
     @GET("/acceptedDrivers")
     Call<DriverList> BidApi(@Query("orderId") String orderId);
 
+    @GET("/cancel-reasons")
+    Call<CancelReasonModel> cancelApi();
+
     @GET("/akhdmny/public/api/user/get-orders")
     Call<MyOrders> MyOrders();
 
@@ -93,7 +97,7 @@ public interface AuthService {
     Call<OrderTimeOut> OrderTimeOut(@Query("order_id") String orderId);
 
     @GET("/akhdmny/public/api/user/cancel-order")
-    Call<OrderTimeOut> cancelOrderApi(@Query("order_id") String orderId);
+    Call<OrderTimeOut> cancelOrderApi(@Query("order_id") String orderId,@Query("cancel_reason") String cancelReason);
 
     @GET("/akhdmny/public/api/user/parcel")
     Call<ParcelLocationApi> parcels(@Query("from_lat") double from_lat, @Query("from_long") double from_long,

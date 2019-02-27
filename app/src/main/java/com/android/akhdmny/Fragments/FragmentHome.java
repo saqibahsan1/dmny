@@ -4,6 +4,7 @@ import android.Manifest;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -34,6 +35,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.akhdmny.Activities.MessageListActivity;
+import com.android.akhdmny.Adapter.BottomSheetAdapter;
 import com.android.akhdmny.ApiResponse.AcceptModel.Driver;
 import com.android.akhdmny.ApiResponse.AcceptModel.User;
 import com.android.akhdmny.ApiResponse.TimeOut.OrderTimeOut;
@@ -212,7 +214,10 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         CancelOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CancelOrder();
+//                CancelFragment cancelFragment = new CancelFragment(reason -> CancelOrder(reason));
+//                FragmentManager fragmentManager = Objects.requireNonNull(getActivity()).getFragmentManager();
+//                cancelFragment.show(getf,cancelFragment.getTag());
+
             }
         });
         driverCall.setOnClickListener(new View.OnClickListener() {
@@ -360,12 +365,12 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 
     }
 
-    private void CancelOrder() {
+    private void CancelOrder(String reason) {
         NetworkConsume.getInstance().ShowProgress(getActivity());
 
         NetworkConsume.getInstance().setAccessKey("Bearer " + prefs.getString("access_token", "12"));
         String orderId = NetworkConsume.getInstance().getDefaults("orderId", getActivity());
-        NetworkConsume.getInstance().getAuthAPI().cancelOrderApi(orderId).enqueue(new Callback<OrderTimeOut>() {
+        NetworkConsume.getInstance().getAuthAPI().cancelOrderApi(orderId,reason).enqueue(new Callback<OrderTimeOut>() {
             @Override
             public void onResponse(Call<OrderTimeOut> call, Response<OrderTimeOut> response) {
                 if (response.isSuccessful()) {
