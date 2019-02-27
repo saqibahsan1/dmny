@@ -1,7 +1,6 @@
 package com.android.akhdmny;
 
 import android.Manifest;
-import android.app.Fragment;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +13,7 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -495,7 +495,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
     private void setFragment(Fragment fragment){
-        getFragmentManager()
+        getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.container, fragment)
                 .commit();

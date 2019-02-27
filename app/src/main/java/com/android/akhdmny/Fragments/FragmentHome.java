@@ -3,8 +3,6 @@ package com.android.akhdmny.Fragments;
 import android.Manifest;
 import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -21,7 +19,9 @@ import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.util.Log;
@@ -214,9 +214,9 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         CancelOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                CancelFragment cancelFragment = new CancelFragment(reason -> CancelOrder(reason));
-//                FragmentManager fragmentManager = Objects.requireNonNull(getActivity()).getFragmentManager();
-//                cancelFragment.show(getf,cancelFragment.getTag());
+                CancelFragment cancelFragment = new CancelFragment(reason -> CancelOrder(reason));
+                FragmentManager fm =getActivity().getSupportFragmentManager();
+                cancelFragment.show(fm,cancelFragment.getTag());
 
             }
         });
