@@ -39,8 +39,10 @@ import com.android.akhdmny.ApiResponse.AcceptModel.User;
 import com.android.akhdmny.ApiResponse.TimeOut.OrderTimeOut;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
 import com.android.akhdmny.MainActivity;
+import com.android.akhdmny.Models.CoordinatesModel;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
 import com.android.akhdmny.R;
+import com.android.akhdmny.Singletons.Cordinates;
 import com.android.akhdmny.Singletons.CurrentOrder;
 import com.arsy.maps_library.MapRadar;
 import com.arsy.maps_library.MapRipple;
@@ -62,6 +64,7 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -488,8 +491,6 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         LatLng latLng = new LatLng(latitude, longitude);
         CameraUpdate location = CameraUpdateFactory.newLatLngZoom(latLng, 17);
         mMap.animateCamera(location);
-
-
         if(isVisible) {
             Driver obj = CurrentOrder.getInstance().driver;
             if(obj != null) {
@@ -514,7 +515,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
                 btn_layout.setVisibility(View.VISIBLE);
                 btn.setVisibility(View.VISIBLE);
                 nestedScrollView.setVisibility(View.GONE);
-                if (currentLocationMarker == null) {
+                if (currentLocationMarker != null) {
                     currentLocationMarker = mMap.addMarker(new MarkerOptions().position(latLng)
                             .anchor(0.5f, 0.5f)
                             .title("current position")
@@ -527,7 +528,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
             btn_layout.setVisibility(View.VISIBLE);
             btn.setVisibility(View.VISIBLE);
             nestedScrollView.setVisibility(View.GONE);
-            if (currentLocationMarker == null) {
+            if (currentLocationMarker != null) {
                 currentLocationMarker = mMap.addMarker(new MarkerOptions().position(latLng)
                         .anchor(0.5f, 0.5f)
                         .title("current position")
@@ -537,76 +538,76 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         }
     }
 
-    private void moveMap() {
-        LatLng latLng = new LatLng(latitude, longitude);
-        CameraUpdate location = CameraUpdateFactory.newLatLngZoom(latLng, 17);
-        mMap.animateCamera(location);
-
-        if (!isOrderLoaded) {
-//            isOrderLoaded = true;
-            try {
-                Gson gson = new Gson();
-                String d_model = NetworkConsume.getInstance().getDefaults("D_model", getActivity());
-                String o_model = NetworkConsume.getInstance().getDefaults("O_model", getActivity());
-                String u_model = NetworkConsume.getInstance().getDefaults("U_model", getActivity());
-
-                if (Objects.equals(d_model, "")) {
-
-                    nestedScrollView.setVisibility(View.GONE);
-                    btn_layout.setVisibility(View.VISIBLE);
-                    btn.setVisibility(View.VISIBLE);
-                    if (currentLocationMarker == null) {
-                        currentLocationMarker = mMap.addMarker(new MarkerOptions().position(latLng)
-                                .anchor(0.5f, 0.5f)
-                                .title("current position")
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker))
-                                .draggable(true));
-                        mMap.setMyLocationEnabled(false);
-                    }
-                } else {
-
-                    if (currentLocationMarker != null) {
-                        currentLocationMarker.remove();
-                    }
-
-                    btn_layout.setVisibility(View.GONE);
-                    nestedScrollView.setVisibility(View.VISIBLE);
-                    btn.setVisibility(View.INVISIBLE);
-
-                    Driver obj = gson.fromJson(d_model, Driver.class);
-                    DriverNumber = obj.getPhone();
-                    User user = gson.fromJson(u_model, User.class);
-                    listener(String.valueOf(obj.getId()));
-                    createMarker(obj.getLat(), obj.getLong(), obj.getName());
-                    driver_Image.setBorderColor(Color.BLACK);
-                    driver_Image.setBorderWidth(1);
-                    Picasso.get()
-                            .load(obj.getAvatar()).error(R.drawable.dummy_image)
-                            .fit()
-                            .into(driver_Image);
-
-                    driverName.setText(obj.getName());
-                    driverRating.setText("5/" + obj.getRating());
-                    carModel.setText(obj.getCarCompany() + " " + obj.getCarModel()
-                            + " " + obj.getCarColor());
-                    carNumber.setText(obj.getCarNo());
-                }
-            } catch (Exception e) {
-                Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
-                nestedScrollView.setVisibility(View.GONE);
-                btn_layout.setVisibility(View.VISIBLE);
-                btn.setVisibility(View.VISIBLE);
-                if (currentLocationMarker == null) {
-                    currentLocationMarker = mMap.addMarker(new MarkerOptions().position(latLng)
-                            .anchor(0.5f, 0.5f)
-                            .title("current position")
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker))
-                            .draggable(true));
-                    mMap.setMyLocationEnabled(false);
-                }
-            }
-        }
-    }
+//    private void moveMap() {
+//        LatLng latLng = new LatLng(latitude, longitude);
+//        CameraUpdate location = CameraUpdateFactory.newLatLngZoom(latLng, 17);
+//        mMap.animateCamera(location);
+//
+//        if (!isOrderLoaded) {
+////            isOrderLoaded = true;
+//            try {
+//                Gson gson = new Gson();
+//                String d_model = NetworkConsume.getInstance().getDefaults("D_model", getActivity());
+//                String o_model = NetworkConsume.getInstance().getDefaults("O_model", getActivity());
+//                String u_model = NetworkConsume.getInstance().getDefaults("U_model", getActivity());
+//
+//                if (Objects.equals(d_model, "")) {
+//
+//                    nestedScrollView.setVisibility(View.GONE);
+//                    btn_layout.setVisibility(View.VISIBLE);
+//                    btn.setVisibility(View.VISIBLE);
+//                    if (currentLocationMarker == null) {
+//                        currentLocationMarker = mMap.addMarker(new MarkerOptions().position(latLng)
+//                                .anchor(0.5f, 0.5f)
+//                                .title("current position")
+//                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker))
+//                                .draggable(true));
+//                        mMap.setMyLocationEnabled(false);
+//                    }
+//                } else {
+//
+//                    if (currentLocationMarker != null) {
+//                        currentLocationMarker.remove();
+//                    }
+//
+//                    btn_layout.setVisibility(View.GONE);
+//                    nestedScrollView.setVisibility(View.VISIBLE);
+//                    btn.setVisibility(View.INVISIBLE);
+//
+//                    Driver obj = gson.fromJson(d_model, Driver.class);
+//                    DriverNumber = obj.getPhone();
+//                    User user = gson.fromJson(u_model, User.class);
+//                    listener(String.valueOf(obj.getId()));
+//                    createMarker(obj.getLat(), obj.getLong(), obj.getName());
+//                    driver_Image.setBorderColor(Color.BLACK);
+//                    driver_Image.setBorderWidth(1);
+//                    Picasso.get()
+//                            .load(obj.getAvatar()).error(R.drawable.dummy_image)
+//                            .fit()
+//                            .into(driver_Image);
+//
+//                    driverName.setText(obj.getName());
+//                    driverRating.setText("5/" + obj.getRating());
+//                    carModel.setText(obj.getCarCompany() + " " + obj.getCarModel()
+//                            + " " + obj.getCarColor());
+//                    carNumber.setText(obj.getCarNo());
+//                }
+//            } catch (Exception e) {
+//                Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+//                nestedScrollView.setVisibility(View.GONE);
+//                btn_layout.setVisibility(View.VISIBLE);
+//                btn.setVisibility(View.VISIBLE);
+//                if (currentLocationMarker == null) {
+//                    currentLocationMarker = mMap.addMarker(new MarkerOptions().position(latLng)
+//                            .anchor(0.5f, 0.5f)
+//                            .title("current position")
+//                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker))
+//                            .draggable(true));
+//                    mMap.setMyLocationEnabled(false);
+//                }
+//            }
+//        }
+//    }
 
 
     protected synchronized void buildGoogleApiClient() {
@@ -642,7 +643,12 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         mMap = googleMap;
         // For showing a move to my location button
         //Setting onMarkerDragListener to track the marker drag
-
+        googleMap.setOnCameraChangeListener(cameraPosition -> {
+            CoordinatesModel model = new CoordinatesModel();
+            model.setLatitude(cameraPosition.target.latitude);
+            model.setLongitude(cameraPosition.target.longitude);
+            Cordinates.getInstance().model = model;
+        });
         mMap.setOnMarkerDragListener(this);
         mMap.setOnMapLongClickListener(this);
 

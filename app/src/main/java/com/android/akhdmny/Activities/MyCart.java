@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Canvas;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -40,20 +42,22 @@ import com.android.akhdmny.ApiResponse.CartApi.CartItem;
 import com.android.akhdmny.ApiResponse.createOrder.CreateOrderResp;
 import com.android.akhdmny.Authenticate.login;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
-import com.android.akhdmny.FireBaseNotification.TrackerService;
 import com.android.akhdmny.Fragments.ServicesActivity;
 import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
 import com.android.akhdmny.R;
 import com.android.akhdmny.Requests.CreateOrderRequest;
-import com.android.akhdmny.Requests.RequestOrder;
+import com.android.akhdmny.Requests.requestOrder;
+import com.android.akhdmny.Singletons.Cordinates;
 import com.android.akhdmny.Utils.GPSActivity;
+import com.android.akhdmny.Utils.SwipeController;
+import com.android.akhdmny.Utils.SwipeControllerActions;
 import com.google.gson.Gson;
+import com.llollox.androidtoggleswitch.widgets.ToggleSwitch;
 import com.squareup.picasso.Picasso;
 import com.wang.avi.AVLoadingIndicatorView;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -102,7 +106,8 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
 //    SpotsDialog dialog;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
-
+    @BindView(R.id.toggleButtons)
+    ToggleSwitch toogleButtons;
 
     EditText editText;
     int progress = 0;
@@ -127,16 +132,16 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
     private Handler mTimerHandler = new Handler();
     private Runnable mRunnable;
     private ArrayList<String> photos = new ArrayList<>();
-    RequestOrder request;
+    requestOrder request;
     TextureView textureViewBlurred;
     RenderScript mRS;
     ScriptIntrinsicBlur scriptIntrinsicBlur;
     Allocation allocOriginalScreenshot, allocBlurred;
     String currency= "";
-
+    SwipeController swipeController = null;
     double finalAmount = 0;
     int tip = 0;
-
+    MyCartAdapter myAdapter;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -154,14 +159,40 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
         listResponse = new ArrayList<>();
         CartApi("");
         itemTouchLister();
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+//        recyclerView.setAdapter(myAdapter);
+        swipeController = new SwipeController(new SwipeControllerActions() {
+            @Override
+            public void onRightClicked(int position) {
+                super.onRightClicked(position);
+                RemoveCartOrderApi(list.get(position).getId());
+            }
+        });
+
+        ItemTouchHelper itemTouchhelper = new ItemTouchHelper(swipeController);
+        itemTouchhelper.attachToRecyclerView(recyclerView);
+
+        recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+                swipeController.onDraw(c);
+            }
+        });
+        toogleButtons.setCheckedPosition(0);
+        toogleButtons.setOnChangeListener(i -> {
+            if (i == 0) {
+                Cordinates.getInstance().isBid = 0;
+            }else {
+                Cordinates.getInstance().isBid = 1;
+            }
+
+        });
     }
-
-
-
     private void CartApi(String code){
         NetworkConsume.getInstance().ShowProgress(MyCart.this);
         NetworkConsume.getInstance().setAccessKey("Bearer "+prefs.getString("access_token","12"));
-        NetworkConsume.getInstance().getAuthAPI().CartOrders(gpsActivity.getLatitude(),gpsActivity.getLongitude(),code).
+        NetworkConsume.getInstance().getAuthAPI().CartOrders(Cordinates.getInstance().model.getLatitude(),Cordinates.getInstance().model.getLongitude(),code).
                 enqueue(new Callback<CartApiResp>() {
                     @Override
                     public void onResponse(Call<CartApiResp> call, Response<CartApiResp> response) {
@@ -192,12 +223,10 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
                                 discountValue.setText(cartOrder.getResponse().getDiscountAmount()+"%");
                                 currency =cartOrder.getResponse().getCurrency();
                                 total_services.setText(String.valueOf(cartOrder.getResponse().getCartItems().size()));
-                                MyCartAdapter myAdapter = new MyCartAdapter(MyCart.this,list,cartOrder.getResponse().getCurrency());
-
-                                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-                                recyclerView.setLayoutManager(mLayoutManager);
-                                recyclerView.setItemAnimator(new DefaultItemAnimator());
+                                myAdapter = new MyCartAdapter(MyCart.this,list,cartOrder.getResponse().getCurrency());
                                 recyclerView.setAdapter(myAdapter);
+                                myAdapter.notifyDataSetChanged();
+
                                 NetworkConsume.getInstance().HideProgress(MyCart.this);
                             }catch (Exception e){
                                 Log.i("err",e.getLocalizedMessage());
@@ -512,8 +541,8 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
     private void createOrderApi(){
         NetworkConsume.getInstance().ShowProgress(MyCart.this);
         CreateOrderRequest request = new CreateOrderRequest();
-        request.setLat(gpsActivity.getLatitude());
-        request.setLong(gpsActivity.getLongitude());
+        request.setLat(Cordinates.getInstance().model.getLatitude());
+        request.setLong(Cordinates.getInstance().model.getLongitude());
         request.setTip(Integer.valueOf(total_tip.getText().toString()));
 //        request.setDiscountPercent(Integer.parseInt(discount));
         request.setCode("");
@@ -556,14 +585,16 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
     private void RemoveCartOrderApi(int id){
         NetworkConsume.getInstance().ShowProgress(MyCart.this);
         NetworkConsume.getInstance().setAccessKey("Bearer "+prefs.getString("access_token","12"));
-        NetworkConsume.getInstance().getAuthAPI().RemoveCartOrders(id,gpsActivity.getLatitude(),gpsActivity.getLongitude()).
+        NetworkConsume.getInstance().getAuthAPI().RemoveCartOrders(id,Cordinates.getInstance().model.getLatitude(),Cordinates.getInstance().model.getLongitude()).
                 enqueue(new Callback<CartApiResp>() {
                     @Override
                     public void onResponse(Call<CartApiResp> call, Response<CartApiResp> response) {
                         if (response.isSuccessful()) {
                             listResponse = new ArrayList<>();
                             list = new ArrayList<>();
-                            alertDialog.hide();
+                            if (alertDialog != null) {
+                                alertDialog.hide();
+                            }
                             CartApiResp cartOrder = response.body();
                             for (int i=0; i< cartOrder.getResponse().getCartItems().size(); i++){
                                 if (cartOrder.getResponse().getCartItems().size() == 0)

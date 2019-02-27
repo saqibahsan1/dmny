@@ -94,7 +94,9 @@
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                android:overScrollMode="never"
                 android:layout_marginTop="10dp" />
 
             <LinearLayout
@@ -284,6 +286,27 @@
                     android:textStyle="bold" />
 
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_gravity="center"
+                android:layout_marginBottom="@dimen/google_1x"
+                android:layout_marginTop="@dimen/twenty">
+
+                <com.llollox.androidtoggleswitch.widgets.ToggleSwitch
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:textToggleLeft="@string/price"
+                    app:textToggleRight="@string/offer"
+                    app:checkedBackgroundColor="@color/colorPrimaryDark"
+                    app:checkedTextColor="@color/colorAccent"
+                    android:id="@+id/toggleButtons"
+                    app:uncheckedTextColor="@android:color/white"
+                    app:toggleWidth="122dp"/>
+
+            </LinearLayout>
+
 
             <LinearLayout
                 android:layout_width="match_parent"

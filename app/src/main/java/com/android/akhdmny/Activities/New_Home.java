@@ -134,7 +134,7 @@ public class New_Home extends AppCompatActivity  implements OnMapReadyCallback,
 //        moveMap();
         MapRipple mapRipple = new MapRipple(mMap, latLng, this);
         mapRipple.withNumberOfRipples(3);
-        mapRipple.withFillColor(Color.BLUE);
+        mapRipple.withFillColor(getResources().getColor(R.color.colorPrimaryDark));
 //        mapRipple.withStrokeColor(Color.BLACK);
         mapRipple.withStrokewidth(10);   // 10dp
         mapRipple.withDistance(1000);   // 2000 metres radius

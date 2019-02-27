@@ -1,5 +1,5 @@
 
-package com.android.akhdmny.ApiResponse;
+package com.android.akhdmny.ApiResponse.ComplainHistory;
 
 import java.util.List;
 import com.google.gson.annotations.Expose;
@@ -12,7 +12,7 @@ public class ComplaintHistoryResponse {
     private Boolean status;
     @SerializedName("response")
     @Expose
-    private List<ComplaintHistoryInsideResponse> response = null;
+    private List<Response> response = null;
     @SerializedName("error")
     @Expose
     private Object error;
@@ -25,11 +25,11 @@ public class ComplaintHistoryResponse {
         this.status = status;
     }
 
-    public List<ComplaintHistoryInsideResponse> getResponse() {
+    public List<Response> getResponse() {
         return response;
     }
 
-    public void setResponse(List<ComplaintHistoryInsideResponse> response) {
+    public void setResponse(List<Response> response) {
         this.response = response;
     }
 

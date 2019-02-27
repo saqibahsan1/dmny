@@ -67,6 +67,7 @@
     <string name="finalTotal">Final Total</string>
     <string name="Coupon">Have a Coupon?</string>
     <string name="Message">Enter body…</string>
+    <string name="reply">Reply…</string>
     <string name="amount">0.0</string>
     <string name="accept">Accept</string>
     <string name="btnSend">Send</string>
@@ -83,6 +84,7 @@
     <string name="complaint">Complaint</string>
     <string name="lang">Language</string>
     <string name="order">Orders</string>
+    <string name="offer">Offer</string>
     <string name="contact">Contact Us</string>
     <string name="Cancel">Cancel</string>
     <string name="cancel_order">Cancel Order</string>

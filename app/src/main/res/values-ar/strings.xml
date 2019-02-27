@@ -125,9 +125,11 @@
     <string name="client">Client Review</string>
     <string name="client_rate">Client Rate</string>
     <string name="price">Price</string>
+    <string name="offer">عرض</string>
     <string name="total_price">Total Price</string>
     <string name="deliverd">Delivered</string>
     <string name="tipU">Tip</string>
     <string name="pending">Pending</string>
+    <string name="reply">الرد…</string>
 
 </resources>

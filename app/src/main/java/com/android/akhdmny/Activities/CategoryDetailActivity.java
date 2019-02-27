@@ -46,6 +46,7 @@ import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
 import com.android.akhdmny.R;
 import com.android.akhdmny.Requests.CategoryDetailsRequest;
+import com.android.akhdmny.Singletons.Cordinates;
 import com.android.akhdmny.Utils.GPSActivity;
 import com.github.rubensousa.bottomsheetbuilder.BottomSheetBuilder;
 import com.github.rubensousa.bottomsheetbuilder.BottomSheetMenuDialog;
@@ -79,7 +80,6 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class CategoryDetailActivity extends AppCompatActivity implements MediaPlayer.OnCompletionListener {
     ArrayList<Service> list;
-    ArrayList<com.android.akhdmny.ApiResponse.Categories.Response> listResp;
     ArrayList<Venue> listFoureSquare;
     String currency;
     @BindView(R.id.recyclerView)
@@ -162,7 +162,7 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
     private void FourSquareApi(){
         NetworkConsume.getInstance().ShowProgress(CategoryDetailActivity.this);
         NetworkConsume.getInstance().setAccessKey(prefs.getString("access_token","12"));
-        NetworkConsume.getInstance().getAuthAPI().fourSquareApiCall(gpsActivity.getLatitude(),gpsActivity.getLongitude()).
+        NetworkConsume.getInstance().getAuthAPI().fourSquareApiCall(Cordinates.getInstance().model.getLatitude(),Cordinates.getInstance().model.getLongitude()).
                 enqueue(new Callback<FourSquare>() {
                     @Override
                     public void onResponse(Call<FourSquare> call, Response<FourSquare> response) {
@@ -220,8 +220,8 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
         CategoryDetailsRequest categoryDetailsRequest = new CategoryDetailsRequest();
         categoryDetailsRequest.setAddress(address);
         categoryDetailsRequest.setCategory_id(NetworkConsume.getInstance().getDefaults("cat_id",CategoryDetailActivity.this));
-        categoryDetailsRequest.setLat(gpsActivity.getLatitude());
-        categoryDetailsRequest.setLongitude(gpsActivity.getLongitude());
+        categoryDetailsRequest.setLat(Cordinates.getInstance().model.getLatitude());
+        categoryDetailsRequest.setLongitude(Cordinates.getInstance().model.getLongitude());
         NetworkConsume.getInstance().getAuthAPI().CatDetails(categoryDetailsRequest).
                 enqueue(new Callback<CategoryDetailsResponse>() {
             @Override
@@ -230,11 +230,11 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
                     CategoryDetailsResponse categoriesResponse = response.body();
                     if ( categoriesResponse.getResponse().getServices().size() != 0) {
                         list = new ArrayList<>();
-                        listResp = new ArrayList<>();
+
                         for (int i = 0; i < categoriesResponse.getResponse().getServices().size(); i++) {
                             list.add(categoriesResponse.getResponse().getServices().get(i));
                         }
-                        listResp.add(categoriesResponse.getResponse());
+                        Cordinates.getInstance().currency = categoriesResponse.getResponse().getCurrency();
                         CatDetailAdapter myAdapter = new CatDetailAdapter(CategoryDetailActivity.this, list,categoriesResponse.getResponse().getCurrency());
                         recyclerView.setAdapter(myAdapter);
                         NetworkConsume.getInstance().HideProgress(CategoryDetailActivity.this);
@@ -300,7 +300,7 @@ public class CategoryDetailActivity extends AppCompatActivity implements MediaPl
                     Picasso.get().load(list.get(position).getImage()).into(imageView);
                     textViewTitle.setText(list.get(position).getTitle());
                     textViewAddress.setText(list.get(position).getAddress());
-                    textViewprice.setText(list.get(position).getPrice().toString()+" "+listResp.get(position).getCurrency());
+                    textViewprice.setText(list.get(position).getPrice().toString()+" "+Cordinates.getInstance().currency);
                 }
                 btn.setOnClickListener(new View.OnClickListener() {
                     @Override

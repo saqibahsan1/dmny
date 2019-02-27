@@ -32,8 +32,8 @@ import android.widget.Toast;
 import com.android.akhdmny.Adapter.HistoryAdapter;
 import com.android.akhdmny.Adapter.ImagesAdapter;
 import com.android.akhdmny.ApiResponse.AddComplaintResponse;
-import com.android.akhdmny.ApiResponse.ComplaintHistoryInsideResponse;
-import com.android.akhdmny.ApiResponse.ComplaintHistoryResponse;
+import com.android.akhdmny.ApiResponse.ComplainHistory.ComplaintHistoryResponse;
+import com.android.akhdmny.ApiResponse.ComplainHistory.ComplaintReply;
 import com.android.akhdmny.Authenticate.login;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
 import com.android.akhdmny.MainActivity;
@@ -125,7 +125,8 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
     private ArrayList<File> photos = new ArrayList<>();
     SharedPreferences prefs;
     SpotsDialog dialog;
-    ArrayList<ComplaintHistoryInsideResponse> list;
+    ArrayList<com.android.akhdmny.ApiResponse.ComplainHistory.Response> list;
+    ArrayList<ComplaintReply> complaintReplies;
     android.app.AlertDialog alertDialog;
     View historyItemView;
     ImageView Audio;
@@ -154,6 +155,7 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
                     ComplaintLayout.setVisibility(View.VISIBLE);
                 }else {
                     list = new ArrayList<>();
+                    complaintReplies = new ArrayList<>();
                     historyLayout.setVisibility(View.VISIBLE);
                     ComplaintLayout.setVisibility(View.GONE);
                     apiHistory();
@@ -173,6 +175,7 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
                 ProgressBar progressBar = historyItemView.findViewById(R.id.progress);
                 progressBar.setVisibility(View.VISIBLE);
                 TextView msg = historyItemView.findViewById(R.id.Tv_msg);
+                TextView reply = historyItemView.findViewById(R.id.reply);
                 textViewTitle.setText(list.get(position).getTitle());
                 ImageView imageView = historyItemView.findViewById(R.id.HistoryImage);
                 Audio = historyItemView.findViewById(R.id.PlayAudio);
@@ -209,7 +212,10 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
                         }
                     }
                 });
-                msg.setText(list.get(position).getDescription());
+                msg.setText(list.get(position).getMessage());
+                if (complaintReplies.get(position) !=null) {
+                    reply.setText(complaintReplies.get(position).getReplyMessage());
+                }
                 if (list.get(position).getImage() != null) {
                     Picasso.get().load(list.get(position).getImage()).into(imageView, new com.squareup.picasso.Callback() {
                         @Override
@@ -236,33 +242,30 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
         }));
         recycler_view.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
         recycler_view.setHasFixedSize(true);
-        recordAudio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(checkPermission()) {
-                        trigger = true;
-                    AUDIO_FILE_PATH = Environment.getExternalStorageDirectory().getPath() + "/recorded_audio.wav";
-                    AndroidAudioRecorder.with(getActivity())
-                            // Required
-                            .setFilePath(AUDIO_FILE_PATH)
-                            .setColor(ContextCompat.getColor(getActivity(), R.color.colorPrimary))
-                            .setRequestCode(RequestPermissionCode)
+        recordAudio.setOnClickListener(v -> {
+            if(checkPermission()) {
+                    trigger = true;
+                AUDIO_FILE_PATH = Environment.getExternalStorageDirectory().getPath() + "/recorded_audio.wav";
+                AndroidAudioRecorder.with(getActivity())
+                        // Required
+                        .setFilePath(AUDIO_FILE_PATH)
+                        .setColor(ContextCompat.getColor(getActivity(), R.color.colorPrimary))
+                        .setRequestCode(RequestPermissionCode)
 
-                            // Optional
-                            .setSource(AudioSource.MIC)
-                            .setChannel(AudioChannel.STEREO)
-                            .setSampleRate(AudioSampleRate.HZ_48000)
-                            .setAutoStart(false)
-                            .setKeepDisplayOn(true)
+                        // Optional
+                        .setSource(AudioSource.MIC)
+                        .setChannel(AudioChannel.STEREO)
+                        .setSampleRate(AudioSampleRate.HZ_48000)
+                        .setAutoStart(false)
+                        .setKeepDisplayOn(true)
 
-                            // Start recording
-                            .record();
+                        // Start recording
+                        .record();
 
 
 
-                }else {
-                    requestPermission();
-                }
+            }else {
+                requestPermission();
             }
         });
         PlayAudio.setOnClickListener(new View.OnClickListener() {
@@ -367,18 +370,16 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
         seek_bar.setMax(mediaPlayer.getDuration());
         seek_barHistory.setMax(mediaPlayer.getDuration());
 
-        mRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if(mediaPlayer!=null){
-                    seek_bar.setProgress(mediaPlayer.getCurrentPosition());
-                    seek_barHistory.setProgress(mediaPlayer.getCurrentPosition());
-                }
-                mHandler.postDelayed(mRunnable,50);
+        mRunnable = () -> {
+            if(mediaPlayer!=null){
+                seek_bar.setProgress(mediaPlayer.getCurrentPosition());
+                seek_barHistory.setProgress(mediaPlayer.getCurrentPosition());
             }
+            mHandler.postDelayed(mRunnable,50);
         };
         mHandler.postDelayed(mRunnable,50);
     }
+
     private void apiHistory(){
         NetworkConsume.getInstance().ShowProgress(getActivity());
         NetworkConsume.getInstance().setAccessKey(prefs.getString("access_token","12"));
@@ -389,20 +390,22 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
                     RV_historyList.setHasFixedSize(true);
                     RV_historyList.setLayoutManager(new LinearLayoutManager(getActivity()));
                     ComplaintHistoryResponse complaintHistoryResponse = response.body();
-                    if (complaintHistoryResponse.getResponse().size() != 0) {
-                        for (int i = 0; i < complaintHistoryResponse.getResponse().size(); i++) {
-                            list.add(complaintHistoryResponse.getResponse().get(i));
-                        }
-
-                        HistoryAdapter myAdapter = new HistoryAdapter(getActivity(), list);
-                        RV_historyList.setAdapter(myAdapter);
-                        NetworkConsume.getInstance().HideProgress(getActivity());
-                    }else {
-                        try {
-                            NetworkConsume.getInstance().SnackBarErrorHistory(historyLayout,getActivity(),"No History was found");
+                    if (complaintHistoryResponse != null) {
+                        if (complaintHistoryResponse.getResponse().size() != 0) {
+                            list.addAll(complaintHistoryResponse.getResponse());
+                            for (int i =0;i<complaintHistoryResponse.getResponse().size();i++) {
+                                complaintReplies.add(complaintHistoryResponse.getResponse().get(i).getComplaintReply());
+                            }
+                            HistoryAdapter myAdapter = new HistoryAdapter(getActivity(), list);
+                            RV_historyList.setAdapter(myAdapter);
                             NetworkConsume.getInstance().HideProgress(getActivity());
-                        }catch (Exception e){
+                        }else {
+                            try {
+                                NetworkConsume.getInstance().SnackBarErrorHistory(historyLayout,getActivity(),"No History was found");
+                                NetworkConsume.getInstance().HideProgress(getActivity());
+                            }catch (Exception e){
 
+                            }
                         }
                     }
 
@@ -425,14 +428,17 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
 
                     Toast.makeText(getActivity(), message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
                 }
+
             }
 
             @Override
             public void onFailure(Call<ComplaintHistoryResponse> call, Throwable t) {
-               // dialog.hide();
+
             }
         });
     }
+
+
     private void onPickPhoto() {
         EasyImage.openChooserWithGallery(FragmentComplaints.this,"Pick source",0);
     }

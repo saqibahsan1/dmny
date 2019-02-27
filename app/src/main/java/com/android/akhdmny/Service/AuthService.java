@@ -4,14 +4,13 @@ import com.android.akhdmny.ApiResponse.AcceptModel.AcceptOrderApiModel;
 import com.android.akhdmny.ApiResponse.AddComplaintResponse;
 import com.android.akhdmny.ApiResponse.AddToCart;
 import com.android.akhdmny.ApiResponse.CartApi.CartApiResp;
-import com.android.akhdmny.ApiResponse.CartOrder;
 import com.android.akhdmny.ApiResponse.Categories.CategoryDetailsResponse;
+import com.android.akhdmny.ApiResponse.ComplainHistory.ComplaintHistoryResponse;
 import com.android.akhdmny.ApiResponse.Coupon.CouponApiResponse;
 import com.android.akhdmny.ApiResponse.DriverList;
 import com.android.akhdmny.ApiResponse.MyChoice.FourSquare;
 import com.android.akhdmny.ApiResponse.MyOrderDetails.MyOrders;
 import com.android.akhdmny.ApiResponse.CategoriesResponse;
-import com.android.akhdmny.ApiResponse.ComplaintHistoryResponse;
 import com.android.akhdmny.ApiResponse.LoginApiResponse;
 import com.android.akhdmny.ApiResponse.OrderId;
 import com.android.akhdmny.ApiResponse.ParcelPost.ParcelPostApi;
@@ -24,7 +23,7 @@ import com.android.akhdmny.ApiResponse.createOrder.CreateOrderResp;
 import com.android.akhdmny.Requests.CategoryDetailsRequest;
 import com.android.akhdmny.Requests.CreateOrderRequest;
 import com.android.akhdmny.Requests.LoginRequest;
-import com.android.akhdmny.Requests.RequestOrder;
+import com.android.akhdmny.Requests.requestOrder;
 import com.android.akhdmny.Requests.SignInRequest;
 import com.android.akhdmny.Requests.VerificationReguest;
 
@@ -66,7 +65,7 @@ public interface AuthService {
     @POST("/akhdmny/public/api/user/services")
     Call<CategoryDetailsResponse> CatDetails(@Body CategoryDetailsRequest request);
 
-    @GET("/akhdmny/public/api/user/problem")
+    @GET("/akhdmny/public/api/user/get-complains")
     Call<ComplaintHistoryResponse> History();
 
     @GET("/akhdmny/public/api/user/foursquare")
@@ -79,7 +78,7 @@ public interface AuthService {
     Call<AcceptOrderApiModel> GetOrderDetails(@Query("order_id") String OrderId);
 
     @POST("/createOrder")
-    Call<OrderId> OrderRequest(@Body RequestOrder order);
+    Call<OrderId> OrderRequest(@Body requestOrder order);
 
     @GET("/updateToken")
     Call<UpdateTokenResponse> Token(@Query("id") int id,@Query("token") String token);
