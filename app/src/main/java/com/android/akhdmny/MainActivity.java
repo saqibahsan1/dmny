@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //        btn_layout = findViewById(R.id.btn_layout);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         try {
-
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
             FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult -> {
                 String newToken = instanceIdResult.getToken();
                 Log.e("newToken", newToken);

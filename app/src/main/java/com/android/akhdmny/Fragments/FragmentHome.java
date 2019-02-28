@@ -34,6 +34,7 @@ import android.widget.Toast;
 
 import com.android.akhdmny.Activities.MessageListActivity;
 import com.android.akhdmny.ApiResponse.AcceptModel.Driver;
+import com.android.akhdmny.ApiResponse.OrderModel.CartItem;
 import com.android.akhdmny.ApiResponse.OrderModel.DriverInfo;
 import com.android.akhdmny.ApiResponse.TimeOut.OrderTimeOut;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
@@ -106,6 +107,9 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
     CircleImageView driver_Image;
     @BindView(R.id.car_Image)
     ImageView car_Image;
+
+    @BindView(R.id.moveAbleMarker)
+    ImageView moveAbleMarker;
 
     @BindView(R.id.carModel)
     TextView carModel;
@@ -402,13 +406,13 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         });
     }
 
-    protected Marker createMarker(double latitude, double longitude, String title) {
+    protected Marker createMarker(double latitude, double longitude, String title,int res_id) {
 
         return marker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(latitude, longitude))
                 .anchor(0.5f, 0.5f)
                 .title(title)
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.car_icon))
+                .icon(BitmapDescriptorFactory.fromResource(res_id))
                 .draggable(true));
     }
 
@@ -450,9 +454,9 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         PolylineOptions lineOptions = new PolylineOptions();
         Polyline polyline;
         List<LatLng> points = new ArrayList<>();
-        if (marker != null) {
-            marker.remove();
-            createMarker(lat, lng, "driver");
+        if (marker == null) {
+//            marker.remove();
+            createMarker(lat, lng, "driver",R.drawable.car_icon);
 
         }
         LatLng latLng = new LatLng(lat, lng);
@@ -483,6 +487,23 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
             setupOrderFields(true);
         }
     }
+    void showMarker(){
+        for (CartItem cartItem : CurrentOrder.shared.order.getCartItems()) {
+            mMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(cartItem.getLat(), cartItem.getLong()))
+                    .anchor(0.5f, 0.5f)
+                    .title(cartItem.getTitle())
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.market_marker))
+                    .draggable(true));
+        }
+        mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(CurrentOrder.shared.user.getLat(), CurrentOrder.shared.user.getLong()))
+                .anchor(0.5f, 0.5f)
+                .title("Drop off")
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker))
+                .draggable(true));
+
+    }
 
     private void setupOrderFields(Boolean isVisible){
         LatLng latLng = new LatLng(latitude, longitude);
@@ -491,6 +512,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         if(isVisible) {
             DriverInfo obj = CurrentOrder.getInstance().driver;
             if(obj != null) {
+                moveAbleMarker.setVisibility(View.GONE);
                 DriverNumber = obj.getPhone();
                 driverName.setText(obj.getName());
                 driverRating.setText("5/" + obj.getRating());
@@ -500,9 +522,10 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
                 carModel.setText(obj.getCarCompany() + " " + obj.getCarModel() + " " + obj.getCarColor());
                 carNumber.setText(obj.getCarNo());
                 listener(String.valueOf(obj.getId()));
-                if (currentLocationMarker != null) {
-                    currentLocationMarker.remove();
-                }
+//                if (currentLocationMarker == null) {
+//                    currentLocationMarker.remove();
+//                }
+                showMarker();
                 mMap.setMyLocationEnabled(true);
                 btn_layout.setVisibility(View.GONE);
                 btn.setVisibility(View.GONE);
@@ -654,14 +677,14 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
             mMap.getUiSettings().setScrollGesturesEnabled(true);
             mMap.getUiSettings().setAllGesturesEnabled(true);
 //            mMap.setMyLocationEnabled(true);
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-
-                LatLng sydney = new LatLng(latitude, longitude);
-                mMap.addMarker(new MarkerOptions().position(sydney).icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker)).
-                        title("Driver"));
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
-            }
+//            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+//
+//                LatLng sydney = new LatLng(latitude, longitude);
+//                mMap.addMarker(new MarkerOptions().position(sydney).icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker)).
+//                        title("Driver"));
+//                mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+//                mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+//            }
             // Check the location settings of the user and create the callback to react to the different possibilities
             LocationSettingsRequest.Builder locationSettingsRequestBuilder = new LocationSettingsRequest.Builder()
                     .addLocationRequest(mLocationRequest);

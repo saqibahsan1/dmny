@@ -10,8 +10,8 @@ import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -43,10 +43,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
@@ -57,8 +55,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.android.akhdmny.MainActivity.btn;
-//import static com.android.akhdmny.MainActivity.btn_layout;
 
 public class New_Home extends AppCompatActivity  implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -88,7 +84,7 @@ public class New_Home extends AppCompatActivity  implements OnMapReadyCallback,
     @BindView(R.id.CancelOrder)
     Button CancelOrder;
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_home);
         ButterKnife.bind(this);
@@ -196,8 +192,13 @@ public class New_Home extends AppCompatActivity  implements OnMapReadyCallback,
     }
 
     @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        getCurrentLocation();
+    public void onConnected(Bundle bundle) {
+        try {
+            getCurrentLocation();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -206,7 +207,7 @@ public class New_Home extends AppCompatActivity  implements OnMapReadyCallback,
     }
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+    public void onConnectionFailed(ConnectionResult connectionResult) {
 
     }
 
@@ -384,14 +385,16 @@ public class New_Home extends AppCompatActivity  implements OnMapReadyCallback,
 
     @Override
     protected void onStart() {
-        googleApiClient.connect();
         super.onStart();
+        googleApiClient.connect();
+
     }
 
     @Override
     protected void onStop() {
-        googleApiClient.disconnect();
         super.onStop();
+        googleApiClient.disconnect();
+
     }
 
 

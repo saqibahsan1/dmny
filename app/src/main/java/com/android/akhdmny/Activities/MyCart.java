@@ -59,6 +59,7 @@ import com.wang.avi.AVLoadingIndicatorView;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -389,9 +390,7 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
 //                for (int i =0; i<list.get(position).getImages().length-1;i++) {
 //                    photos.add(list.get(position).getImages());
 //                }
-                for (String o : list.get(position).getImages()) {
-                    photos.add(o);
-                }
+                photos.addAll(Arrays.asList(list.get(position).getImages()));
 
                 ImageAdapterCart imagesAdapter = new ImageAdapterCart(MyCart.this, photos);
 
@@ -560,12 +559,12 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
 //                        Intent i = new Intent(MyCart.this, MainActivity.class);
 //                        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 //                        startActivity(i);
-
-                        Intent start = new Intent(MyCart.this,New_Home.class);
-                        start.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        alertDialog.dismiss();
+                        Intent start = new Intent(MyCart.this,DriverSearch.class);
+//                        start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(start);
                         finish();
-                        alertDialog.dismiss();
+
                         NetworkConsume.getInstance().HideProgress(MyCart.this);
                     }
                 }else {

@@ -1,0 +1,354 @@
+package com.android.akhdmny.Activities;
+
+import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentSender;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationListener;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
+
+import com.android.akhdmny.ApiResponse.AcceptModel.Driver;
+import com.android.akhdmny.ApiResponse.TimeOut.OrderTimeOut;
+import com.android.akhdmny.Authenticate.login;
+import com.android.akhdmny.ErrorHandling.LoginApiError;
+import com.android.akhdmny.MainActivity;
+import com.android.akhdmny.NetworkManager.NetworkConsume;
+import com.android.akhdmny.R;
+import com.arsy.maps_library.MapRadar;
+import com.arsy.maps_library.MapRipple;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.gson.Gson;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class DriverSearch extends AppCompatActivity implements OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        LocationListener{
+
+    public static final int RequestPermissionCode = 99;
+    GoogleApiClient mGoogleApiClient;
+    private GoogleMap mMap;
+    private GoogleApiClient googleApiClient;
+    private String TAG = "gps";
+    public static final int REQUEST_CHECK_SETTINGS = 123;
+    LocationRequest mLocationRequest;
+    int INTERVAL = 1000;
+    int FASTEST_INTERVAL = 500;
+    private double longitude = 0.0;
+    private double latitude =0.0;
+    MapRipple mapRipple;
+    MapRadar mapRadar;
+    SharedPreferences prefs;
+    String id ="";
+    @BindView(R.id.CancelOrder)
+    Button CancelOrder;
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.new_home);
+        ButterKnife.bind(this);
+        Init();
+    }
+
+    private void Init(){
+        prefs = getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+
+        mapFragment.getMapAsync(this);
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        CancelOrder.setOnClickListener(v -> TimeoutApi());
+    }
+
+    // The callback for the management of the user settings regarding location
+    private ResultCallback<LocationSettingsResult> mResultCallbackFromSettings = new ResultCallback<LocationSettingsResult>() {
+        @Override
+        public void onResult(LocationSettingsResult result) {
+            final Status status = result.getStatus();
+            //final LocationSettingsStates locationSettingsStates = result.getLocationSettingsStates();
+            switch (status.getStatusCode()) {
+                case LocationSettingsStatusCodes.SUCCESS:
+                    // All location settings are satisfied. The client can initialize location
+                    // requests here.
+                    break;
+                case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                    // Location settings are not satisfied. But could be fixed by showing the user
+                    // a dialog.
+                    try {
+                        // Show the dialog by calling startResolutionForResult(),
+                        // and check the result in onActivityResult().
+                        status.startResolutionForResult(
+                                DriverSearch.this,
+                                REQUEST_CHECK_SETTINGS);
+                    } catch (IntentSender.SendIntentException e) {
+                        // Ignore the error.
+                    }
+                    break;
+                case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                    Log.e(TAG, "Settings change unavailable. We have no way to fix the settings so we won't show the dialog.");
+                    break;
+            }
+        }
+    };
+
+    private void TimeoutApi(){
+        NetworkConsume.getInstance().setAccessKey("Bearer "+prefs.getString("access_token","12"));
+        String orderId =NetworkConsume.getInstance().getDefaults("orderId",this);
+        NetworkConsume.getInstance().getAuthAPI().OrderTimeOut(orderId).enqueue(new Callback<OrderTimeOut>() {
+            @Override
+            public void onResponse(Call<OrderTimeOut> call, Response<OrderTimeOut> response) {
+                if (response.isSuccessful()){
+                    OrderTimeOut timeOut = response.body();
+                    Toast.makeText(DriverSearch.this, timeOut.getResponse().getMessage(), Toast.LENGTH_SHORT).show();
+                    mMap.clear();
+
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CurrentOrder").child("User").child(id);
+                    ref.child("status").setValue(6);
+                    NetworkConsume.getInstance().setDefaults("orderId","",DriverSearch.this);
+                    if (mapRadar != null) {
+                        if (mapRadar.isAnimationRunning()) {
+                            mapRadar.stopRadarAnimation();
+                        }
+                    }
+                    finish();
+                }
+                else {
+                    Gson gson = new Gson();
+                    NetworkConsume.getInstance().setDefaults("orderId","",DriverSearch.this);
+                    LoginApiError message=gson.fromJson(response.errorBody().charStream(),LoginApiError.class);
+                    Toast.makeText(DriverSearch.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
+                    if (message.getError().getMessage().get(0).equals("Unauthorized access_token")){
+                        SharedPreferences prefs = getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
+                        prefs.edit().putString("access_token", "")
+                                .putString("avatar","")
+                                .putString("login","").commit();
+
+                        Intent intent = new Intent(DriverSearch.this, login.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        finish();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<OrderTimeOut> call, Throwable t) {
+                NetworkConsume.getInstance().setDefaults("orderId","",DriverSearch.this);
+                Toast.makeText(DriverSearch.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public boolean checkPermission() {
+
+        int FirstPermissionResult = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION);
+        int SecondPermissionResult = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION);
+
+        return FirstPermissionResult == PackageManager.PERMISSION_GRANTED &&
+                SecondPermissionResult == PackageManager.PERMISSION_GRANTED;
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+
+            case RequestPermissionCode:
+
+                if (grantResults.length > 0) {
+
+                    boolean finelocation = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                    boolean coarselocation = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+
+                    if (finelocation && coarselocation) {
+
+                        if (checkPermission())
+                            buildGoogleApiClient();
+                        Toast.makeText(DriverSearch.this, "Permission Granted", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(DriverSearch.this, "Permission Denied", Toast.LENGTH_LONG).show();
+
+                    }
+                }
+
+                break;
+        }
+    }
+
+    private void getCurrentLocation() {
+        Location location = null;
+        if (checkPermission()) {
+            location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        }
+
+        if (location != null) {
+            //Getting longitude and latitude
+            longitude = location.getLongitude();
+            latitude = location.getLatitude();
+
+            //moving the map to location
+            moveMap();
+        }
+    }
+    private void moveMap() {
+        LatLng latLng = new LatLng(latitude, longitude);
+        CameraUpdate location = CameraUpdateFactory.newLatLngZoom(latLng, 15);
+        mMap.animateCamera(location);
+        //startRippleAnimation(latLng);
+        startRadarAnimation(latLng);
+    }
+    private void startRippleAnimation(LatLng latLng){
+//        moveMap();
+        mapRipple = new MapRipple(mMap, latLng, this);
+        mapRipple.withNumberOfRipples(3);
+        mapRipple.withFillColor(getResources().getColor(R.color.sky_blue));
+        mapRipple.withStrokeColor(Color.WHITE);
+        mapRipple.withStrokewidth(10);   // 10dp
+        mapRipple.withDistance(500);   // 2000 metres radius
+        mapRipple.withRippleDuration(8000);    //12000ms
+        mapRipple.withTransparency(0.1f);
+        mapRipple.startRippleMapAnimation();
+    }
+    private void startRadarAnimation(LatLng latLng){
+        mapRadar = new MapRadar(mMap, latLng, this);
+        mapRadar.withDistance(500);
+        mapRadar.withClockwiseAnticlockwiseDuration(2);
+        //mapRadar.withOuterCircleFillColor(Color.parseColor("#12000000"));
+        mapRadar.withOuterCircleStrokeColor(Color.parseColor("#fccd29"));
+        mapRadar.withRadarColors(getResources().getColor(R.color.colorPrimaryDark),
+                this.getResources().getColor(R.color.sky_blue));
+        mapRadar.withOuterCircleTransparency(0.5f);
+        mapRadar.withRadarTransparency(0.5f);
+        mapRadar.startRadarAnimation();
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
+
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        getCurrentLocation();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        if (checkPermission()) {
+            buildGoogleApiClient();
+            mMap.setMyLocationEnabled(true);
+            // Check the location settings of the user and create the callback to react to the different possibilities
+            LocationSettingsRequest.Builder locationSettingsRequestBuilder = new LocationSettingsRequest.Builder()
+                    .addLocationRequest(mLocationRequest);
+            PendingResult<LocationSettingsResult> result =
+                    LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, locationSettingsRequestBuilder.build());
+            result.setResultCallback(mResultCallbackFromSettings);
+        } else {
+            requestPermission();
+        }
+    }
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        googleApiClient.connect();
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        googleApiClient.disconnect();
+
+    }
+    private void requestPermission() {
+
+        ActivityCompat.requestPermissions(DriverSearch.this, new String[]
+                {
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                }, RequestPermissionCode);
+
+    }
+
+}

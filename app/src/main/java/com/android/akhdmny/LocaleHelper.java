@@ -1,12 +1,9 @@
 package com.android.akhdmny;
 
 import android.app.Application;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.preference.PreferenceManager;
-
-import com.ahmedjazzar.rosetta.LanguageSwitcher;
 
 import java.util.HashSet;
 import java.util.Locale;
@@ -15,7 +12,7 @@ public class LocaleHelper extends Application{
 
     private Locale firstLaunchLocale;
     private HashSet<Locale> supportedLocales;
-    public static LanguageSwitcher languageSwitcher;
+//    public static LanguageSwitcher languageSwitcher;
     private static LocaleHelper mInstance;
     @Override
     public void onCreate() {
@@ -31,8 +28,8 @@ public class LocaleHelper extends Application{
         AutomatedSupportedLocales();
         manualSupportedLocales();
 
-        languageSwitcher = new LanguageSwitcher(this, firstLaunchLocale);
-        languageSwitcher.setSupportedLocales(supportedLocales);
+//        languageSwitcher = new LanguageSwitcher(this, firstLaunchLocale);
+//        languageSwitcher.setSupportedLocales(supportedLocales);
     }
 
     private void AutomatedSupportedLocales() {

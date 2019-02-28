@@ -93,6 +93,7 @@ public class TrackerService extends Service {
                 for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
                     if (Objects.equals(dataSnapshot1.getKey(), "orderId")){
                         orderId = Objects.requireNonNull(dataSnapshot1.getValue()).toString();
+                        NetworkConsume.getInstance().setDefaults("orderId",orderId,TrackerService.this);
                     }
                     if (Objects.equals(dataSnapshot1.getKey(), "status")) {
                         if (observerListener != null) {
@@ -101,7 +102,7 @@ public class TrackerService extends Service {
                     }
                     if (Objects.equals(dataSnapshot1.getKey(), "status") && dataSnapshot1.getValue().toString().equals("0")){
 
-                        NetworkConsume.getInstance().setDefaults("orderId",orderId,TrackerService.this);
+//                        NetworkConsume.getInstance().setDefaults("orderId",orderId,TrackerService.this);
 //                        Intent start = new Intent(TrackerService.this,New_Home.class);
 //                        start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //                        startActivity(start);

@@ -21,6 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:id="@+id/moveAbleMarker"
             android:src="@drawable/user_marker"/>
     </android.support.design.widget.CoordinatorLayout>
 
@@ -77,7 +78,7 @@
 
     <include
         layout="@layout/current_order_driver_info"
-        android:visibility="visible" />
+        android:visibility="gone" />
 
     <!--<include-->
         <!--layout="@layout/driver_details"-->
