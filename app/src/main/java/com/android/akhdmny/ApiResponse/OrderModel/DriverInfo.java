@@ -1,10 +1,10 @@
 
-package com.android.akhdmny.ApiResponse.AcceptModel;
+package com.android.akhdmny.ApiResponse.OrderModel;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class User {
+public class DriverInfo {
 
     @SerializedName("id")
     @Expose
@@ -12,15 +12,18 @@ public class User {
     @SerializedName("email")
     @Expose
     private String email;
-    @SerializedName("name")
-    @Expose
-    private String name;
     @SerializedName("first_name")
     @Expose
     private String firstName;
     @SerializedName("last_name")
     @Expose
     private String lastName;
+    @SerializedName("user_id")
+    @Expose
+    private Integer userId;
+    @SerializedName("name")
+    @Expose
+    private String name;
     @SerializedName("phone")
     @Expose
     private String phone;
@@ -33,27 +36,30 @@ public class User {
     @SerializedName("gender")
     @Expose
     private String gender;
-    @SerializedName("is_online")
+    @SerializedName("car_color")
     @Expose
-    private Integer isOnline;
-    @SerializedName("last_login")
+    private String carColor;
+    @SerializedName("car_no")
     @Expose
-    private String lastLogin;
-    @SerializedName("access_token")
+    private String carNo;
+    @SerializedName("car_model")
     @Expose
-    private String accessToken;
-    @SerializedName("country")
+    private Integer carModel;
+    @SerializedName("car_company")
     @Expose
-    private String country;
+    private String carCompany;
+    @SerializedName("rating")
+    @Expose
+    private String rating;
     @SerializedName("lat")
     @Expose
-    private Integer lat;
+    private Double lat;
     @SerializedName("long")
     @Expose
-    private Integer _long;
-    @SerializedName("status")
+    private Double _long;
+    @SerializedName("IsBusy")
     @Expose
-    private Integer status;
+    private Object isBusy;
 
     public Integer getId() {
         return id;
@@ -71,14 +77,6 @@ public class User {
         this.email = email;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getFirstName() {
         return firstName;
     }
@@ -93,6 +91,22 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPhone() {
@@ -127,60 +141,68 @@ public class User {
         this.gender = gender;
     }
 
-    public Integer getIsOnline() {
-        return isOnline;
+    public String getCarColor() {
+        return carColor;
     }
 
-    public void setIsOnline(Integer isOnline) {
-        this.isOnline = isOnline;
+    public void setCarColor(String carColor) {
+        this.carColor = carColor;
     }
 
-    public String getLastLogin() {
-        return lastLogin;
+    public String getCarNo() {
+        return carNo;
     }
 
-    public void setLastLogin(String lastLogin) {
-        this.lastLogin = lastLogin;
+    public void setCarNo(String carNo) {
+        this.carNo = carNo;
     }
 
-    public String getAccessToken() {
-        return accessToken;
+    public Integer getCarModel() {
+        return carModel;
     }
 
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
+    public void setCarModel(Integer carModel) {
+        this.carModel = carModel;
     }
 
-    public String getCountry() {
-        return country;
+    public String getCarCompany() {
+        return carCompany;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
+    public void setCarCompany(String carCompany) {
+        this.carCompany = carCompany;
     }
 
-    public Integer getLat() {
+    public String getRating() {
+        return rating;
+    }
+
+    public void setRating(String rating) {
+        this.rating = rating;
+    }
+
+    public Double getLat() {
         return lat;
     }
 
-    public void setLat(Integer lat) {
+    public void setLat(Double lat) {
         this.lat = lat;
     }
 
-    public Integer getLong() {
+    public Double getLong() {
         return _long;
     }
 
-    public void setLong(Integer _long) {
+    public void setLong(Double _long) {
         this._long = _long;
     }
 
-    public Integer getStatus() {
-        return status;
+    public Object getIsBusy() {
+        return isBusy;
     }
 
-    public void setStatus(Integer status) {
-        this.status = status;
+    public void setIsBusy(Object isBusy) {
+        this.isBusy = isBusy;
     }
 
 }

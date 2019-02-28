@@ -4,14 +4,17 @@ import com.android.akhdmny.ApiResponse.AcceptModel.Driver;
 import com.android.akhdmny.ApiResponse.AcceptModel.Order;
 import com.android.akhdmny.ApiResponse.AcceptModel.User;
 import com.android.akhdmny.ApiResponse.MyOrderDetails.OrderDetail;
+import com.android.akhdmny.ApiResponse.OrderModel.DriverInfo;
+import com.android.akhdmny.ApiResponse.OrderModel.OrderDetails;
+import com.android.akhdmny.ApiResponse.OrderModel.UserInfo;
 
 public class CurrentOrder {
 
     public static CurrentOrder shared;
 
-    public Driver driver;
-    public User user;
-    public OrderDetail order;
+    public DriverInfo driver;
+    public UserInfo user;
+    public OrderDetails order;
     public int orderId;
     public int userId;
     public int driverId;

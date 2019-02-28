@@ -1,10 +1,10 @@
 
-package com.android.akhdmny.ApiResponse.AcceptModel;
+package com.android.akhdmny.ApiResponse.OrderModel;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class User {
+public class UserInfo {
 
     @SerializedName("id")
     @Expose
@@ -47,10 +47,10 @@ public class User {
     private String country;
     @SerializedName("lat")
     @Expose
-    private Integer lat;
+    private Double lat;
     @SerializedName("long")
     @Expose
-    private Integer _long;
+    private Double _long;
     @SerializedName("status")
     @Expose
     private Integer status;
@@ -159,19 +159,19 @@ public class User {
         this.country = country;
     }
 
-    public Integer getLat() {
+    public Double getLat() {
         return lat;
     }
 
-    public void setLat(Integer lat) {
+    public void setLat(Double lat) {
         this.lat = lat;
     }
 
-    public Integer getLong() {
+    public Double getLong() {
         return _long;
     }
 
-    public void setLong(Integer _long) {
+    public void setLong(Double _long) {
         this._long = _long;
     }
 

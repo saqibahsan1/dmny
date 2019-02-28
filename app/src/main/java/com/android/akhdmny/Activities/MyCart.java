@@ -244,7 +244,7 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
                                         .putString("login","").commit();
 
                                 Intent intent = new Intent(MyCart.this, login.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(intent);
                                 finish();
                             }
@@ -358,7 +358,7 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
 //                        if (editText.getText().toString().equals("")){
 //                            Toast.makeText(MyCart.this, "Please enter a tip...", Toast.LENGTH_SHORT).show();
 //                        }else {
-                            createOrderApi(Integer.parseInt(discountVal.getText().toString()));
+                            createOrderApi(Integer.parseInt(discount));
                         //}
 
 

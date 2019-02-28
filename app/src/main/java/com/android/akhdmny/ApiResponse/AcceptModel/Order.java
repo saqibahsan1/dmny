@@ -32,10 +32,10 @@ public class Order {
     private Double finalAmount;
     @SerializedName("discount_amount")
     @Expose
-    private Double discountAmount;
+    private Integer discountAmount;
     @SerializedName("discount_percent")
     @Expose
-    private Double discountPercent;
+    private Integer discountPercent;
     @SerializedName("address")
     @Expose
     private Object address;
@@ -45,6 +45,12 @@ public class Order {
     @SerializedName("long")
     @Expose
     private Double _long;
+    @SerializedName("driver_accept_order_lat")
+    @Expose
+    private Integer driverAcceptOrderLat;
+    @SerializedName("driver_accept_order_long")
+    @Expose
+    private Integer driverAcceptOrderLong;
     @SerializedName("status")
     @Expose
     private Integer status;
@@ -54,21 +60,30 @@ public class Order {
     @SerializedName("cancel_reason")
     @Expose
     private Object cancelReason;
+    @SerializedName("bid")
+    @Expose
+    private String bid;
+    @SerializedName("tip")
+    @Expose
+    private Integer tip;
+    @SerializedName("is_bid")
+    @Expose
+    private Integer isBid;
+    @SerializedName("client_note")
+    @Expose
+    private Object clientNote;
     @SerializedName("created_at")
     @Expose
     private String createdAt;
     @SerializedName("updated_at")
     @Expose
     private String updatedAt;
-    @SerializedName("remember_token")
-    @Expose
-    private Object rememberToken;
     @SerializedName("deleted_at")
     @Expose
     private Object deletedAt;
-    @SerializedName("bid")
+    @SerializedName("remember_token")
     @Expose
-    private String bid;
+    private Object rememberToken;
 
     public Integer getId() {
         return id;
@@ -134,19 +149,19 @@ public class Order {
         this.finalAmount = finalAmount;
     }
 
-    public Double getDiscountAmount() {
+    public Integer getDiscountAmount() {
         return discountAmount;
     }
 
-    public void setDiscountAmount(Double discountAmount) {
+    public void setDiscountAmount(Integer discountAmount) {
         this.discountAmount = discountAmount;
     }
 
-    public Double getDiscountPercent() {
+    public Integer getDiscountPercent() {
         return discountPercent;
     }
 
-    public void setDiscountPercent(Double discountPercent) {
+    public void setDiscountPercent(Integer discountPercent) {
         this.discountPercent = discountPercent;
     }
 
@@ -174,6 +189,22 @@ public class Order {
         this._long = _long;
     }
 
+    public Integer getDriverAcceptOrderLat() {
+        return driverAcceptOrderLat;
+    }
+
+    public void setDriverAcceptOrderLat(Integer driverAcceptOrderLat) {
+        this.driverAcceptOrderLat = driverAcceptOrderLat;
+    }
+
+    public Integer getDriverAcceptOrderLong() {
+        return driverAcceptOrderLong;
+    }
+
+    public void setDriverAcceptOrderLong(Integer driverAcceptOrderLong) {
+        this.driverAcceptOrderLong = driverAcceptOrderLong;
+    }
+
     public Integer getStatus() {
         return status;
     }
@@ -198,6 +229,38 @@ public class Order {
         this.cancelReason = cancelReason;
     }
 
+    public String getBid() {
+        return bid;
+    }
+
+    public void setBid(String bid) {
+        this.bid = bid;
+    }
+
+    public Integer getTip() {
+        return tip;
+    }
+
+    public void setTip(Integer tip) {
+        this.tip = tip;
+    }
+
+    public Integer getIsBid() {
+        return isBid;
+    }
+
+    public void setIsBid(Integer isBid) {
+        this.isBid = isBid;
+    }
+
+    public Object getClientNote() {
+        return clientNote;
+    }
+
+    public void setClientNote(Object clientNote) {
+        this.clientNote = clientNote;
+    }
+
     public String getCreatedAt() {
         return createdAt;
     }
@@ -214,14 +277,6 @@ public class Order {
         this.updatedAt = updatedAt;
     }
 
-    public Object getRememberToken() {
-        return rememberToken;
-    }
-
-    public void setRememberToken(Object rememberToken) {
-        this.rememberToken = rememberToken;
-    }
-
     public Object getDeletedAt() {
         return deletedAt;
     }
@@ -230,12 +285,12 @@ public class Order {
         this.deletedAt = deletedAt;
     }
 
-    public String getBid() {
-        return bid;
+    public Object getRememberToken() {
+        return rememberToken;
     }
 
-    public void setBid(String bid) {
-        this.bid = bid;
+    public void setRememberToken(Object rememberToken) {
+        this.rememberToken = rememberToken;
     }
 
 }

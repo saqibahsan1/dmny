@@ -12,23 +12,18 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import com.android.akhdmny.Activities.Bid;
 import com.android.akhdmny.Activities.Driver_Ratings;
-import com.android.akhdmny.Activities.New_Home;
 import com.android.akhdmny.ApiResponse.AcceptModel.AcceptOrderApiModel;
+import com.android.akhdmny.ApiResponse.OrderModel.OrderDetailsModel;
 import com.android.akhdmny.Interfaces.ObserverInterface;
 import com.android.akhdmny.MainActivity;
-import com.android.akhdmny.NetworkManager.Network;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
 
 import com.android.akhdmny.Singletons.CurrentOrder;
 import com.android.akhdmny.Singletons.OrderManager;
-import com.arsy.maps_library.MapRipple;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -40,8 +35,6 @@ import java.util.Objects;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static com.android.akhdmny.MainActivity.btn;
 //import static com.android.akhdmny.MainActivity.btn_layout;
 
 
@@ -179,18 +172,18 @@ public class TrackerService extends Service {
 //        NetworkConsume.getInstance().ShowProgress(TrackerService.this);
         NetworkConsume.getInstance().setAccessKey("Bearer " + prefs.getString("access_token", "12"));
         String orderId = NetworkConsume.getInstance().getDefaults("orderId", TrackerService.this);
-        NetworkConsume.getInstance().getAuthAPI().GetOrderDetails(orderId).enqueue(new Callback<AcceptOrderApiModel>() {
+        NetworkConsume.getInstance().getAuthAPI().GetOrderDetails(orderId).enqueue(new Callback<OrderDetailsModel>() {
             @Override
-            public void onResponse(@NonNull Call<AcceptOrderApiModel> call, @NonNull Response<AcceptOrderApiModel> response) {
+            public void onResponse(@NonNull Call<OrderDetailsModel> call, @NonNull Response<OrderDetailsModel> response) {
                 if (response.isSuccessful()){
-                    AcceptOrderApiModel orderDetails = response.body();
+                    OrderDetailsModel orderDetails = response.body();
                     if (orderDetails != null) {
-                        CurrentOrder.getInstance().driver = orderDetails.getResponse().getDriver();
-                        CurrentOrder.getInstance().user = orderDetails.getResponse().getUser();
-                        CurrentOrder.getInstance().order = orderDetails.getResponse().getOrder();
+                        CurrentOrder.getInstance().driver = orderDetails.getResponse().getDriverInfo();
+                        CurrentOrder.getInstance().user = orderDetails.getResponse().getUserInfo();
+                        CurrentOrder.getInstance().order = orderDetails.getResponse().getOrderDetails();
                         CurrentOrder.getInstance().userId = orderDetails.getResponse().getUserId();
                         CurrentOrder.getInstance().driverId = orderDetails.getResponse().getDriverId();
-                        CurrentOrder.getInstance().orderId = orderDetails.getResponse().getOrder().getOrderId();
+                        CurrentOrder.getInstance().orderId = orderDetails.getResponse().getOrderDetails().getOrderId();
 
                         Log.i("GetOrderDetails",  "success");
 
@@ -206,7 +199,7 @@ public class TrackerService extends Service {
                 }
             }
             @Override
-            public void onFailure(@NonNull Call<AcceptOrderApiModel> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<OrderDetailsModel> call, @NonNull Throwable t) {
 //                NetworkConsume.getInstance().HideProgress(TrackerService.this);
                 Toast.makeText(TrackerService.this, t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.i("GetOrderDetails", t.getMessage() + " error");

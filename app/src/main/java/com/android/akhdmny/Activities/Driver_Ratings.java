@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.akhdmny.ApiResponse.AcceptModel.Driver;
-import com.android.akhdmny.FireBaseNotification.TrackerService;
 import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
 import com.android.akhdmny.R;

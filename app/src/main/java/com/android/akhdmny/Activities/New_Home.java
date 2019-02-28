@@ -134,12 +134,12 @@ public class New_Home extends AppCompatActivity  implements OnMapReadyCallback,
 //        moveMap();
         MapRipple mapRipple = new MapRipple(mMap, latLng, this);
         mapRipple.withNumberOfRipples(3);
-        mapRipple.withFillColor(getResources().getColor(R.color.colorPrimaryDark));
-//        mapRipple.withStrokeColor(Color.BLACK);
+        mapRipple.withFillColor(getResources().getColor(R.color.sky_blue));
+        mapRipple.withStrokeColor(Color.WHITE);
         mapRipple.withStrokewidth(10);   // 10dp
-        mapRipple.withDistance(1000);   // 2000 metres radius
+        mapRipple.withDistance(500);   // 2000 metres radius
         mapRipple.withRippleDuration(8000);    //12000ms
-        mapRipple.withTransparency(0.2f);
+        mapRipple.withTransparency(0.1f);
         mapRipple.startRippleMapAnimation();
     }
 

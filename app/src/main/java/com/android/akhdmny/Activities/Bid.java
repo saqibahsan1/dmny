@@ -20,13 +20,9 @@ import android.widget.Toast;
 
 import com.android.akhdmny.Adapter.BidAdapter;
 import com.android.akhdmny.ApiResponse.AcceptModel.AcceptOrderApiModel;
-import com.android.akhdmny.ApiResponse.AcceptModel.Driver;
-import com.android.akhdmny.ApiResponse.AcceptModel.Order;
-import com.android.akhdmny.ApiResponse.AcceptModel.User;
 import com.android.akhdmny.ApiResponse.DriverList;
 import com.android.akhdmny.ApiResponse.DriverListInsideResponse;
-import com.android.akhdmny.ApiResponse.FireBaseBids;
-import com.android.akhdmny.ApiResponse.MyOrderDetails.OrderDetail;
+import com.android.akhdmny.ApiResponse.OrderModel.OrderDetailsModel;
 import com.android.akhdmny.ApiResponse.TimeOut.OrderTimeOut;
 import com.android.akhdmny.Authenticate.login;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
@@ -37,7 +33,6 @@ import com.android.akhdmny.NetworkManager.NetworkConsume;
 import com.android.akhdmny.R;
 import com.android.akhdmny.Service.ClickListener;
 import com.android.akhdmny.Singletons.CurrentOrder;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -45,14 +40,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 
-import java.sql.Time;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -239,24 +230,24 @@ public class Bid extends AppCompatActivity {
         NetworkConsume.getInstance().ShowProgress(Bid.this);
         NetworkConsume.getInstance().setAccessKey("Bearer " + prefs.getString("access_token", "12"));
         NetworkConsume.getInstance().getAuthAPI().AcceptBidApi(listInsideResponses.get(pos).getOrderId(), listInsideResponses.get(pos).getBid(),
-                listInsideResponses.get(pos).getDriverId()).enqueue(new Callback<AcceptOrderApiModel>() {
+                listInsideResponses.get(pos).getDriverId()).enqueue(new Callback<Object>() {
             @Override
-            public void onResponse(@NonNull Call<AcceptOrderApiModel> call, @NonNull Response<AcceptOrderApiModel> response) {
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                 if (response.isSuccessful()) {
-                    AcceptOrderApiModel orderDetails = response.body();
-                    if (orderDetails != null) {
-                        CurrentOrder.getInstance().driver = orderDetails.getResponse().getDriver();
-                        CurrentOrder.getInstance().user = orderDetails.getResponse().getUser();
-                        CurrentOrder.getInstance().order = orderDetails.getResponse().getOrder();
-                        CurrentOrder.getInstance().userId = orderDetails.getResponse().getUserId();
-                        CurrentOrder.getInstance().driverId = orderDetails.getResponse().getDriverId();
-                        CurrentOrder.getInstance().orderId = orderDetails.getResponse().getOrder().getOrderId();
-
-                        Intent intent = new Intent(Bid.this, MainActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(intent);
-                        finish();
-                    }
+                    getOrderDetails();
+//                    AcceptOrderApiModel orderDetails = response.body();
+//                    if (orderDetails != null) {
+//                        CurrentOrder.getInstance().driver = orderDetails.getResponse().getDriver();
+//                        CurrentOrder.getInstance().user = orderDetails.getResponse().getUser();
+//                        CurrentOrder.getInstance().order = orderDetails.getResponse().getOrder();
+//                        CurrentOrder.getInstance().userId = orderDetails.getResponse().getUser().getId();
+//                        CurrentOrder.getInstance().driverId = orderDetails.getResponse().getDriver().getId();
+//                        CurrentOrder.getInstance().orderId = orderDetails.getResponse().getOrder().getId();
+//                        Intent intent = new Intent(Bid.this, MainActivity.class);
+//                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                        startActivity(intent);
+//                        finish();
+//                    }
                     NetworkConsume.getInstance().HideProgress(Bid.this);
 
                 } else {
@@ -265,13 +256,52 @@ public class Bid extends AppCompatActivity {
                     LoginApiError message = gson.fromJson(response.errorBody().charStream(), LoginApiError.class);
                     Toast.makeText(Bid.this, message.getError().getMessage().get(0), Toast.LENGTH_SHORT).show();
                 }
-
             }
 
             @Override
-            public void onFailure(Call<AcceptOrderApiModel> call, Throwable t) {
+            public void onFailure(Call<Object> call, Throwable t) {
                 Log.w("err", t.getMessage());
                 NetworkConsume.getInstance().HideProgress(Bid.this);
+            }
+        });
+    }
+    private void getOrderDetails(){
+        SharedPreferences prefs = Bid.this.getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
+//        NetworkConsume.getInstance().ShowProgress(TrackerService.this);
+        NetworkConsume.getInstance().setAccessKey("Bearer " + prefs.getString("access_token", "12"));
+        String orderId = NetworkConsume.getInstance().getDefaults("orderId", Bid.this);
+        NetworkConsume.getInstance().getAuthAPI().GetOrderDetails(orderId).enqueue(new Callback<OrderDetailsModel>() {
+            @Override
+            public void onResponse(@NonNull Call<OrderDetailsModel> call, @NonNull Response<OrderDetailsModel> response) {
+                if (response.isSuccessful()){
+                    OrderDetailsModel orderDetails = response.body();
+                    if (orderDetails != null) {
+                        CurrentOrder.getInstance().driver = orderDetails.getResponse().getDriverInfo();
+                        CurrentOrder.getInstance().user = orderDetails.getResponse().getUserInfo();
+                        CurrentOrder.getInstance().order = orderDetails.getResponse().getOrderDetails();
+                        CurrentOrder.getInstance().userId = orderDetails.getResponse().getUserId();
+                        CurrentOrder.getInstance().driverId = orderDetails.getResponse().getDriverId();
+                        CurrentOrder.getInstance().orderId = orderDetails.getResponse().getOrderDetails().getOrderId();
+
+                        Log.i("GetOrderDetails",  "success");
+
+                        Intent start = new Intent(Bid.this, MainActivity.class);
+                        start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(start);
+
+                    }else{
+//                        NetworkConsume.getInstance().HideProgress(TrackerService.this);
+                    }
+                }else{
+//                    NetworkConsume.getInstance().HideProgress(TrackerService.this);
+                }
+            }
+            @Override
+            public void onFailure(@NonNull Call<OrderDetailsModel> call, @NonNull Throwable t) {
+//                NetworkConsume.getInstance().HideProgress(TrackerService.this);
+                Toast.makeText(Bid.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.i("GetOrderDetails", t.getMessage() + " error");
+
             }
         });
     }

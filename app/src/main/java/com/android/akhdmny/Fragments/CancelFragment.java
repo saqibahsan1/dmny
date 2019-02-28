@@ -50,14 +50,14 @@ public class CancelFragment extends BottomSheetDialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.cancel_fragment, container, false);
         ButterKnife.bind(this,view);
+        reasonArrayList = new ArrayList<>();
+        prefs = Objects.requireNonNull(getActivity()).getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
         cancelApi();
         adapter = new BottomSheetAdapter(getActivity(),reasonArrayList,detectReasonSelected);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(adapter);
-        prefs = Objects.requireNonNull(getActivity()).getSharedPreferences(MainActivity.AUTH_PREF_KEY, Context.MODE_PRIVATE);
-        reasonArrayList = new ArrayList<>();
 
         return view;
     }
@@ -69,12 +69,12 @@ public class CancelFragment extends BottomSheetDialogFragment {
             @Override
             public void onResponse(Call<CancelReasonModel> call, Response<CancelReasonModel> response) {
                 if (response.isSuccessful()){
-                    NetworkConsume.getInstance().HideProgress(getActivity());
                     CancelReasonModel model = response.body();
                     if (model != null) {
                         reasonArrayList.addAll(model.getResult().getReasons());
                         adapter.notifyDataSetChanged();
                     }
+                    NetworkConsume.getInstance().HideProgress(getActivity());
                 }else {
                     NetworkConsume.getInstance().HideProgress(getActivity());
                     Toast.makeText(getActivity(), "Something Went Wrong!!", Toast.LENGTH_SHORT).show();

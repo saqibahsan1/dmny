@@ -1,6 +1,7 @@
 package com.android.akhdmny.Authenticate;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,23 +15,22 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.akhdmny.ApiResponse.LoginApiResponse;
-import com.android.akhdmny.ApiResponse.RegisterResponse;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
+import com.android.akhdmny.FireBaseNotification.TrackerService;
 import com.android.akhdmny.MainActivity;
 import com.android.akhdmny.NetworkManager.NetworkConsume;
 import com.android.akhdmny.R;
 import com.android.akhdmny.Requests.LoginRequest;
-import com.android.akhdmny.Requests.SignInRequest;
 import com.android.akhdmny.Utils.UserDetails;
 import com.android.akhdmny.Utils.Validator;
 import com.google.gson.Gson;
 import com.hbb20.CountryCodePicker;
 import com.victor.loading.rotate.RotateLoading;
-import com.wang.avi.AVLoadingIndicatorView;
+
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -64,9 +64,29 @@ public class login extends AppCompatActivity {
         ClickEvent();
 
     }
+    private void stopService(){
+
+        Intent intent = new Intent(login.this, TrackerService.class);
+        Objects.requireNonNull(login.this).stopService(intent);
+    }
+
+    private boolean isMyServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        if (manager != null) {
+            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+                if (TrackerService.class.getName().equals(service.service.getClassName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     private void ClickEvent(){
         mActivity = this;
+        if (isMyServiceRunning()){
+            stopService();
+        }
         ccp_getFullNumber.registerCarrierNumberEditText(et_Mobile);
         btn_register.setOnClickListener(new View.OnClickListener() {
             @Override

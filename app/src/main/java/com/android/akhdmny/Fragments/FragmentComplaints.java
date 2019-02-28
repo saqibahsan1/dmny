@@ -225,9 +225,11 @@ public class FragmentComplaints extends Fragment implements MediaPlayer.OnComple
 
                         @Override
                         public void onError(Exception e) {
-
+                            progressBar.setVisibility(View.GONE);
                         }
                     });
+                }else {
+                    progressBar.setVisibility(View.GONE);
                 }
                 history.setView(historyItemView);
                 history.setCancelable(true);

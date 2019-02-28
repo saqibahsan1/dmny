@@ -13,6 +13,7 @@ import com.android.akhdmny.ApiResponse.MyOrderDetails.MyOrders;
 import com.android.akhdmny.ApiResponse.CategoriesResponse;
 import com.android.akhdmny.ApiResponse.LoginApiResponse;
 import com.android.akhdmny.ApiResponse.OrderId;
+import com.android.akhdmny.ApiResponse.OrderModel.OrderDetailsModel;
 import com.android.akhdmny.ApiResponse.ParcelPost.ParcelPostApi;
 import com.android.akhdmny.ApiResponse.Parcels.ParcelLocationApi;
 import com.android.akhdmny.ApiResponse.ProfileResponse;
@@ -73,10 +74,10 @@ public interface AuthService {
     Call<FourSquare> fourSquareApiCall(@Query("lat") double lat, @Query("long") double longi);
 
     @GET("/akhdmny/public/api/user/accept-bid")
-    Call<AcceptOrderApiModel> AcceptBidApi(@Query("order_id") int OrderId, @Query("bid") int Bid, @Query("driver_id") int DriverId);
+    Call<Object> AcceptBidApi(@Query("order_id") int OrderId, @Query("bid") int Bid, @Query("driver_id") int DriverId);
 
     @GET("/akhdmny/public/api/user/get-order-detail")
-    Call<AcceptOrderApiModel> GetOrderDetails(@Query("order_id") String OrderId);
+    Call<OrderDetailsModel> GetOrderDetails(@Query("order_id") String OrderId);
 
     @POST("/createOrder")
     Call<OrderId> OrderRequest(@Body requestOrder order);
@@ -87,7 +88,7 @@ public interface AuthService {
     @GET("/acceptedDrivers")
     Call<DriverList> BidApi(@Query("orderId") String orderId);
 
-    @GET("/cancel-reasons")
+    @GET("/akhdmny/public/api/user/cancel-reasons")
     Call<CancelReasonModel> cancelApi();
 
     @GET("/akhdmny/public/api/user/get-orders")

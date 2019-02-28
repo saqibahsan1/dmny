@@ -18,12 +18,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetBehavior;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.NestedScrollView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,9 +33,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.akhdmny.Activities.MessageListActivity;
-import com.android.akhdmny.Adapter.BottomSheetAdapter;
 import com.android.akhdmny.ApiResponse.AcceptModel.Driver;
-import com.android.akhdmny.ApiResponse.AcceptModel.User;
+import com.android.akhdmny.ApiResponse.OrderModel.DriverInfo;
 import com.android.akhdmny.ApiResponse.TimeOut.OrderTimeOut;
 import com.android.akhdmny.ErrorHandling.LoginApiError;
 import com.android.akhdmny.MainActivity;
@@ -66,7 +63,6 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -83,7 +79,6 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -211,14 +206,11 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
 
-        CancelOrder.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CancelFragment cancelFragment = new CancelFragment(reason -> CancelOrder(reason));
-                FragmentManager fm =getActivity().getSupportFragmentManager();
-                cancelFragment.show(fm,cancelFragment.getTag());
+        CancelOrder.setOnClickListener(v -> {
+            CancelFragment cancelFragment = new CancelFragment(reason -> CancelOrder(reason));
+            FragmentManager fm =getActivity().getSupportFragmentManager();
+            cancelFragment.show(fm,cancelFragment.getTag());
 
-            }
         });
         driverCall.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -497,7 +489,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
         CameraUpdate location = CameraUpdateFactory.newLatLngZoom(latLng, 17);
         mMap.animateCamera(location);
         if(isVisible) {
-            Driver obj = CurrentOrder.getInstance().driver;
+            DriverInfo obj = CurrentOrder.getInstance().driver;
             if(obj != null) {
                 DriverNumber = obj.getPhone();
                 driverName.setText(obj.getName());
