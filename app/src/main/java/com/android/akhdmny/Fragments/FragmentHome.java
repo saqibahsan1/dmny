@@ -643,6 +643,8 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
     @Override
     public void onConnected(@Nullable Bundle bundle) {
             Location location = null;
+            try {
+
             if (checkPermission()) {
                 location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
             }
@@ -651,6 +653,10 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
                 latitude = location.getLatitude();
                 setupOrder();
                 getCurrentLocation();
+            }
+
+            }catch (Exception e){
+                e.printStackTrace();
             }
     }
 
