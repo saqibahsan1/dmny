@@ -349,6 +349,7 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 
                         if (checkPermission())
                             buildGoogleApiClient();
+                        getCurrentLocation();
                         Toast.makeText(getActivity(), "Permission Granted", Toast.LENGTH_LONG).show();
                     } else {
                         Toast.makeText(getActivity(), "Permission Denied", Toast.LENGTH_LONG).show();
@@ -641,16 +642,16 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Location location = null;
-        if (checkPermission()) {
-            location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        }
-        if (location != null) {
-            longitude = location.getLongitude();
-            latitude = location.getLatitude();
-            setupOrder();
-            getCurrentLocation();
-        }
+            Location location = null;
+            if (checkPermission()) {
+                location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+            }
+            if (location != null) {
+                longitude = location.getLongitude();
+                latitude = location.getLatitude();
+                setupOrder();
+                getCurrentLocation();
+            }
     }
 
     @Override

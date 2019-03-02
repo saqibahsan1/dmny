@@ -166,10 +166,8 @@ public class Bid extends AppCompatActivity {
 
                 listInsideResponses.clear();
                 for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
-                    // BidAcceptApi();
                     DriverListInsideResponse insideResponse = dataSnapshot1.getValue(DriverListInsideResponse.class);
                     listInsideResponses.add(insideResponse);
-//                    recyclerView.notifyAll();
                     adapter.notifyDataSetChanged();
                 }
             }

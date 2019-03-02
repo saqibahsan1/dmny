@@ -111,7 +111,7 @@ public class TrackerService extends Service {
                         NetworkConsume.getInstance().setDefaults("orderId",orderId,TrackerService.this);
 
                             Intent start = new Intent(TrackerService.this, Bid.class);
-                            start.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            start.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(start);
                     }
                     if (Objects.equals(dataSnapshot1.getKey(), "status") && dataSnapshot1.getValue().toString().equals("2")){
