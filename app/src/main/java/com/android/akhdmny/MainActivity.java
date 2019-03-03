@@ -228,28 +228,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-
-            case PERMISSION_CODE:
-
-                if (grantResults.length > 0) {
-
-                    boolean finelocation = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-//                    boolean coarselocation = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-
-                    if (finelocation) {
-
-
-
-                       // Toast.makeText(getActivity(), "Permission Granted", Toast.LENGTH_LONG).show();
-                    } else {
-                      //  Toast.makeText(getActivity(), "Permission Denied", Toast.LENGTH_LONG).show();
-
-                    }
-                }
-
-                break;
-        }
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+//        switch (requestCode) {
+//
+//            case PERMISSION_CODE:
+//
+//                if (grantResults.length > 0) {
+//
+//                    boolean finelocation = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+////                    boolean coarselocation = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+//
+//                    if (finelocation) {
+//
+//
+//
+//                       // Toast.makeText(getActivity(), "Permission Granted", Toast.LENGTH_LONG).show();
+//                    } else {
+//                      //  Toast.makeText(getActivity(), "Permission Denied", Toast.LENGTH_LONG).show();
+//
+//                    }
+//                }
+//
+//                break;
+//        }
 
     }
 

@@ -193,6 +193,7 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
     private void CartApi(String code){
         NetworkConsume.getInstance().ShowProgress(MyCart.this);
         NetworkConsume.getInstance().setAccessKey("Bearer "+prefs.getString("access_token","12"));
+        if (Cordinates.getInstance().model.getLatitude() !=null)
         NetworkConsume.getInstance().getAuthAPI().CartOrders(Cordinates.getInstance().model.getLatitude(),Cordinates.getInstance().model.getLongitude(),code).
                 enqueue(new Callback<CartApiResp>() {
                     @Override
@@ -390,11 +391,18 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
 //                for (int i =0; i<list.get(position).getImages().length-1;i++) {
 //                    photos.add(list.get(position).getImages());
 //                }
-                photos.addAll(Arrays.asList(list.get(position).getImages()));
+                if (list.get(position).getImage()!=null) {
+                    photos.addAll(Arrays.asList(list.get(position).getImages()));
 
-                ImageAdapterCart imagesAdapter = new ImageAdapterCart(MyCart.this, photos);
+                    ImageAdapterCart imagesAdapter = new ImageAdapterCart(MyCart.this, photos);
 
-                recyclerViewPopup.setAdapter(imagesAdapter);
+                    recyclerViewPopup.setAdapter(imagesAdapter);
+                }else {
+                    recyclerViewPopup.setVisibility(View.GONE);
+                }
+                if (list.get(position).getVoice() ==null){
+                    PlayAudio.setVisibility(View.GONE);
+                }
                 Picasso.get().load(R.drawable.place_holder).into(imageView);
                 PlayAudio.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -417,7 +425,7 @@ public class MyCart extends AppCompatActivity implements MediaPlayer.OnCompletio
                 TextView textViewprice = viewCart.findViewById(R.id.tv_email);
                 textViewTitle.setText(list.get(position).getTitle());
                 textViewAddress.setText(list.get(position).getAddress());
-                textViewprice.setText(list.get(position).getAmount()+" "+listResponse.get(position).getCurrency());
+                textViewprice.setText(list.get(position).getAmount()+" "+currency);
                 textDialogMsg.setText(list.get(position).getDescription());
                 ADD_Cart.setView(viewCart);
                 ADD_Cart.setCancelable(true);

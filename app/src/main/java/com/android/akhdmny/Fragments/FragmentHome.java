@@ -228,6 +228,12 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
                 startActivity(new Intent(getActivity(), MessageListActivity.class));
             }
         });
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermission();
+        } else {
+            requestPermission();
+        }
+
         clickListner();
 
         return view;
@@ -350,7 +356,8 @@ public class FragmentHome extends Fragment implements OnMapReadyCallback,
                         if (checkPermission())
                             buildGoogleApiClient();
                         getCurrentLocation();
-                        Toast.makeText(getActivity(), "Permission Granted", Toast.LENGTH_LONG).show();
+
+//                        Toast.makeText(getActivity(), "Permission Granted", Toast.LENGTH_LONG).show();
                     } else {
                         Toast.makeText(getActivity(), "Permission Denied", Toast.LENGTH_LONG).show();
 
