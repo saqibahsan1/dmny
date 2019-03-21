@@ -1,4 +1,19 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.fabric.io/public' }
+    }
+
+    dependencies {
+        classpath 'io.fabric.tools:gradle:1.+'
+    }
+}
 apply plugin: 'com.android.application'
+
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
+}
+
+apply plugin: 'io.fabric'
 
 android {
     compileSdkVersion 27
@@ -51,7 +66,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-places:16.0.0'
     implementation 'com.google.android.gms:play-services-maps:16.1.0'
     implementation 'com.google.android.gms:play-services-location:16.0.0'
-    implementation 'com.google.firebase:firebase-core:16.0.7'
+    implementation 'com.google.firebase:firebase-core:16.0.8'
     implementation 'com.google.firebase:firebase-iid:17.1.0'
     implementation 'com.google.firebase:firebase-database:16.1.0'
     implementation 'com.google.firebase:firebase-storage:16.1.0'
@@ -71,6 +86,11 @@ dependencies {
     implementation 'com.github.fuzz-productions:RatingBar:1.0.3'
     implementation 'com.github.aarsy.googlemapsanimations:googlemapsanimations:1.0.5'
     implementation 'com.karumi:dexter:4.2.0'
+    // Check for v11.4.2 or higher
+    implementation 'com.google.firebase:firebase-core:16.0.8'
+
+    // Add dependency
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.9'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.preference.PreferenceManager;
 
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 import java.util.HashSet;
 import java.util.Locale;
 
@@ -17,8 +19,10 @@ public class LocaleHelper extends Application{
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
 
         init();
+        logUser();
     }
     public static synchronized LocaleHelper getInstance() {
         return mInstance;
@@ -63,5 +67,13 @@ public class LocaleHelper extends Application{
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         return preferences.getString("lang", "en");
     }
+    private void logUser() {
+        // TODO: Use the current user's information
+        // You can call any combination of these three methods
+        Crashlytics.setUserIdentifier("12345");
+        Crashlytics.setUserEmail("user@fabric.io");
+        Crashlytics.setUserName("Test User");
+    }
+
 
 }
